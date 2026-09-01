@@ -1,0 +1,100 @@
+.page {
+  --night: #0d0b09;
+  --cream: #f2ead9;
+  --rust: #a33524;
+  --gold: #c69a4b;
+  background: var(--cream);
+  color: #19140f;
+}
+
+.hero {
+  min-height: 94svh;
+  padding: 28px clamp(22px, 7vw, 112px) 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #f7efdf;
+  background:
+    linear-gradient(90deg, rgba(8, 6, 5, 0.98) 0%, rgba(8, 6, 5, 0.84) 45%, rgba(8, 6, 5, 0.12) 100%),
+    url("/story-a/01-battlefield.webp") center / cover;
+}
+
+.nav { position: absolute; top: 28px; display: flex; gap: 10px; color: #b9aa94; font-size: 13px; }
+.nav a { color: #f1d9a9; text-underline-offset: 4px; }
+.kicker { margin: 0 0 16px; color: var(--gold); font: 750 11px/1.3 var(--font-geist-mono), monospace; letter-spacing: .16em; text-transform: uppercase; }
+.hero h1 { max-width: none; margin: 0; font: 500 clamp(70px, 15vw, 220px)/.76 Georgia, serif; letter-spacing: -.075em; }
+.subtitle { margin: 25px 0 0; color: var(--gold); font: 700 12px var(--font-geist-mono), monospace; letter-spacing: .2em; text-transform: uppercase; }
+.logline { max-width: 760px; margin: 28px 0 0; color: #ded2c1; font: 400 clamp(21px, 2.4vw, 34px)/1.36 Georgia, serif; }
+.start { width: fit-content; margin-top: 30px; padding: 14px 20px; background: var(--rust); color: #fff; font-weight: 750; text-decoration: none; }
+.readingTime { margin: 20px 0 0; color: #a99d8d; font: 12px var(--font-geist-mono), monospace; }
+
+.orientation, .cast, .chapter, .footer { padding: clamp(70px, 9vw, 138px) clamp(22px, 7vw, 112px); }
+.orientation { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(340px, 1.3fr); gap: clamp(40px, 8vw, 130px); }
+.orientation h2, .sectionIntro h2, .footer h2 { margin: 0; font: 500 clamp(46px, 7vw, 102px)/.96 Georgia, serif; letter-spacing: -.055em; }
+.spine { margin: 0; padding: 0; list-style: none; counter-reset: story; border-top: 1px solid #bbae99; }
+.spine li { counter-increment: story; position: relative; padding: 22px 0 22px 54px; border-bottom: 1px solid #bbae99; font: 19px/1.5 Georgia, serif; }
+.spine li::before { content: "0" counter(story); position: absolute; left: 0; top: 25px; color: var(--rust); font: 700 11px var(--font-geist-mono), monospace; }
+
+.cast { background: #d7cbb7; }
+.castGrid { margin-top: 50px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid #968976; }
+.castGrid article { min-height: 260px; padding: 25px; border-right: 1px solid #968976; }
+.castGrid article:last-child { border-right: 0; }
+.castGrid p { margin: 0 0 34px; color: var(--rust); font: 700 10px var(--font-geist-mono), monospace; letter-spacing: .12em; text-transform: uppercase; }
+.castGrid h3 { margin: 0 0 15px; font: 500 27px Georgia, serif; }
+.castGrid span { color: #51493f; font: 15px/1.55 Georgia, serif; }
+
+.chapterNav { position: sticky; top: 0; z-index: 10; display: flex; overflow-x: auto; background: var(--night); color: #eee2ce; border-bottom: 1px solid #3b3128; scrollbar-width: none; }
+.chapterNav a { flex: 0 0 auto; padding: 14px 18px; border-right: 1px solid #3b3128; text-decoration: none; font-size: 12px; }
+.chapterNav a span { display: block; margin-bottom: 4px; color: var(--gold); font: 9px var(--font-geist-mono), monospace; letter-spacing: .1em; }
+
+.chapters { background: var(--night); color: #f5ecdc; }
+.chapter { border-bottom: 1px solid #3a3028; scroll-margin-top: 62px; }
+.chapterHeader { display: grid; grid-template-columns: 160px minmax(320px, .8fr) minmax(340px, 1.2fr); gap: clamp(25px, 5vw, 80px); align-items: end; }
+.chapterMeta p { margin: 0 0 8px; color: var(--gold); font: 700 11px var(--font-geist-mono), monospace; letter-spacing: .13em; }
+.chapterMeta span { color: #978c7c; font: 14px Georgia, serif; }
+.chapterHeader h2 { margin: 0; font: 500 clamp(48px, 7vw, 100px)/.88 Georgia, serif; letter-spacing: -.055em; }
+.chapterStory { margin: 0; color: #bfb3a2; font: 20px/1.55 Georgia, serif; }
+
+.playCard { margin: 60px 0 72px; display: grid; grid-template-columns: repeat(3, 1fr); background: #171310; border: 1px solid #463b31; }
+.playCard div { padding: 26px; border-right: 1px solid #463b31; }
+.playCard div:last-child { border-right: 0; }
+.playCard p { margin: 0 0 10px; color: var(--gold); font: 700 10px var(--font-geist-mono), monospace; letter-spacing: .13em; text-transform: uppercase; }
+.playCard strong { color: #ddd1c0; font: 400 16px/1.5 Georgia, serif; }
+
+.panels { max-width: 1180px; margin: 0 auto; }
+.widePanel, .tallPanel { margin: 0 0 clamp(70px, 10vw, 150px); }
+.tallPanel { max-width: 760px; }
+.tallPanel:nth-child(even) { margin-left: auto; }
+.imageWrap { position: relative; background: #000; border: 1px solid #514336; }
+.imageWrap img { width: 100%; height: auto; display: block; filter: contrast(1.04); }
+.panelNumber { position: absolute; top: 0; left: 0; padding: 9px 11px; background: var(--rust); color: #fff; font: 700 11px var(--font-geist-mono), monospace; }
+.widePanel figcaption, .tallPanel figcaption { max-width: 690px; margin-top: 19px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+.widePanel figcaption p, .tallPanel figcaption p { margin: 0; color: #c9bcaa; font: 19px/1.52 Georgia, serif; }
+.widePanel blockquote, .tallPanel blockquote { width: fit-content; margin: 0; padding: 10px 13px; border-left: 3px solid var(--gold); background: #1a1511; color: #f4dcae; font: 700 12px/1.45 var(--font-geist-mono), monospace; }
+
+.footer { background: var(--rust); color: #fff2df; }
+.footer .kicker { color: #efc36d; }
+.footer p:not(.kicker) { max-width: 740px; color: #eed8c5; font: 20px/1.55 Georgia, serif; }
+.footer a { display: inline-block; margin-top: 22px; color: #fff; font-weight: 750; text-underline-offset: 6px; }
+
+@media (max-width: 1000px) {
+  .castGrid { grid-template-columns: repeat(2, 1fr); }
+  .castGrid article { border-bottom: 1px solid #968976; }
+  .chapterHeader { grid-template-columns: 1fr; }
+  .chapterMeta { margin-bottom: 14px; }
+  .playCard { grid-template-columns: 1fr; }
+  .playCard div { border-right: 0; border-bottom: 1px solid #463b31; }
+}
+
+@media (max-width: 700px) {
+  .hero { min-height: 860px; background-position: 64% center; }
+  .hero h1 { font-size: 72px; line-height: .86; }
+  .orientation { grid-template-columns: 1fr; }
+  .castGrid { grid-template-columns: 1fr; }
+  .castGrid article { min-height: 0; border-right: 0; }
+  .playCard { margin: 42px 0 55px; }
+  .chapter { padding-left: 18px; padding-right: 18px; }
+  .chapterHeader h2 { font-size: 52px; }
+  .chapterStory { font-size: 18px; }
+  .widePanel figcaption p, .tallPanel figcaption p { font-size: 17px; }
+}

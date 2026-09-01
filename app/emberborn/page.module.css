@@ -1,0 +1,169 @@
+/* Story B reader. Scoped to this route; nothing here leaks into the rest of
+   the site. Colour tokens are inherited from :root in app/globals.css. */
+
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 48px) 40px;
+}
+
+.back {
+  padding: 28px 0 0;
+  font: 700 12px/1 var(--font-geist-mono), monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.back a { color: var(--red); text-decoration: none; text-underline-offset: 5px; }
+.back a:hover, .back a:focus-visible { text-decoration: underline; }
+
+/* --- header ---------------------------------------------------------- */
+
+.head {
+  padding: clamp(48px, 8vw, 96px) 0 clamp(40px, 6vw, 72px);
+  border-bottom: 1px solid var(--ink);
+}
+
+.eyebrow {
+  margin: 0 0 20px;
+  color: var(--red);
+  font: 700 12px/1.2 var(--font-geist-mono), monospace;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.head h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(58px, 10vw, 128px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.88;
+}
+
+.sub {
+  margin: 14px 0 0;
+  color: var(--gold);
+  font: 700 13px var(--font-geist-mono), monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.deck {
+  max-width: 640px;
+  margin: 32px 0 0;
+  color: #4e473d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(19px, 2vw, 25px);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.briefing { margin: 44px 0 0; }
+
+.briefing div { padding: 20px 0; border-top: 1px solid var(--line); }
+
+.briefing dt,
+.beats dt {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font: 700 11px var(--font-geist-mono), monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.briefing dd,
+.beats dd {
+  margin: 0;
+  max-width: 68ch;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* --- scenes ---------------------------------------------------------- */
+
+.scenes { margin: 0; padding: 0; list-style: none; }
+
+.scene { padding: clamp(52px, 8vw, 90px) 0; border-bottom: 1px solid var(--line); }
+
+.sceneTop { display: flex; align-items: baseline; gap: 18px; }
+
+.num {
+  color: var(--gold);
+  font: 500 clamp(38px, 5vw, 58px)/1 var(--font-geist-mono), monospace;
+}
+
+.phase {
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  font: 700 11px var(--font-geist-mono), monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.scene h2 {
+  margin: 26px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 5vw, 62px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.line {
+  max-width: 62ch;
+  margin: 16px 0 0;
+  color: #4e473d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(18px, 1.7vw, 22px);
+  font-style: italic;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.art {
+  margin: 32px 0 8px;
+  line-height: 0;
+  border: 1px solid var(--ink);
+  background: #fff;
+}
+
+.art img { width: 100%; height: auto; display: block; }
+
+.beats { margin: 24px 0 0; }
+
+.beats div { padding: 20px 0; border-top: 1px solid var(--line); }
+
+/* --- footer ---------------------------------------------------------- */
+
+.foot {
+  padding: clamp(48px, 7vw, 80px) 0 0;
+  max-width: 68ch;
+}
+
+.foot p {
+  margin: 0 0 18px;
+  color: #4f473d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.credit { font-size: 15px !important; color: var(--muted) !important; }
+.credit code { font-family: var(--font-geist-mono), monospace; font-size: 0.92em; }
+
+.backFoot {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--red);
+  font-weight: 750;
+  text-underline-offset: 6px;
+}
+
+@media (max-width: 700px) {
+  .scene { padding: 44px 0; }
+  .briefing dd, .beats dd, .foot p { font-size: 17px; }
+}
