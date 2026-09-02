@@ -172,12 +172,12 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   ]);
   assert.equal(runtime, readableSource, "the readable source and served runtime must remain byte-identical");
   assert.doesNotMatch(runtime, /primitive\("sphere", "Indigo night sky"/, "an opaque sky mesh must not hide distant scenery");
-  assert.match(runtime, /ambientLight = new pc\.Color\(\.03, \.04, \.09\)/);
-  assert.match(runtime, /scene\.exposure = 1\.0/);
+  assert.match(runtime, /ambientLight = new pc\.Color\(\.065, \.072, \.12\)/);
+  assert.match(runtime, /scene\.exposure = 1\.12/);
   assert.doesNotMatch(runtime, /new pc\.Entity\("Camera soft fill"\)/, "the camera must not carry a flattening headlight");
   assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
   assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
-  assert.match(runtime, /diffuseMapTiling = new pc\.Vec2\(11, 4\)/, "each 22 by 8 metre road slab needs an approximately two-metre texture repeat");
+  assert.match(runtime, /diffuseMapTiling = new pc\.Vec2\(7, 4\)/, "each 13 by 8 metre centre-road slab needs an approximately two-metre texture repeat");
   assert.match(runtime, /function flickerFireLight/);
   assert.match(runtime, /state\.fireLights.*flickerFireLight/, "every cached practical light must animate each frame");
   assert.match(runtime, /renderingSummary/, "visual QA must expose the A0 lighting contract in the running scene");
@@ -242,11 +242,38 @@ test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB ba
   assert.doesNotMatch(runtime, /primitive\("sphere", "Smoke plume"/);
   assert.doesNotMatch(runtime, /state\.app\.root\.findByTag\("fire"\)/, "the frame loop must use the cached emitter list");
   assert.doesNotMatch(runtime, /state\.app\.root\.findByTag\("smoke"\)/, "GPU smoke must not need per-frame scene scans");
-  assert.match(runtime, /primitive\("plane", "Textured sagging festival pennant"/);
+  assert.match(runtime, /new pc\.Entity\("Triangular festival pennant"/);
   assert.match(runtime, /fabric_pattern_07_col_1_512\.webp/);
   assert.match(runtime, /"Packed earth street slab"/);
   assert.match(runtime, /"Wet ash fire decal"/);
   assert.match(runtime, /assignStaticModelToBatch\(entity\)/, "late-loaded GLBs must join the active static batch group");
+});
+
+test("A7 gives the street distinct houses, Indian set dressing, real L-turns, and vista landmarks", async () => {
+  const [runtime, layoutText, moonlit] = await Promise.all([
+    readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonlit_golf_2k.hdr", root)),
+  ]);
+  const layout = JSON.parse(layoutText);
+  assert.ok(moonlit.length > 100000, "the visible-moon CC0 HDR must ship in the standalone export");
+  assert.equal(layout.tallHouseBays.length, 2);
+  assert.equal(layout.setbackHouseBays.length, 2);
+  assert.equal(layout.colliders.filter(({ label }) => /L-turn/.test(label)).length, 2);
+  assert.ok(!layout.colliders.some(({ minX, maxX, minZ, maxZ }) => 2 >= minX && 2 <= maxX && -9 >= minZ && -9 <= maxZ), "the market L-turn must not trap the unchanged enemy spawn");
+  assert.equal(layout.placements.brass_diya_lantern.length, 24);
+  assert.ok(layout.placements.Kenney_fountain_round.length >= 3, "the arrival vista needs a built stone well");
+  assert.ok(layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length === 2, "the gate needs a two-wheel rath");
+  assert.match(runtime, /mats\.roadSand = material\(\[\.40, \.38, \.35\]\)/);
+  assert.match(runtime, /const tones = \["lime", "ochre", "rose", "turquoise"\]/);
+  assert.match(runtime, /"Household shrine niche"/);
+  assert.match(runtime, /"Cool moon rim"/);
+  assert.match(runtime, /"Palace horizon glow"/);
+  assert.match(runtime, /"Triangular festival pennant"/);
+  assert.match(runtime, /if \(!target\) \{ state\.targetEnemyId = null;/, "occluded or defeated enemies must clear the target lock");
+  assert.doesNotMatch(runtime, /primitive\("sphere", "Moon disc"/);
+  assert.doesNotMatch(runtime, /primitive\("sphere", `Night star/);
+  assert.match(runtime, /setDressingSummary/);
 });
 
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {

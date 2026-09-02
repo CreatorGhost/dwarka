@@ -48,11 +48,14 @@ void (async () => {
   const WORLD_COLLIDERS = Object.freeze(WORLD_LAYOUT.colliders.map((collider) => Object.freeze([collider.minX, collider.maxX, collider.minZ, collider.maxZ, collider.label, collider.id, collider.visual])));
   const MODEL_URLS = {
     Vrishaketu_Composite: "./assets/models/Vrishaketu_Composite.glb", Raider_Archer_Composite: "./assets/models/Raider_Archer_Composite.glb", Brute_Composite: "./assets/models/Brute_Composite.glb", Male_Peasant_Composite: "./assets/models/Male_Peasant_Composite.glb", Female_Peasant_Composite: "./assets/models/Female_Peasant_Composite.glb",
-    Wall_Plaster_Door_Round: "./assets/models/Wall_Plaster_Door_Round.glb", Wall_Plaster_Window_Wide_Round: "./assets/models/Wall_Plaster_Window_Wide_Round.glb", Wall_Plaster_Door_Flat: "./assets/models/Wall_Plaster_Door_Flat.glb", Wall_Plaster_Straight: "./assets/models/Wall_Plaster_Straight.glb", Door_2_Round: "./assets/models/Door_2_Round.glb", Door_4_Flat: "./assets/models/Door_4_Flat.glb", WindowShutters_Wide_Round_Open: "./assets/models/WindowShutters_Wide_Round_Open.glb", Wall_Arch: "./assets/models/Wall_Arch.glb", Kenney_roof_flat_square: "./assets/models/Kenney_roof_flat_square.glb", Kenney_column: "./assets/models/Kenney_column.glb", Kenney_pillar_wood: "./assets/models/Kenney_pillar_wood.glb", Prop_ExteriorBorder_Straight1: "./assets/models/Prop_ExteriorBorder_Straight1.glb",
+    Wall_Plaster_Door_Round: "./assets/models/Wall_Plaster_Door_Round.glb", Wall_Plaster_Window_Wide_Round: "./assets/models/Wall_Plaster_Window_Wide_Round.glb", Wall_Plaster_Door_Flat: "./assets/models/Wall_Plaster_Door_Flat.glb", Wall_Plaster_Straight: "./assets/models/Wall_Plaster_Straight.glb", Door_2_Round: "./assets/models/Door_2_Round.glb", Door_4_Flat: "./assets/models/Door_4_Flat.glb", WindowShutters_Wide_Round_Open: "./assets/models/WindowShutters_Wide_Round_Open.glb", Wall_Arch: "./assets/models/Wall_Arch.glb", Kenney_roof_flat_square: "./assets/models/Kenney_roof_flat_square.glb", Kenney_column: "./assets/models/Kenney_column.glb", Kenney_column_wide: "./assets/models/Kenney_column_wide.glb", Kenney_pillar_wood: "./assets/models/Kenney_pillar_wood.glb", Prop_ExteriorBorder_Straight1: "./assets/models/Prop_ExteriorBorder_Straight1.glb", Prop_Support: "./assets/models/Prop_Support.glb", Overhang_Plaster_Long: "./assets/models/Overhang_Plaster_Long.glb", Overhang_Plaster_Short: "./assets/models/Overhang_Plaster_Short.glb",
+    brass_diya_lantern: "./assets/models/brass_diya_lantern.glb", brass_vase_02: "./assets/models/brass_vase_02.glb", brass_vase_03: "./assets/models/brass_vase_03.glb", planter_pot_clay: "./assets/models/planter_pot_clay.glb", wicker_basket_01: "./assets/models/wicker_basket_01.glb", Bag: "./assets/models/Bag.glb", FarmCrate_Empty: "./assets/models/FarmCrate_Empty.glb", Vase_4: "./assets/models/Vase_4.glb", Rope_1: "./assets/models/Rope_1.glb", Banner_1_Cloth: "./assets/models/Banner_1_Cloth.glb", Banner_2_Cloth: "./assets/models/Banner_2_Cloth.glb", Kenney_tent_canvas: "./assets/models/Kenney_tent_canvas.glb", Kenney_stall_green: "./assets/models/Kenney_stall_green.glb", Kenney_fountain_round: "./assets/models/Kenney_fountain_round.glb", Kenney_fountain_center: "./assets/models/Kenney_fountain_center.glb", Kenney_cart: "./assets/models/Kenney_cart.glb", Kenney_wheel: "./assets/models/Kenney_wheel.glb", Bucket_Wooden_1: "./assets/models/Bucket_Wooden_1.glb",
     Prop_Wagon: "./assets/models/Prop_Wagon.glb", Balcony_Simple_Straight: "./assets/models/Balcony_Simple_Straight.glb", Stairs_Exterior_Straight: "./assets/models/Stairs_Exterior_Straight.glb", Stall_Cart_Empty: "./assets/models/Stall_Cart_Empty.glb", Stall_Empty: "./assets/models/Stall_Empty.glb", Barrel: "./assets/models/Barrel.glb", Vase_2: "./assets/models/Vase_2.glb", Pot_1: "./assets/models/Pot_1.glb", Sword_Bronze: "./assets/models/Sword_Bronze.glb", Banner_1: "./assets/models/Banner_1.glb", Lantern_Wall: "./assets/models/Lantern_Wall.glb", Crate_Wooden: "./assets/models/Crate_Wooden.glb", Bench: "./assets/models/Bench.glb", Prop_Crate: "./assets/models/Prop_Crate.glb", Prop_WoodenFence_Single: "./assets/models/Prop_WoodenFence_Single.glb",
   };
   const ENVIRONMENT_PLACEMENTS = Object.freeze(WORLD_LAYOUT.placements);
   const STREET_HOUSE_BAYS = Object.freeze(WORLD_LAYOUT.streetHouseBays || []);
+  const TALL_HOUSE_BAYS = Object.freeze(WORLD_LAYOUT.tallHouseBays || []);
+  const SETBACK_HOUSE_BAYS = Object.freeze(WORLD_LAYOUT.setbackHouseBays || []);
   const STREET_HOUSE_MODEL_KEYS = new Set(["Wall_Plaster_Door_Flat", "Wall_Plaster_Straight", "Wall_Plaster_Window_Wide_Round", "Door_4_Flat", "Kenney_roof_flat_square"]);
   const GROUND_ALIGNED_MODELS = new Set(WORLD_LAYOUT.groundAlignedModels);
   const STREET_SURFACE_Y = WORLD_LAYOUT.streetSurfaceY;
@@ -81,10 +84,10 @@ void (async () => {
     profile: null, token: null, settings: { locale: "en", voiceLocale: "en", voiceLinked: true, master: 1, music: 0.7, effects: 0.8, dialogue: 1, muteAll: false, captions: true, speakerNames: true, cameraShake: true, tutorials: true, tutorialDone: [] }, requestedAction: "continue",
     socket: null, reconnectTimer: 0, reconnectAttempts: 0, sessionAccepted: false, snapshot: null, reconnectPhase: null, intentionalSockets: new WeakSet(), lastPhase: null,
     keys: new Set(), pressed: new Set(), aim: false, yaw: 0, pitch: -0.1, lookYaw: 0, lookPitch: -0.1, visualYaw: 0, seq: 0, playing: false, paused: true, modalMode: "loading", storyIndex: 0,
-    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], environmentMaterials: new Map(), projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraFrame: null, roadEntity: null, environmentAtlas: null, skyboxCubemap: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
+    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], environmentMaterials: new Map(), projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraFrame: null, roadEntity: null, environmentAtlas: null, skyboxCubemap: null, moonlitSkybox: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
     fpsFrames: 0, fpsElapsed: 0, fpsLast: 60, qaVisible: false, qaFocusName: null, qaFocusDistance: 1.45, qaFocusAngle: 0, qaAnimationPreviews: new Map(), qaAimPreview: false, captionTimer: 0, toastTimer: 0, effectsReady: false, readyTimer: 0, tutorialSeen: new Set(), mouseTurned: false,
     voiceEntries: new Map(), voiceAudio: null, pendingVoiceLine: null, lastBarkPhase: null, effectAudio: new Map(), localAction: null, lastVisualActionAt: { fire: 0, melee: 0 }, enemyWarnings: new Map(), lastPlayerHealth: null, damageFlashUntil: 0, lastFootstepAt: 0, footstepIndex: 0, lastMouseAt: 0,
-    fireEffects: [], fireLights: [], vfxAssets: {}, batchedModelRenders: 0,
+    fireEffects: [], fireLights: [], vfxAssets: {}, batchedModelRenders: 0, pennantMesh: null,
     snapshotVelocity: { x: 0, z: 0 }, enemySnapshotVelocities: new Map(), snapshotReceivedAt: 0,
   };
 
@@ -584,8 +587,11 @@ void (async () => {
 
   function tintStreetHouse(entity, position) {
     if (!entity) return;
-    const tone = (Math.round(position[2] / 4) + (position[0] > 0 ? 1 : 0)) % 3 === 0 ? "ochre" : "lime";
-    const color = tone === "ochre" ? new pc.Color(.86, .58, .28) : new pc.Color(.72, .79, .54);
+    const atTurnWall = Math.abs(position[2] + 3.8) < .55 || Math.abs(position[2] + 18) < .55 || (Math.abs(position[0] - 1.7) < .55 && position[2] < -3.5 && position[2] > -10.5) || (Math.abs(position[0] + 1.6) < .55 && position[2] < -11.5 && position[2] > -18.5);
+    const tones = ["lime", "ochre", "rose", "turquoise"];
+    const tone = atTurnWall ? "sandstone" : tones[Math.abs(Math.round(position[2] / 4) + (position[0] > 0 ? 1 : 0)) % tones.length];
+    const colors = { lime: new pc.Color(.72, .79, .54), ochre: new pc.Color(.86, .58, .28), rose: new pc.Color(.76, .48, .46), turquoise: new pc.Color(.34, .64, .62), sandstone: new pc.Color(.69, .51, .31) };
+    const color = colors[tone];
     entity.findComponents?.("render").forEach((render) => {
       for (const instance of render.meshInstances || []) {
         const source = instance.material; const cacheKey = `${source.id}:${tone}`;
@@ -596,19 +602,36 @@ void (async () => {
     });
   }
 
+  function tintEnvironmentEntity(entity, tone, color, metalness = 0, gloss = .16) {
+    if (!entity) return;
+    entity.findComponents?.("render").forEach((render) => {
+      for (const instance of render.meshInstances || []) {
+        const source = instance.material; const cacheKey = `${source.id}:${tone}`;
+        let tinted = state.environmentMaterials.get(cacheKey);
+        if (!tinted) { tinted = source.clone(); tinted.diffuse = color; tinted.useMetalness = true; tinted.metalness = metalness; tinted.gloss = gloss; tinted.update(); state.environmentMaterials.set(cacheKey, tinted); }
+        instance.material = tinted;
+      }
+    });
+  }
+
   function streetHousePlacementsFor(key) {
     const placements = [];
     for (let index = 0; index < STREET_HOUSE_BAYS.length; index += 1) {
       const centreZ = STREET_HOUSE_BAYS[index];
       for (const side of [-1, 1]) {
-        const x = side * 10.12; const yaw = side < 0 ? 90 : -90; const doorOnNearModule = (index + (side > 0 ? 2 : 0)) % 4 === 0;
+        const tall = TALL_HOUSE_BAYS.some((bay) => bay.side === side && bay.z === centreZ); const setback = SETBACK_HOUSE_BAYS.some((bay) => bay.side === side && bay.z === centreZ) ? 1.2 : 0;
+        const x = side * (10.12 + setback); const yaw = side < 0 ? 90 : -90; const doorOnNearModule = (index + (side > 0 ? 2 : 0)) % 4 === 0;
         for (const offset of [-1, 1]) {
           const isDoor = doorOnNearModule && offset === 1;
           const isWindow = !isDoor && (index + offset + (side > 0 ? 1 : 0)) % 3 === 0;
           if ((key === "Wall_Plaster_Door_Flat" && isDoor) || (key === "Wall_Plaster_Window_Wide_Round" && isWindow) || (key === "Wall_Plaster_Straight" && !isDoor && !isWindow)) placements.push([x, 0, centreZ + offset, yaw, 1]);
-          if (key === "Door_4_Flat" && isDoor) placements.push([side * 9.88, 0, centreZ + offset, yaw, 1]);
+          if (key === "Door_4_Flat" && isDoor) placements.push([side * (9.88 + setback), 0, centreZ + offset, yaw, 1]);
+          if (tall) {
+            const upperWindow = (index + offset) % 2 === 0;
+            if ((key === "Wall_Plaster_Window_Wide_Round" && upperWindow) || (key === "Wall_Plaster_Straight" && !upperWindow)) placements.push([x, 3.12, centreZ + offset, yaw, 1]);
+          }
         }
-        if (key === "Kenney_roof_flat_square") for (const roofX of [side * 11.2, side * 13.4]) for (const offset of [-1.1, 1.1]) placements.push([roofX, 3.12, centreZ + offset, 0, 1]);
+        if (key === "Kenney_roof_flat_square") for (const roofX of [side * (11.2 + setback), side * (13.4 + setback)]) for (const offset of [-1.1, 1.1]) placements.push([roofX, tall ? 6.24 : 3.12, centreZ + offset, 0, 1]);
       }
     }
     return placements;
@@ -778,10 +801,19 @@ void (async () => {
   }
 
   function placeEnvironmentFor(key) {
-    for (const [x, y, z, yaw, scale] of environmentPlacementsFor(key)) {
+    const placements = environmentPlacementsFor(key);
+    for (let index = 0; index < placements.length; index += 1) {
+      const [x, y, z, yaw, scale] = placements[index];
       const entity = instantiateModel(key, key, [x, y, z], scale, yaw);
       if (entity && key.startsWith("Wall_Plaster_")) tintStreetHouse(entity, [x, y, z]);
+      if (entity && ["Kenney_column", "Kenney_column_wide", "Prop_ExteriorBorder_Straight1", "Kenney_fountain_round"].includes(key)) tintEnvironmentEntity(entity, "weathered-sandstone", new pc.Color(.58, .39, .22));
+      if (entity && ["Kenney_pillar_wood", "Prop_Support"].includes(key)) tintEnvironmentEntity(entity, "aged-timber", new pc.Color(.26, .105, .045), 0, .12);
+      if (entity && key === "Kenney_fountain_center") tintEnvironmentEntity(entity, "well-water", new pc.Color(.08, .28, .38), 0, .7);
       if (entity && GROUND_ALIGNED_MODELS.has(key)) alignEnvironmentModelToStreet(entity, y);
+      if (entity && key === "brass_diya_lantern") {
+        entity.findComponents?.("render").forEach((render) => { for (const instance of render.meshInstances || []) { const source = instance.material; const cacheKey = `${source.id}:diya`; let lit = state.environmentMaterials.get(cacheKey); if (!lit) { lit = source.clone(); lit.useMetalness = true; lit.metalness = .82; lit.gloss = .58; lit.emissive = new pc.Color(.34, .08, .01); lit.emissiveIntensity = .5; lit.update(); state.environmentMaterials.set(cacheKey, lit); } instance.material = lit; } });
+        if (index % 3 === 0) { const glow = new pc.Entity("Threshold diya glow"); glow.addComponent("light", { type: "omni", color: new pc.Color(1, .42, .12), intensity: .16, range: 2.7, castShadows: false }); entity.addChild(glow); glow.setLocalPosition(0, .22, 0); registerFireLight(glow, .16, index * .67); }
+      }
       if (entity) { assignStaticModelToBatch(entity); state.environmentEntities.push(entity); }
     }
   }
@@ -804,14 +836,20 @@ void (async () => {
     const applyPackedSand = (asset) => {
       if (!asset?.resource) { console.warn("Packed sand texture failed to load; using the rough matte fallback"); return; }
       const texture = asset.resource; texture.addressU = texture.addressV = pc.ADDRESS_REPEAT; texture.minFilter = pc.FILTER_LINEAR_MIPMAP_LINEAR; texture.magFilter = pc.FILTER_LINEAR; texture.anisotropy = 8;
-      mats.roadSand.diffuseMap = texture; mats.roadSand.diffuseMapTiling = new pc.Vec2(11, 4); mats.roadSand.update();
+      mats.roadSand.diffuseMap = texture; mats.roadSand.diffuseMapTiling = new pc.Vec2(7, 4); mats.roadSand.update();
+      state.app.assets.loadFromUrl("./assets/textures/brown_mud_dry_diff_512.webp?v=20260903a", "texture", (earthError, earthAsset) => {
+        if (earthError || !earthAsset?.resource) return;
+        earthAsset.resource.addressU = earthAsset.resource.addressV = pc.ADDRESS_REPEAT; earthAsset.resource.anisotropy = 8;
+        mats.roadSand.diffuseMap = earthAsset.resource; mats.roadSand.diffuseMapTiling = new pc.Vec2(13, 8); mats.roadSand.diffuse = new pc.Color(.76, .73, .67); mats.roadSand.update();
+      });
     };
     const packedSandAsset = state.app.assets.find("packed-sand-v1.webp", "texture");
     if (packedSandAsset) { packedSandAsset.ready(applyPackedSand); state.app.assets.load(packedSandAsset); }
     else state.app.assets.loadFromUrl("./assets/textures/packed-sand-v1.webp?v=20260902b", "texture", (error, asset) => { if (error) console.warn("Packed sand texture failed to load; using the rough matte fallback"); else applyPackedSand(asset); });
     state.app.assets.loadFromUrl("./assets/textures/fabric_pattern_07_col_1_512.webp?v=20260903a", "texture", (error, asset) => {
       if (error || !asset?.resource) return;
-      asset.resource.addressU = asset.resource.addressV = pc.ADDRESS_REPEAT; mats.bunting.diffuseMap = asset.resource; mats.bunting.diffuseMapTiling = new pc.Vec2(1, 1); mats.bunting.update();
+      asset.resource.addressU = asset.resource.addressV = pc.ADDRESS_REPEAT;
+      for (const cloth of mats.buntingPalette) { cloth.diffuseMap = asset.resource; cloth.diffuseMapTiling = new pc.Vec2(1, 1); cloth.update(); }
     });
     for (const [kind, url] of [["fire", "./assets/textures/kenney-explosion-fire-atlas.webp"], ["smoke", "./assets/textures/kenney-black-smoke-atlas.webp"]]) state.app.assets.loadFromUrl(`${url}?v=20260903a`, "texture", (error, asset) => {
       if (error || !asset?.resource) { console.warn(`Kenney ${kind} atlas failed to load`); return; }
@@ -965,7 +1003,7 @@ void (async () => {
     candidates.sort((a, b) => a.score - b.score || a.distance - b.distance || String(a.id).localeCompare(String(b.id)));
     const previous = candidates.find((candidate) => candidate.id === state.targetEnemyId); let target = candidates[0] || null;
     if (previous && (!target || previous.score <= target.score + .22)) target = previous;
-    if (!target) { state.targetMarker.enabled = false; return; }
+    if (!target) { state.targetEnemyId = null; state.targetMarker.enabled = false; return; }
     const desiredYaw = Math.atan2(target.x - origin.x, -(target.z - origin.z)); const yawDelta = angleDifference(desiredYaw, state.yaw);
     const desiredPitch = Math.atan2(1.1 - 1.42, target.distance); const pitchDelta = desiredPitch - state.pitch;
     const inputIdle = performance.now() - state.lastMouseAt > 70; const assistStrength = pc.math.clamp(1 - Math.abs(yawDelta) / .42, 0, 1);
@@ -1002,11 +1040,12 @@ void (async () => {
   }
 
   function createBunting(z, height, paletteOffset = 0) {
-    const cord = primitive("box", "Festival cord", [0, 0, 0], [.015, .015, 1], mats.wood); cord.castShadows = false;
-    boxBetweenLocal(cord, state.app.root, new pc.Vec3(-9.5, height, z), new pc.Vec3(9.5, height, z), .015);
+    if (!state.pennantMesh) state.pennantMesh = pc.createMesh(state.app.graphicsDevice, [-.5, .42, 0, .5, .42, 0, 0, -.58, 0], { normals: [0, 0, 1, 0, 0, 1, 0, 0, 1], uvs: [0, 0, 1, 0, .5, 1], indices: [0, 1, 2] });
+    const points = [];
+    for (let index = 0; index < 13; index += 1) { const progress = index / 12; points.push(new pc.Vec3(-9.5 + progress * 19, height - Math.sin(progress * Math.PI) * .64, z)); }
+    for (let index = 0; index < points.length - 1; index += 1) { const cord = primitive("box", "Sagging festival cord", [0, 0, 0], [.015, .015, 1], mats.wood); cord.castShadows = false; boxBetweenLocal(cord, state.app.root, points[index], points[index + 1], .015); }
     for (let index = 0; index < 11; index += 1) {
-      const progress = index / 10; const x = -8.65 + index * 1.73; const sag = Math.sin(progress * Math.PI) * .64; const y = height - sag;
-      const pennant = primitive("plane", "Textured sagging festival pennant", [x, y - .3, z], [.38, 1, .58], mats.bunting); pennant.setEulerAngles(90, 0, (index + paletteOffset) % 2 ? 7 : -7); pennant.castShadows = false;
+      const anchor = points[index + 1]; const pennant = new pc.Entity("Triangular festival pennant"); const instance = new pc.MeshInstance(state.pennantMesh, mats.buntingPalette[(index + paletteOffset) % mats.buntingPalette.length]); pennant.addComponent("render", { meshInstances: [instance] }); state.app.root.addChild(pennant); pennant.setPosition(anchor.x, anchor.y - .48, anchor.z); pennant.setLocalScale(.74, .88, 1); pennant.setEulerAngles(0, 0, (index + paletteOffset) % 2 ? 6 : -6); pennant.render.castShadows = false; pennant.render.receiveShadows = true;
     }
   }
 
@@ -1017,9 +1056,14 @@ void (async () => {
       primitive("cylinder", "Rooftop gold finial", [x, 6.86 * scale, z], [.09 * scale, .7 * scale, .09 * scale], mats.gold);
       primitive("sphere", "Rooftop finial crown", [x, 7.25 * scale, z], [.18 * scale, .18 * scale, .18 * scale], mats.gold);
     }
-    for (const [x, z, color] of [[-9.6, 22.5, mats.magenta], [9.6, 14.5, mats.turquoise], [-9.6, -2.5, mats.gold], [9.6, -19, mats.magenta], [-9.6, -34.8, mats.turquoise]]) {
-      const rug = primitive("box", "Dyed threshold rug", [x, .035, z], [1.1, .035, 1.85], color); rug.castShadows = false;
+    for (const [x, z, color, yaw] of [[-8.65, 22.5, mats.magenta, -4], [8.65, 18.5, mats.gold, 5], [8.65, 14.5, mats.turquoise, -3], [-8.65, 6.5, mats.gold, 4], [-8.65, -2.5, mats.gold, -5], [8.65, -10.5, mats.turquoise, 3], [8.65, -19, mats.magenta, -4], [-8.65, -26.5, mats.gold, 5], [-8.65, -34.8, mats.turquoise, -3]]) {
+      const rug = primitive("box", "Dyed threshold rug", [x, .052, z], [1.35, .035, 2.15], color); rug.setEulerAngles(0, yaw, 0); rug.castShadows = false;
     }
+    const nicheBack = primitive("box", "Household shrine niche", [-9.76, 1.55, 2.1], [.08, 1.28, 1.16], mats.indigo); nicheBack.castShadows = false;
+    for (const [y, z, height, depth] of [[2.22, 2.1, .15, 1.42], [.9, 2.1, .15, 1.42], [1.55, 1.45, 1.45, .14], [1.55, 2.75, 1.45, .14]]) { const frame = primitive("box", "Shrine niche sandstone frame", [-9.62, y, z], [.22, height, depth], mats.stoneLight); frame.castShadows = false; }
+    createSunEmblem(-9.48, 1.55, 2.1, 90);
+    const shrineGlow = new pc.Entity("Shrine diya glow"); shrineGlow.addComponent("light", { type: "omni", color: new pc.Color(1, .38, .1), intensity: .4, range: 4.2, castShadows: false }); shrineGlow.setPosition(-9.1, 1.25, 2.1); registerFireLight(shrineGlow, .4, 2.7); state.app.root.addChild(shrineGlow);
+    const wellBeam = primitive("box", "Well timber crossbeam", [5, 2.16, 17], [2.35, .16, .18], mats.wood); wellBeam.castShadows = true;
     createBunting(11.5, 5.15, 0); createBunting(-8.5, 4.92, 1); createBunting(-26.5, 5.12, 2);
   }
 
@@ -1042,6 +1086,12 @@ void (async () => {
     primitive("cylinder", "Central shrine drum", [gateX, 5.48, -58.65], [2.05, .95, 2.05], mats.indigo);
     const dome = primitive("sphere", "Central shrine dome", [gateX, 6.18, -58.65], [2.35, 1.05, 2.35], mats.turquoise); dome.castShadows = false;
     primitive("cylinder", "Central shrine finial", [gateX, 7.32, -58.65], [.11, .88, .11], mats.gold); primitive("sphere", "Central shrine crown", [gateX, 7.8, -58.65], [.2, .2, .2], mats.gold);
+    for (const x of [gateX - 5.25, gateX + 5.25]) {
+      primitive("box", "Distant palace beacon tower", [x, 7.3, -57.9], [2.05, 9.4, 1.55], mats.stoneLight);
+      primitive("cylinder", "Distant palace beacon drum", [x, 12.15, -58.1], [1.42, .62, 1.42], mats.sandLight);
+      const towerDome = primitive("sphere", "Distant palace beacon dome", [x, 12.65, -58.1], [1.55, .72, 1.55], mats.turquoise); towerDome.castShadows = false;
+      primitive("cylinder", "Distant palace beacon finial", [x, 13.55, -58.1], [.08, .72, .08], mats.gold);
+    }
     const runner = primitive("box", "Doorway dyed runner", [gateX, .025, -34.25], [3.3, .025, 4.4], mats.magenta); runner.castShadows = false;
     for (const [x, z, facing] of [[-8.05, -31.8, 0], [-1.15, -31.8, 180]]) createWallTorch(x, 2.15, z, facing);
     const fill = new pc.Entity("Doorway fire fill"); fill.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .24), intensity: .62, range: 11, castShadows: false }); fill.setPosition(-4.6, 3.2, -31.7); registerFireLight(fill, .62, 4.2); state.app.root.addChild(fill);
@@ -1057,7 +1107,12 @@ void (async () => {
       state.environmentAtlas = pc.EnvLighting.generateAtlas(state.skyboxCubemap, { size: 512 });
       state.app.scene.skybox = state.skyboxCubemap;
       state.app.scene.envAtlas = state.environmentAtlas;
-      state.app.scene.skyboxIntensity = .16;
+      state.app.scene.skyboxIntensity = .13;
+      state.app.assets.loadFromUrl("./assets/environment/moonlit_golf_2k.hdr?v=20260903a", "texture", (skyError, skyAsset) => {
+        if (skyError || !skyAsset?.resource) return;
+        skyAsset.resource.addressU = pc.ADDRESS_REPEAT; skyAsset.resource.addressV = pc.ADDRESS_CLAMP_TO_EDGE;
+        state.moonlitSkybox = pc.EnvLighting.generateSkyboxCubemap(skyAsset.resource, 512); state.app.scene.skybox = state.moonlitSkybox; state.app.scene.skyboxIntensity = .62;
+      });
     });
   }
 
@@ -1076,10 +1131,10 @@ void (async () => {
     frame.vignette.outer = .92;
     frame.vignette.curvature = .68;
     frame.grading.enabled = true;
-    frame.grading.brightness = .9;
-    frame.grading.contrast = 1.04;
-    frame.grading.saturation = .96;
-    frame.grading.tint = new pc.Color(.72, .82, 1);
+    frame.grading.brightness = 1.08;
+    frame.grading.contrast = 1.08;
+    frame.grading.saturation = .88;
+    frame.grading.tint = new pc.Color(.94, .96, 1);
     frame.update();
     return frame;
   }
@@ -1087,8 +1142,8 @@ void (async () => {
   function buildScene() {
     state.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window), graphicsDeviceOptions: { antialias: true, alpha: false, powerPreference: "high-performance" } });
     state.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW); state.app.setCanvasResolution(pc.RESOLUTION_AUTO); state.app.graphicsDevice.maxPixelRatio = Math.min(1, window.devicePixelRatio); state.app.start();
-    state.app.scene.ambientLight = new pc.Color(.03, .04, .09); state.app.scene.exposure = 1.0; state.app.scene.toneMapping = pc.TONEMAP_ACES; state.app.scene.gammaCorrection = pc.GAMMA_SRGB; state.app.scene.fog.type = pc.FOG_EXP2; state.app.scene.fog.color = new pc.Color(.038, .028, .085); state.app.scene.fog.density = .0055;
-    mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.30, 0.22, 0.25]); mats.roadSand = material([.72, .61, .46]); mats.bunting = material([.42, .12, .3]); mats.ash = translucentMaterial([.055, .045, .06], .54); mats.rut = translucentMaterial([.18, .10, .06], .34); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
+    state.app.scene.ambientLight = new pc.Color(.065, .072, .12); state.app.scene.exposure = 1.12; state.app.scene.toneMapping = pc.TONEMAP_ACES; state.app.scene.gammaCorrection = pc.GAMMA_SRGB; state.app.scene.fog.type = pc.FOG_EXP2; state.app.scene.fog.color = new pc.Color(.028, .032, .078); state.app.scene.fog.density = .0038;
+    mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.20, 0.19, 0.20]); mats.roadSand = material([.40, .38, .35]); mats.sideMargin = material([.29, .27, .28]); mats.buntingPalette = [material([.10, .58, .62]), material([.63, .08, .34]), material([.88, .55, .08])]; for (const cloth of mats.buntingPalette) { cloth.cull = pc.CULLFACE_NONE; cloth.gloss = .06; cloth.update(); } mats.ash = translucentMaterial([.035, .032, .04], .78); mats.rut = translucentMaterial([.12, .09, .075], .58); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
     mats.roadSand.gloss = .008; mats.roadSand.metalness = 0; mats.roadSand.update();
     mats.bowWood.diffuse = new pc.Color(.52, .16, .045); mats.bowWood.emissive = new pc.Color(.025, .006, .001); mats.bowWood.emissiveIntensity = .45; mats.bowWood.update();
     for (const plaster of [mats.stone, mats.stoneLight, mats.sand, mats.sandLight, mats.sandDark, mats.roadSand]) { plaster.useMetalness = true; plaster.metalness = 0; plaster.gloss = plaster === mats.roadSand ? .008 : .16; plaster.update(); }
@@ -1097,8 +1152,11 @@ void (async () => {
     mats.iron.useMetalness = true; mats.iron.metalness = .64; mats.iron.gloss = .28; mats.iron.update();
     mats.steel.useMetalness = true; mats.steel.metalness = .84; mats.steel.gloss = .56; mats.steel.update();
     primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark);
-    for (let index = 0; index < 10; index += 1) { const road = primitive("box", "Packed earth street slab", [0, STREET_SURFACE_Y - .04 - (index % 2) * .003, 34 - index * 8], [22, .08, 8.08], mats.roadSand); road.castShadows = false; road.receiveShadows = false; if (!state.roadEntity) state.roadEntity = road; }
-    for (const [x, z, sx, sz, yaw] of [[-6, 9.8, 1.5, .8, 18], [8, -3, 1.35, .72, -12], [-9, -17, 1.25, .68, 21], [5, -29, 1.45, .76, -18]]) { const ash = primitive("plane", "Wet ash fire decal", [x, STREET_SURFACE_Y + .012, z], [sx, 1, sz], mats.ash); ash.setEulerAngles(0, yaw, 0); ash.castShadows = false; ash.receiveShadows = false; }
+    for (let index = 0; index < 10; index += 1) {
+      const z = 34 - index * 8; const road = primitive("box", "Packed earth street slab", [0, STREET_SURFACE_Y - .04 - (index % 2) * .003, z], [13, .08, 8.08], mats.roadSand); road.castShadows = false; road.receiveShadows = false; if (!state.roadEntity) state.roadEntity = road;
+      for (const side of [-1, 1]) { const margin = primitive("box", "Stone threshold margin", [side * 8.8, STREET_SURFACE_Y - .025, z], [4.4, .1, 8.05], mats.sideMargin); margin.castShadows = false; const kerb = primitive("box", "Street drain kerb", [side * 6.58, STREET_SURFACE_Y + .035, z], [.16, .14, 8.02], mats.stoneLight); kerb.castShadows = false; }
+    }
+    for (const [x, z, sx, sz, yaw] of [[-6, 9.8, 2.6, 1.45, 18], [8, -3, 2.3, 1.25, -12], [-9, -17, 2.2, 1.2, 21], [5, -29, 2.5, 1.35, -18]]) { const ash = primitive("plane", "Wet ash fire decal", [x, STREET_SURFACE_Y + .062, z], [sx, 1, sz], mats.ash); ash.setEulerAngles(0, yaw, 0); ash.castShadows = false; ash.receiveShadows = false; }
     for (const [x, z, yaw] of [[-1.4, 16, -4], [2.1, 3.5, 6], [-2.8, -9, -5], [1.7, -23, 4]]) { const rut = primitive("plane", "Cart rut decal", [x, STREET_SURFACE_Y + .01, z], [.16, 1, 3.6], mats.rut); rut.setEulerAngles(0, yaw, 0); rut.castShadows = false; rut.receiveShadows = false; }
     for (const [x, z, radius] of [[-7.8, 25, .08], [7.2, 14, .06], [-8.3, 2, .075], [7.7, -10, .065], [-7.5, -23, .08], [7.9, -36, .07]]) { const pebble = primitive("sphere", "Road pebble", [x, STREET_SURFACE_Y + radius * .22, z], [radius * 1.4, radius * .42, radius], mats.sandDark); pebble.castShadows = false; }
     for (const [x, z, color, lean] of [[-7.8, -9.8, mats.turquoise, -7], [7.7, -14.2, mats.magenta, 7], [-7.6, -22.0, mats.gold, -7]]) {
@@ -1121,12 +1179,16 @@ void (async () => {
     for (const [x, z] of [[-6, 9.8], [8, -3], [-9, -17], [5, -29]]) createBrazier(x, z);
     createSunEmblem(-10.15, 2.7, 18.1); createSunEmblem(10.15, 2.7, 10.1, 180); createSunEmblem(-10.15, 2.7, -15.9); createSunEmblem(10.15, 2.7, -29.9, 180);
     createRegionalSkyline();
-    for (const [x, y, z, size] of [[-12, 23, -52, 2.8], [7, 20, -48, .16], [-8, 17, -44, .12], [16, 26, -50, .13], [-18, 25, -38, .10], [2, 29, -56, .12]]) { const star = primitive("sphere", size > 1 ? "Moon disc" : "Night star", [x, y, z], [size, size, size], mats.fireHot); star.castShadows = false; }
     for (const [x, z] of [[-9.4, 17.9], [9.4, 9.9], [-9.4, -10.1], [9.4, -25.9]]) { const lanternLight = new pc.Entity("Wall lantern glow"); lanternLight.addComponent("light", { type: "omni", color: new pc.Color(1, .54, .24), intensity: .6, range: 5.8, castShadows: false }); lanternLight.setPosition(x, 2.2, z); registerFireLight(lanternLight, .6, x * .29 + z * .13); state.app.root.addChild(lanternLight); }
     const moon = new pc.Entity("Moonlight"); moon.addComponent("light", { type: "directional", color: new pc.Color(.58, .68, 1), intensity: 1.68, castShadows: true, shadowDistance: 42, shadowResolution: 2048, shadowBias: .05, normalOffsetBias: .02, numCascades: 2 }); moon.setEulerAngles(48, -32, 0); state.app.root.addChild(moon);
+    const rim = new pc.Entity("Cool moon rim"); rim.addComponent("light", { type: "directional", color: new pc.Color(.32, .48, 1), intensity: .34, castShadows: false }); rim.setEulerAngles(38, 148, 0); state.app.root.addChild(rim);
+    const palaceGlow = new pc.Entity("Palace horizon glow"); palaceGlow.addComponent("light", { type: "omni", color: new pc.Color(1, .43, .18), intensity: 3.4, range: 28, castShadows: false }); palaceGlow.setPosition(-4.7, 7.8, -52); state.app.root.addChild(palaceGlow);
+    for (const [x, z] of [[-4.7, -3.2], [4.6, -17.4]]) { const wash = new pc.Entity("Warm turn-wall wash"); wash.addComponent("light", { type: "omni", color: new pc.Color(1, .44, .18), intensity: .52, range: 9, castShadows: false }); wash.setPosition(x, 2.5, z); state.app.root.addChild(wash); }
     const fill = new pc.Entity("Warm reflected fire fill"); fill.addComponent("light", { type: "directional", color: new pc.Color(1, .49, .26), intensity: .17, castShadows: false }); fill.setEulerAngles(28, 148, 0); state.app.root.addChild(fill);
     batchStaticEnvironment(); createObjectiveMarker(); createTargetMarker();
-    state.playerEntity = createCharacter("Vrishaketu", mats.player, 1); state.chitra = createCharacter("Chitra", mats.chitra, .73); state.chitra.setPosition(0, CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale, 14);
+    state.playerEntity = createCharacter("Vrishaketu", mats.player, 1);
+    const playerBounce = new pc.Entity("Player ground bounce"); playerBounce.addComponent("light", { type: "omni", color: new pc.Color(.56, .66, 1), intensity: .28, range: 4.6, castShadows: false }); state.playerEntity.addChild(playerBounce); playerBounce.setLocalPosition(0, .62, .34);
+    state.chitra = createCharacter("Chitra", mats.chitra, .73); state.chitra.setPosition(0, CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale, 14);
     state.camera = new pc.Entity("Right shoulder camera"); state.camera.addComponent("camera", { clearColor: new pc.Color(.075, .035, .16), fov: 63, nearClip: .08, farClip: 110 }); state.app.root.addChild(state.camera);
     state.cameraFrame = createCameraFrame(); loadImageBasedLighting(); loadApprovedAssets();
     state.app.on("update", updateScene);
@@ -1361,10 +1423,22 @@ void (async () => {
       cachedFireRoots: state.fireEffects.length,
       cachedFireLights: state.fireLights.length,
       taggedSceneQueriesInUpdate: false,
-      texturedPennants: state.app.root.find((entity) => entity.name === "Textured sagging festival pennant").length,
+      texturedPennants: state.app.root.find((entity) => entity.name === "Triangular festival pennant").length,
       roadSlabs: state.app.root.find((entity) => entity.name === "Packed earth street slab").length,
       roadDecals: state.app.root.find((entity) => /decal$/.test(entity.name)).length,
       batchedModelRenders: state.batchedModelRenders,
+    }),
+    setDressingSummary: () => ({
+      tallHouseBays: TALL_HOUSE_BAYS.length,
+      setbackHouseBays: SETBACK_HOUSE_BAYS.length,
+      lTurnColliders: WORLD_COLLIDERS.filter(([, , , , label]) => /L-turn/.test(label)).length,
+      groundClutter: state.environmentEntities.filter((entity) => ["brass_vase_02", "brass_vase_03", "planter_pot_clay", "wicker_basket_01", "Bag", "FarmCrate_Empty", "Vase_4"].includes(entity.name)).length,
+      diyas: state.environmentEntities.filter((entity) => entity.name === "brass_diya_lantern").length,
+      wellParts: state.environmentEntities.filter((entity) => ["Kenney_fountain_round", "Kenney_fountain_center", "Bucket_Wooden_1", "Rope_1"].includes(entity.name)).length,
+      rathParts: state.environmentEntities.filter((entity) => ["Kenney_cart", "Kenney_wheel", "Prop_Support"].includes(entity.name) && entity.getPosition().z < -28).length,
+      moonPrimitives: state.app.root.find((entity) => /^(Moon disc|Night star)/.test(entity.name)).length,
+      shrineNiches: state.app.root.find((entity) => entity.name === "Household shrine niche").length,
+      palaceLandmarks: state.app.root.find((entity) => /^Distant palace/.test(entity.name) || /^Central shrine/.test(entity.name)).length,
     }),
     focusCharacter: (name = null, distance = 1.45, angle = 0) => { state.qaFocusName = name; state.qaFocusDistance = Math.max(1.2, Math.min(6, Number(distance) || 1.45)); state.qaFocusAngle = Math.max(-180, Math.min(180, Number(angle) || 0)); if (state.camera?.camera) state.camera.camera.fov = name ? 42 : 63; return Boolean(!name || state.app?.root.findByName(name)); },
     previewAnimation: (name, animation = null) => { if (animation && !CHARACTER_ANIMATIONS[animation]) return false; if (animation) state.qaAnimationPreviews.set(name, animation); else state.qaAnimationPreviews.delete(name); const root = state.app?.root.findByName(name); if (root && animation) setCharacterAnimation(root, animation); return Boolean(root); },
