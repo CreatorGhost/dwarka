@@ -33,6 +33,7 @@ test("ships a local PlayCanvas export instead of a remote runtime", async () => 
     readFile(new URL("../public/playcanvas/chapter-1/playcanvas.min.js", import.meta.url)),
   ]);
   assert.match(html, /playcanvas\.min\.js/);
-  assert.match(runtime, /new pc\.Application/);
+  assert.ok(runtime.length > 80_000);
+  assert.match(runtime, /Offline play/);
   assert.ok(engine.byteLength > 500_000);
 });
