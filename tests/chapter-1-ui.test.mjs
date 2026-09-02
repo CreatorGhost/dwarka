@@ -208,6 +208,26 @@ test("A1 uses the ledgered HDR, physical materials, post effects, and production
   assert.match(css, /#damage-flash\.damaged/);
 });
 
+test("A2 builds the street from unit-scale plaster bays and terraced roof modules", async () => {
+  const [runtime, layoutText] = await Promise.all([
+    readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root), "utf8"),
+  ]);
+  const layout = JSON.parse(layoutText);
+  assert.deepEqual(layout.streetHouseBays.slice(0, 4), [22, 18, 14, 10]);
+  assert.ok(layout.streetHouseBays.every((z, index, bays) => index === 0 || bays[index - 1] - z === 4), "house bays must stay on the four-metre grid");
+  assert.doesNotMatch(runtime, /primitive\("box", "Left house"/, "the old box-house corridor must be gone");
+  assert.doesNotMatch(runtime, /primitive\("cylinder", "Awning support"/, "awnings must use authored wooden posts");
+  assert.doesNotMatch(runtime, /primitive\("box", "Carved turn-wall pilaster"/, "turn walls must use authored columns");
+  assert.match(runtime, /Kenney_roof_flat_square/);
+  assert.match(runtime, /Wall_Plaster_Door_Flat/);
+  assert.match(runtime, /tintStreetHouse/);
+  assert.match(runtime, /placements\.push\(\[x, 0, centreZ \+ offset, yaw, 1\]\)/, "street wall modules must remain at source scale");
+  for (const key of ["Kenney_column", "Prop_ExteriorBorder_Straight1", "Kenney_pillar_wood"]) {
+    assert.ok(layout.placements[key].every((placement) => placement[4] === 1), `${key} must remain at source scale`);
+  }
+});
+
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {
   const progress = await readFile(new URL("app/game/chapter-1/progress.ts", root), "utf8");
   assert.match(progress, /incoming\.nextPhase.*existing\.nextPhase/);

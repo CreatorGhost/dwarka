@@ -48,10 +48,12 @@ void (async () => {
   const WORLD_COLLIDERS = Object.freeze(WORLD_LAYOUT.colliders.map((collider) => Object.freeze([collider.minX, collider.maxX, collider.minZ, collider.maxZ, collider.label, collider.id, collider.visual])));
   const MODEL_URLS = {
     Vrishaketu_Composite: "./assets/models/Vrishaketu_Composite.glb", Raider_Archer_Composite: "./assets/models/Raider_Archer_Composite.glb", Brute_Composite: "./assets/models/Brute_Composite.glb", Male_Peasant_Composite: "./assets/models/Male_Peasant_Composite.glb", Female_Peasant_Composite: "./assets/models/Female_Peasant_Composite.glb",
-    Wall_Plaster_Door_Round: "./assets/models/Wall_Plaster_Door_Round.glb", Wall_Plaster_Window_Wide_Round: "./assets/models/Wall_Plaster_Window_Wide_Round.glb", Door_2_Round: "./assets/models/Door_2_Round.glb", WindowShutters_Wide_Round_Open: "./assets/models/WindowShutters_Wide_Round_Open.glb", Wall_Arch: "./assets/models/Wall_Arch.glb", Roof_RoundTiles_4x4: "./assets/models/Roof_RoundTiles_4x4.glb", Roof_RoundTiles_4x8: "./assets/models/Roof_RoundTiles_4x8.glb",
+    Wall_Plaster_Door_Round: "./assets/models/Wall_Plaster_Door_Round.glb", Wall_Plaster_Window_Wide_Round: "./assets/models/Wall_Plaster_Window_Wide_Round.glb", Wall_Plaster_Door_Flat: "./assets/models/Wall_Plaster_Door_Flat.glb", Wall_Plaster_Straight: "./assets/models/Wall_Plaster_Straight.glb", Door_2_Round: "./assets/models/Door_2_Round.glb", Door_4_Flat: "./assets/models/Door_4_Flat.glb", WindowShutters_Wide_Round_Open: "./assets/models/WindowShutters_Wide_Round_Open.glb", Wall_Arch: "./assets/models/Wall_Arch.glb", Kenney_roof_flat_square: "./assets/models/Kenney_roof_flat_square.glb", Kenney_column: "./assets/models/Kenney_column.glb", Kenney_pillar_wood: "./assets/models/Kenney_pillar_wood.glb", Prop_ExteriorBorder_Straight1: "./assets/models/Prop_ExteriorBorder_Straight1.glb",
     Prop_Wagon: "./assets/models/Prop_Wagon.glb", Balcony_Simple_Straight: "./assets/models/Balcony_Simple_Straight.glb", Stairs_Exterior_Straight: "./assets/models/Stairs_Exterior_Straight.glb", Stall_Cart_Empty: "./assets/models/Stall_Cart_Empty.glb", Stall_Empty: "./assets/models/Stall_Empty.glb", Barrel: "./assets/models/Barrel.glb", Vase_2: "./assets/models/Vase_2.glb", Pot_1: "./assets/models/Pot_1.glb", Sword_Bronze: "./assets/models/Sword_Bronze.glb", Banner_1: "./assets/models/Banner_1.glb", Lantern_Wall: "./assets/models/Lantern_Wall.glb", Crate_Wooden: "./assets/models/Crate_Wooden.glb", Bench: "./assets/models/Bench.glb", Prop_Crate: "./assets/models/Prop_Crate.glb", Prop_WoodenFence_Single: "./assets/models/Prop_WoodenFence_Single.glb",
   };
   const ENVIRONMENT_PLACEMENTS = Object.freeze(WORLD_LAYOUT.placements);
+  const STREET_HOUSE_BAYS = Object.freeze(WORLD_LAYOUT.streetHouseBays || []);
+  const STREET_HOUSE_MODEL_KEYS = new Set(["Wall_Plaster_Door_Flat", "Wall_Plaster_Straight", "Wall_Plaster_Window_Wide_Round", "Door_4_Flat", "Kenney_roof_flat_square"]);
   const GROUND_ALIGNED_MODELS = new Set(WORLD_LAYOUT.groundAlignedModels);
   const STREET_SURFACE_Y = WORLD_LAYOUT.streetSurfaceY;
   const CHARACTER_GROUND_LIFT = WORLD_LAYOUT.characterGroundLift;
@@ -79,7 +81,7 @@ void (async () => {
     profile: null, token: null, settings: { locale: "en", voiceLocale: "en", voiceLinked: true, master: 1, music: 0.7, effects: 0.8, dialogue: 1, muteAll: false, captions: true, speakerNames: true, cameraShake: true, tutorials: true, tutorialDone: [] }, requestedAction: "continue",
     socket: null, reconnectTimer: 0, reconnectAttempts: 0, sessionAccepted: false, snapshot: null, reconnectPhase: null, intentionalSockets: new WeakSet(), lastPhase: null,
     keys: new Set(), pressed: new Set(), aim: false, yaw: 0, pitch: -0.1, lookYaw: 0, lookPitch: -0.1, visualYaw: 0, seq: 0, playing: false, paused: true, modalMode: "loading", storyIndex: 0,
-    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraFrame: null, roadEntity: null, environmentAtlas: null, skyboxCubemap: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
+    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], environmentMaterials: new Map(), projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraFrame: null, roadEntity: null, environmentAtlas: null, skyboxCubemap: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
     fpsFrames: 0, fpsElapsed: 0, fpsLast: 60, qaVisible: false, qaFocusName: null, qaFocusDistance: 1.45, qaFocusAngle: 0, qaAnimationPreviews: new Map(), qaAimPreview: false, captionTimer: 0, toastTimer: 0, effectsReady: false, readyTimer: 0, tutorialSeen: new Set(), mouseTurned: false,
     voiceEntries: new Map(), voiceAudio: null, pendingVoiceLine: null, lastBarkPhase: null, effectAudio: new Map(), localAction: null, lastVisualActionAt: { fire: 0, melee: 0 }, enemyWarnings: new Map(), lastPlayerHealth: null, damageFlashUntil: 0, lastFootstepAt: 0, footstepIndex: 0, lastMouseAt: 0,
     snapshotVelocity: { x: 0, z: 0 }, enemySnapshotVelocities: new Map(), snapshotReceivedAt: 0,
@@ -574,6 +576,42 @@ void (async () => {
     return entity;
   }
 
+  function tintStreetHouse(entity, position) {
+    if (!entity) return;
+    const tone = (Math.round(position[2] / 4) + (position[0] > 0 ? 1 : 0)) % 3 === 0 ? "ochre" : "lime";
+    const color = tone === "ochre" ? new pc.Color(.86, .58, .28) : new pc.Color(.72, .79, .54);
+    entity.findComponents?.("render").forEach((render) => {
+      for (const instance of render.meshInstances || []) {
+        const source = instance.material; const cacheKey = `${source.id}:${tone}`;
+        let tinted = state.environmentMaterials.get(cacheKey);
+        if (!tinted) { tinted = source.clone(); tinted.diffuse = color; tinted.useMetalness = true; tinted.metalness = 0; tinted.gloss = .16; tinted.update(); state.environmentMaterials.set(cacheKey, tinted); }
+        instance.material = tinted;
+      }
+    });
+  }
+
+  function streetHousePlacementsFor(key) {
+    const placements = [];
+    for (let index = 0; index < STREET_HOUSE_BAYS.length; index += 1) {
+      const centreZ = STREET_HOUSE_BAYS[index];
+      for (const side of [-1, 1]) {
+        const x = side * 10.12; const yaw = side < 0 ? 90 : -90; const doorOnNearModule = (index + (side > 0 ? 2 : 0)) % 4 === 0;
+        for (const offset of [-1, 1]) {
+          const isDoor = doorOnNearModule && offset === 1;
+          const isWindow = !isDoor && (index + offset + (side > 0 ? 1 : 0)) % 3 === 0;
+          if ((key === "Wall_Plaster_Door_Flat" && isDoor) || (key === "Wall_Plaster_Window_Wide_Round" && isWindow) || (key === "Wall_Plaster_Straight" && !isDoor && !isWindow)) placements.push([x, 0, centreZ + offset, yaw, 1]);
+          if (key === "Door_4_Flat" && isDoor) placements.push([side * 9.88, 0, centreZ + offset, yaw, 1]);
+        }
+        if (key === "Kenney_roof_flat_square") for (const roofX of [side * 11.2, side * 13.4]) for (const offset of [-1.1, 1.1]) placements.push([roofX, 3.12, centreZ + offset, 0, 1]);
+      }
+    }
+    return placements;
+  }
+
+  function environmentPlacementsFor(key) {
+    return [...(ENVIRONMENT_PLACEMENTS[key] || []), ...(STREET_HOUSE_MODEL_KEYS.has(key) ? streetHousePlacementsFor(key) : [])];
+  }
+
   function alignEnvironmentModelToStreet(entity, requestedY) {
     if (!entity || requestedY > .1) return;
     const instances = entity.findComponents?.("render").flatMap((render) => render.meshInstances || []) || [];
@@ -734,8 +772,9 @@ void (async () => {
   }
 
   function placeEnvironmentFor(key) {
-    for (const [x, y, z, yaw, scale] of ENVIRONMENT_PLACEMENTS[key] || []) {
+    for (const [x, y, z, yaw, scale] of environmentPlacementsFor(key)) {
       const entity = instantiateModel(key, key, [x, y, z], scale, yaw);
+      if (entity && key.startsWith("Wall_Plaster_")) tintStreetHouse(entity, [x, y, z]);
       if (entity && GROUND_ALIGNED_MODELS.has(key)) alignEnvironmentModelToStreet(entity, y);
       if (entity) state.environmentEntities.push(entity);
     }
@@ -766,7 +805,7 @@ void (async () => {
     else state.app.assets.loadFromUrl("./assets/textures/packed-sand-v1.webp?v=20260902b", "texture", (error, asset) => { if (error) console.warn("Packed sand texture failed to load; using the rough matte fallback"); else applyPackedSand(asset); });
     for (const [key, url] of Object.entries(MODEL_URLS)) state.app.assets.loadFromUrl(`${url}?v=20260902k`, "container", (error, asset) => {
       if (error || !asset) { console.warn(`Optional model failed: ${key}`); return; }
-      state.modelAssets[key] = asset; if (ENVIRONMENT_PLACEMENTS[key]) placeEnvironmentFor(key);
+      state.modelAssets[key] = asset; if (ENVIRONMENT_PLACEMENTS[key] || STREET_HOUSE_MODEL_KEYS.has(key)) placeEnvironmentFor(key);
       for (const root of state.characterRoots) upgradeCharacter(root);
     });
     state.app.assets.loadFromUrl("./assets/animations/UAL1_Standard.glb?v=20260902i", "container", (error, asset) => {
@@ -932,7 +971,6 @@ void (async () => {
 
   function decorateTurnWalls() {
     for (const [z, columns, motifX, textileColor] of [[-3.67, [-9.1, -6.5, -3.9, -1.3, 1.2], -5.2, mats.turquoise], [-17.87, [-1.15, 1.7, 4.55, 7.4, 9.95], 4.45, mats.magenta]]) {
-      for (const x of columns) { primitive("box", "Carved turn-wall pilaster", [x, .92, z], [.16, 1.72, .13], mats.sandLight); primitive("box", "Gold pilaster capital", [x, 1.72, z - .01], [.42, .14, .18], mats.gold); }
       for (const x of [columns[1], columns[3]]) { const cloth = primitive("box", "Dyed turn-wall textile", [x, .86, z - .03], [1.08, 1.08, .035], textileColor); cloth.castShadows = false; }
       createSunEmblem(motifX, 1.02, z - .08);
     }
@@ -1006,17 +1044,8 @@ void (async () => {
     mats.steel.useMetalness = true; mats.steel.metalness = .84; mats.steel.gloss = .56; mats.steel.update();
     primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark); const road = primitive("box", "Packed sand street", [0, STREET_SURFACE_Y - .04, -3], [22, .08, 82], mats.roadSand); road.castShadows = false; road.receiveShadows = false; state.roadEntity = road;
     for (const [x, z, radius] of [[-7.8, 25, .08], [7.2, 14, .06], [-8.3, 2, .075], [7.7, -10, .065], [-7.5, -23, .08], [7.9, -36, .07]]) { const pebble = primitive("sphere", "Road pebble", [x, STREET_SURFACE_Y + radius * .22, z], [radius * 1.4, radius * .42, radius], mats.sandDark); pebble.castShadows = false; }
-    for (let z = 34; z > -44; z -= 6) {
-      const leftColor = z % 12 === 4 ? mats.magenta : mats.indigo; const rightColor = z % 12 === 4 ? mats.turquoise : mats.wood;
-      primitive("box", "Left house", [-13, 2.5, z], [5, 5.5, 5.3], leftColor); primitive("box", "Right house", [13, 2.6, z - 2], [5, 5.7, 5.4], rightColor);
-      primitive("box", "Left stone plinth", [-10.55, .35, z], [.36, .7, 5.3], mats.stoneLight); primitive("box", "Right stone plinth", [10.55, .35, z - 2], [.36, .7, 5.4], mats.stoneLight);
-      primitive("box", "Left carved cornice", [-10.55, 4.45, z], [.34, .18, 5.3], mats.gold); primitive("box", "Right carved cornice", [10.55, 4.55, z - 2], [.34, .18, 5.4], mats.gold);
-      primitive("box", "Cloth", [-10.35, 2.6, z + 1.8], [.15, 2.5, 1.7], z % 12 === 4 ? mats.gold : mats.magenta);
-    }
     for (const [x, z, color, lean] of [[-7.8, -9.8, mats.turquoise, -7], [7.7, -14.2, mats.magenta, 7], [-7.6, -22.0, mats.gold, -7]]) {
       const awning = primitive("box", "Woven market awning", [x, 3.25, z], [4.3, .09, 3.0], color); awning.setEulerAngles(0, 0, lean); awning.castShadows = false;
-      primitive("cylinder", "Awning support", [x > 0 ? 5.7 : -5.7, 1.55, z - 1.25], [.065, 1.55, .065], mats.wood);
-      primitive("cylinder", "Awning support", [x > 0 ? 5.7 : -5.7, 1.55, z + 1.25], [.065, 1.55, .065], mats.wood);
     }
     for (const [minX, maxX, minZ, maxZ, name, , visual] of WORLD_COLLIDERS) {
       if (visual || ["Stall", "Barrels"].includes(name) || /brazier|vase|stairs|awning support/i.test(name)) continue;
@@ -1261,6 +1290,14 @@ void (async () => {
       fireLightIntensities: state.app.root.findByTag("fire-light").map((light) => light.light.intensity),
       iblReady: Boolean(state.app.scene.skybox && state.app.scene.envAtlas),
       post: state.cameraFrame ? { bloom: state.cameraFrame.bloom.intensity, ssao: state.cameraFrame.ssao.type, vignette: state.cameraFrame.vignette.intensity } : null,
+    }),
+    architectureSummary: () => ({
+      boxHouseCount: state.app.root.find((entity) => entity.name === "Left house" || entity.name === "Right house").length,
+      wallModules: state.environmentEntities.filter((entity) => entity.name.startsWith("Wall_Plaster_")).length,
+      flatRoofModules: state.environmentEntities.filter((entity) => entity.name === "Kenney_roof_flat_square").length,
+      authoredAwningPosts: state.environmentEntities.filter((entity) => entity.name === "Kenney_pillar_wood").length,
+      authoredTurnColumns: state.environmentEntities.filter((entity) => entity.name === "Kenney_column").length,
+      nonUnitArchitecture: state.environmentEntities.filter((entity) => ["Wall_Plaster_Door_Flat", "Wall_Plaster_Straight", "Wall_Plaster_Window_Wide_Round", "Kenney_roof_flat_square", "Kenney_pillar_wood", "Kenney_column", "Prop_ExteriorBorder_Straight1"].includes(entity.name) && Math.abs(entity.getLocalScale().x - 1) > .001).map((entity) => entity.name),
     }),
     focusCharacter: (name = null, distance = 1.45, angle = 0) => { state.qaFocusName = name; state.qaFocusDistance = Math.max(1.2, Math.min(6, Number(distance) || 1.45)); state.qaFocusAngle = Math.max(-180, Math.min(180, Number(angle) || 0)); if (state.camera?.camera) state.camera.camera.fov = name ? 42 : 63; return Boolean(!name || state.app?.root.findByName(name)); },
     previewAnimation: (name, animation = null) => { if (animation && !CHARACTER_ANIMATIONS[animation]) return false; if (animation) state.qaAnimationPreviews.set(name, animation); else state.qaAnimationPreviews.delete(name); const root = state.app?.root.findByName(name); if (root && animation) setCharacterAnimation(root, animation); return Boolean(root); },
