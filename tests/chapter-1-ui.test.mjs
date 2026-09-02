@@ -165,6 +165,24 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   assert.deepEqual(layout.placements.Prop_Wagon[0], [2.6, 0, 2.6, 24, 0.86]);
 });
 
+test("A0 night rendering exposes the skyline and lets practical fire lights breathe", async () => {
+  const [runtime, readableSource] = await Promise.all([
+    readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
+    readFile(new URL("../../game/client-scripts/chapter-1.js", import.meta.url), "utf8"),
+  ]);
+  assert.equal(runtime, readableSource, "the readable source and served runtime must remain byte-identical");
+  assert.doesNotMatch(runtime, /primitive\("sphere", "Indigo night sky"/, "an opaque sky mesh must not hide distant scenery");
+  assert.match(runtime, /ambientLight = new pc\.Color\(\.03, \.04, \.09\)/);
+  assert.match(runtime, /scene\.exposure = 1\.0/);
+  assert.doesNotMatch(runtime, /new pc\.Entity\("Camera soft fill"\)/, "the camera must not carry a flattening headlight");
+  assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
+  assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
+  assert.match(runtime, /diffuseMapTiling = new pc\.Vec2\(11, 41\)/, "the 22 by 82 metre road needs an approximately two-metre texture repeat");
+  assert.match(runtime, /function flickerFireLight/);
+  assert.match(runtime, /findByTag\("fire-light"\).*flickerFireLight/, "every registered practical light must animate each frame");
+  assert.match(runtime, /renderingSummary/, "visual QA must expose the A0 lighting contract in the running scene");
+});
+
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {
   const progress = await readFile(new URL("app/game/chapter-1/progress.ts", root), "utf8");
   assert.match(progress, /incoming\.nextPhase.*existing\.nextPhase/);

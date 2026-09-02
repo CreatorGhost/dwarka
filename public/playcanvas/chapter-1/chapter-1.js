@@ -79,7 +79,7 @@ void (async () => {
     profile: null, token: null, settings: { locale: "en", voiceLocale: "en", voiceLinked: true, master: 1, music: 0.7, effects: 0.8, dialogue: 1, muteAll: false, captions: true, speakerNames: true, cameraShake: true, tutorials: true, tutorialDone: [] }, requestedAction: "continue",
     socket: null, reconnectTimer: 0, reconnectAttempts: 0, sessionAccepted: false, snapshot: null, reconnectPhase: null, intentionalSockets: new WeakSet(), lastPhase: null,
     keys: new Set(), pressed: new Set(), aim: false, yaw: 0, pitch: -0.1, lookYaw: 0, lookPitch: -0.1, visualYaw: 0, seq: 0, playing: false, paused: true, modalMode: "loading", storyIndex: 0,
-    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
+    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, roadEntity: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
     fpsFrames: 0, fpsElapsed: 0, fpsLast: 60, qaVisible: false, qaFocusName: null, qaFocusDistance: 1.45, qaFocusAngle: 0, qaAnimationPreviews: new Map(), qaAimPreview: false, captionTimer: 0, toastTimer: 0, effectsReady: false, readyTimer: 0, tutorialSeen: new Set(), mouseTurned: false,
     voiceEntries: new Map(), voiceAudio: null, pendingVoiceLine: null, lastBarkPhase: null, effectAudio: new Map(), localAction: null, lastVisualActionAt: { fire: 0, melee: 0 }, enemyWarnings: new Map(), lastPlayerHealth: null, damageFlashUntil: 0, lastFootstepAt: 0, footstepIndex: 0, lastMouseAt: 0,
     snapshotVelocity: { x: 0, z: 0 }, enemySnapshotVelocities: new Map(), snapshotReceivedAt: 0,
@@ -758,8 +758,8 @@ void (async () => {
   function loadApprovedAssets() {
     const applyPackedSand = (asset) => {
       if (!asset?.resource) { console.warn("Packed sand texture failed to load; using the rough matte fallback"); return; }
-      const texture = asset.resource; texture.addressU = texture.addressV = pc.ADDRESS_MIRRORED_REPEAT; texture.minFilter = pc.FILTER_LINEAR_MIPMAP_LINEAR; texture.magFilter = pc.FILTER_LINEAR; texture.anisotropy = 8;
-      mats.roadSand.diffuseMap = texture; mats.roadSand.diffuseMapTiling = new pc.Vec2(.75, 2.75); mats.roadSand.update();
+      const texture = asset.resource; texture.addressU = texture.addressV = pc.ADDRESS_REPEAT; texture.minFilter = pc.FILTER_LINEAR_MIPMAP_LINEAR; texture.magFilter = pc.FILTER_LINEAR; texture.anisotropy = 8;
+      mats.roadSand.diffuseMap = texture; mats.roadSand.diffuseMapTiling = new pc.Vec2(11, 41); mats.roadSand.update();
     };
     const packedSandAsset = state.app.assets.find("packed-sand-v1.webp", "texture");
     if (packedSandAsset) { packedSandAsset.ready(applyPackedSand); state.app.assets.load(packedSandAsset); }
@@ -795,6 +795,19 @@ void (async () => {
     }
   }
 
+  function registerFireLight(light, baseIntensity, phase = 0) {
+    light.tags.add("fire-light");
+    light.dwarkaBaseIntensity = baseIntensity;
+    light.dwarkaFlickerPhase = phase;
+  }
+
+  function flickerFireLight(light, timeMs) {
+    const phase = light.dwarkaFlickerPhase || 0;
+    const lowFrequency = Math.sin(timeMs * .0067 + phase);
+    const highFrequency = Math.sin(timeMs * .0173 + phase * 1.7);
+    light.light.intensity = light.dwarkaBaseIntensity * (1 + lowFrequency * .12 + highFrequency * .045);
+  }
+
   function createBrazier(x, z) {
     const bowl = primitive("cylinder", "Iron fire bowl", [x, .48, z], [.72, .18, .72], mats.iron); bowl.setLocalEulerAngles(0, 0, 0);
     primitive("cylinder", "Brazier stem", [x, .25, z], [.12, .28, .12], mats.iron);
@@ -803,14 +816,14 @@ void (async () => {
     const inner = primitive("cone", "Gold flame", [.08, .28, .02], [.27, .62, .27], mats.fireHot, fire); inner.setLocalEulerAngles(0, 0, -8);
     outer.castShadows = false; inner.castShadows = false;
     for (let index = 0; index < 4; index += 1) { const smoke = primitive("sphere", "Smoke plume", [0, .82 + index * .32, 0], [.24 + index * .09, .18 + index * .06, .24 + index * .09], mats.smoke, fire); smoke.tags.add("smoke"); smoke.dwarkaSmokeIndex = index; smoke.castShadows = false; }
-    const light = new pc.Entity("Fire light"); light.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .18), intensity: 1.45, range: 8.5, castShadows: false }); light.setPosition(x, 1.35, z); state.app.root.addChild(light);
+    const light = new pc.Entity("Fire light"); light.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .18), intensity: 1.45, range: 8.5, castShadows: false }); light.setPosition(x, 1.35, z); registerFireLight(light, 1.45, x * .31 + z * .17); state.app.root.addChild(light);
   }
 
   function createWallTorch(x, y, z, facing = 0) {
     const torch = new pc.Entity("Wall torch"); torch.setPosition(x, y, z); torch.setEulerAngles(0, facing, 0); state.app.root.addChild(torch);
     primitive("cylinder", "Torch bracket", [0, -.28, .05], [.045, .34, .045], mats.iron, torch);
     const flameRoot = new pc.Entity("Torch flame root"); flameRoot.setLocalPosition(0, .15, 0); flameRoot.tags.add("fire"); torch.addChild(flameRoot); const flame = primitive("cone", "Torch flame", [0, 0, 0], [.22, .48, .22], mats.fireHot, flameRoot); flame.castShadows = false;
-    const light = new pc.Entity("Torch glow"); light.addComponent("light", { type: "omni", color: new pc.Color(1, .52, .24), intensity: 1.0, range: 7, castShadows: false }); light.setPosition(x, y + .25, z); state.app.root.addChild(light);
+    const light = new pc.Entity("Torch glow"); light.addComponent("light", { type: "omni", color: new pc.Color(1, .52, .24), intensity: 1.0, range: 7, castShadows: false }); light.setPosition(x, y + .25, z); registerFireLight(light, 1, x * .23 + z * .19); state.app.root.addChild(light);
   }
 
   function createObjectiveMarker() {
@@ -939,18 +952,17 @@ void (async () => {
     primitive("cylinder", "Central shrine finial", [gateX, 7.32, -58.65], [.11, .88, .11], mats.gold); primitive("sphere", "Central shrine crown", [gateX, 7.8, -58.65], [.2, .2, .2], mats.gold);
     const runner = primitive("box", "Doorway dyed runner", [gateX, .025, -34.25], [3.3, .025, 4.4], mats.magenta); runner.castShadows = false;
     for (const [x, z, facing] of [[-8.05, -31.8, 0], [-1.15, -31.8, 180]]) createWallTorch(x, 2.15, z, facing);
-    const fill = new pc.Entity("Doorway fire fill"); fill.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .24), intensity: .62, range: 11, castShadows: false }); fill.setPosition(-4.6, 3.2, -31.7); state.app.root.addChild(fill);
+    const fill = new pc.Entity("Doorway fire fill"); fill.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .24), intensity: .62, range: 11, castShadows: false }); fill.setPosition(-4.6, 3.2, -31.7); registerFireLight(fill, .62, 4.2); state.app.root.addChild(fill);
   }
 
   function buildScene() {
     state.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window), graphicsDeviceOptions: { antialias: true, alpha: false, powerPreference: "high-performance" } });
     state.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW); state.app.setCanvasResolution(pc.RESOLUTION_AUTO); state.app.graphicsDevice.maxPixelRatio = Math.min(1, window.devicePixelRatio); state.app.start();
-    state.app.scene.ambientLight = new pc.Color(.24, .27, .44); state.app.scene.exposure = 1.36; state.app.scene.toneMapping = pc.TONEMAP_ACES; state.app.scene.gammaCorrection = pc.GAMMA_SRGB; state.app.scene.fog.type = pc.FOG_EXP2; state.app.scene.fog.color = new pc.Color(.038, .028, .085); state.app.scene.fog.density = .0055;
-    mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.30, 0.22, 0.25]); mats.roadSand = material([.72, .61, .46]); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.sky = material([.04, .018, .10], [.075, .035, .18]); mats.sky.useLighting = false; mats.sky.cull = pc.CULLFACE_FRONT; mats.sky.update(); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
+    state.app.scene.ambientLight = new pc.Color(.03, .04, .09); state.app.scene.exposure = 1.0; state.app.scene.toneMapping = pc.TONEMAP_ACES; state.app.scene.gammaCorrection = pc.GAMMA_SRGB; state.app.scene.fog.type = pc.FOG_EXP2; state.app.scene.fog.color = new pc.Color(.038, .028, .085); state.app.scene.fog.density = .0055;
+    mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.30, 0.22, 0.25]); mats.roadSand = material([.72, .61, .46]); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
     mats.roadSand.gloss = .008; mats.roadSand.metalness = 0; mats.roadSand.update();
     mats.bowWood.diffuse = new pc.Color(.52, .16, .045); mats.bowWood.emissive = new pc.Color(.025, .006, .001); mats.bowWood.emissiveIntensity = .45; mats.bowWood.update();
-    const sky = primitive("sphere", "Indigo night sky", [0, 24, -6], [92, 70, 92], mats.sky); sky.castShadows = false; sky.receiveShadows = false;
-    primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark); const road = primitive("box", "Packed sand street", [0, STREET_SURFACE_Y - .04, -3], [22, .08, 82], mats.roadSand); road.castShadows = false; road.receiveShadows = false;
+    primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark); const road = primitive("box", "Packed sand street", [0, STREET_SURFACE_Y - .04, -3], [22, .08, 82], mats.roadSand); road.castShadows = false; road.receiveShadows = false; state.roadEntity = road;
     for (const [x, z, radius] of [[-7.8, 25, .08], [7.2, 14, .06], [-8.3, 2, .075], [7.7, -10, .065], [-7.5, -23, .08], [7.9, -36, .07]]) { const pebble = primitive("sphere", "Road pebble", [x, STREET_SURFACE_Y + radius * .22, z], [radius * 1.4, radius * .42, radius], mats.sandDark); pebble.castShadows = false; }
     for (let z = 34; z > -44; z -= 6) {
       const leftColor = z % 12 === 4 ? mats.magenta : mats.indigo; const rightColor = z % 12 === 4 ? mats.turquoise : mats.wood;
@@ -981,14 +993,13 @@ void (async () => {
     for (const [x, z] of [[-6, 9.8], [8, -3], [-9, -17], [5, -29]]) createBrazier(x, z);
     createSunEmblem(-10.15, 2.7, 18.1); createSunEmblem(10.15, 2.7, 10.1, 180); createSunEmblem(-10.15, 2.7, -15.9); createSunEmblem(10.15, 2.7, -29.9, 180);
     createRegionalSkyline();
-    for (const [x, y, z, size] of [[-26, 31, -62, 2.8], [35, 23, -58, .16], [-31, 20, -48, .12], [18, 34, -54, .13], [-42, 28, -30, .10], [41, 32, -20, .12]]) { const star = primitive("sphere", size > 1 ? "Moon disc" : "Night star", [x, y, z], [size, size, size], mats.fireHot); star.castShadows = false; }
-    for (const [x, z] of [[-9.4, 17.9], [9.4, 9.9], [-9.4, -10.1], [9.4, -25.9]]) { const lanternLight = new pc.Entity("Wall lantern glow"); lanternLight.addComponent("light", { type: "omni", color: new pc.Color(1, .54, .24), intensity: .6, range: 5.8, castShadows: false }); lanternLight.setPosition(x, 2.2, z); state.app.root.addChild(lanternLight); }
+    for (const [x, y, z, size] of [[-12, 23, -52, 2.8], [7, 20, -48, .16], [-8, 17, -44, .12], [16, 26, -50, .13], [-18, 25, -38, .10], [2, 29, -56, .12]]) { const star = primitive("sphere", size > 1 ? "Moon disc" : "Night star", [x, y, z], [size, size, size], mats.fireHot); star.castShadows = false; }
+    for (const [x, z] of [[-9.4, 17.9], [9.4, 9.9], [-9.4, -10.1], [9.4, -25.9]]) { const lanternLight = new pc.Entity("Wall lantern glow"); lanternLight.addComponent("light", { type: "omni", color: new pc.Color(1, .54, .24), intensity: .6, range: 5.8, castShadows: false }); lanternLight.setPosition(x, 2.2, z); registerFireLight(lanternLight, .6, x * .29 + z * .13); state.app.root.addChild(lanternLight); }
     const moon = new pc.Entity("Moonlight"); moon.addComponent("light", { type: "directional", color: new pc.Color(.58, .68, 1), intensity: 1.68, castShadows: true, shadowDistance: 42, shadowResolution: 1024, shadowBias: .22, normalOffsetBias: .06 }); moon.setEulerAngles(48, -32, 0); state.app.root.addChild(moon);
     const fill = new pc.Entity("Warm reflected fire fill"); fill.addComponent("light", { type: "directional", color: new pc.Color(1, .49, .26), intensity: .17, castShadows: false }); fill.setEulerAngles(28, 148, 0); state.app.root.addChild(fill);
     batchStaticEnvironment(); createObjectiveMarker(); createTargetMarker();
     state.playerEntity = createCharacter("Vrishaketu", mats.player, 1); state.chitra = createCharacter("Chitra", mats.chitra, .73); state.chitra.setPosition(0, CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale, 14);
     state.camera = new pc.Entity("Right shoulder camera"); state.camera.addComponent("camera", { clearColor: new pc.Color(.075, .035, .16), fov: 63, nearClip: .08, farClip: 110 }); state.app.root.addChild(state.camera);
-    const heroFill = new pc.Entity("Camera soft fill"); heroFill.addComponent("light", { type: "omni", color: new pc.Color(1, .76, .62), intensity: .42, range: 5.2, castShadows: false }); heroFill.setLocalPosition(0, .2, 0); state.camera.addChild(heroFill);
     loadApprovedAssets();
     state.app.on("update", updateScene);
     window.addEventListener("resize", () => state.app.resizeCanvas());
@@ -1149,6 +1160,7 @@ void (async () => {
     if (state.objectiveMarker?.enabled && state.objectiveTarget) { const bob = Math.sin(performance.now() * .0032) * .13; state.objectiveMarker.setPosition(state.objectiveTarget[0], state.objectiveTarget[1] + bob, state.objectiveTarget[2]); state.objectiveMarker.rotateLocal(0, dt * 38, 0); }
     updateObjectiveGuidance(snapshot);
     for (const fire of state.app.root.findByTag("fire")) { const pulse = 1 + Math.sin(performance.now() * .006 + fire.getPosition().x) * .12; fire.setLocalScale(pulse, .92 + pulse * .12, pulse); fire.setLocalEulerAngles(0, Math.sin(performance.now() * .002 + fire.getPosition().z) * 5, 0); }
+    for (const light of state.app.root.findByTag("fire-light")) flickerFireLight(light, performance.now());
     for (const smoke of state.app.root.findByTag("smoke")) { const index = smoke.dwarkaSmokeIndex || 0; const drift = performance.now() * .00016 + index * .24; const rise = .78 + (drift % 1.35); smoke.setLocalPosition(Math.sin(drift * 5.3) * .13, rise, Math.cos(drift * 4.1) * .09); const size = .16 + rise * .15; smoke.setLocalScale(size, size * .72, size); }
     for (let index = state.projectiles.length - 1; index >= 0; index -= 1) {
       const projectile = state.projectiles[index]; projectile.elapsed += dt; const progress = Math.min(1, projectile.elapsed / projectile.duration);
@@ -1196,6 +1208,14 @@ void (async () => {
       const minimum = { x: Math.min(...instances.map((item) => item.aabb.center.x - item.aabb.halfExtents.x)), y: Math.min(...instances.map((item) => item.aabb.center.y - item.aabb.halfExtents.y)), z: Math.min(...instances.map((item) => item.aabb.center.z - item.aabb.halfExtents.z)) };
       const maximum = { x: Math.max(...instances.map((item) => item.aabb.center.x + item.aabb.halfExtents.x)), y: Math.max(...instances.map((item) => item.aabb.center.y + item.aabb.halfExtents.y)), z: Math.max(...instances.map((item) => item.aabb.center.z + item.aabb.halfExtents.z)) };
       return { name: entity.name, minimum, maximum, groundCorrection: entity.dwarkaGroundCorrection || 0 };
+    }),
+    renderingSummary: () => ({
+      ambient: [state.app.scene.ambientLight.r, state.app.scene.ambientLight.g, state.app.scene.ambientLight.b],
+      exposure: state.app.scene.exposure,
+      skySphereCount: state.app.root.findByName("Indigo night sky") ? 1 : 0,
+      cameraLightCount: state.camera?.findComponents("light").length || 0,
+      roadTiling: state.roadEntity?.render?.material?.diffuseMapTiling ? [state.roadEntity.render.material.diffuseMapTiling.x, state.roadEntity.render.material.diffuseMapTiling.y] : null,
+      fireLightIntensities: state.app.root.findByTag("fire-light").map((light) => light.light.intensity),
     }),
     focusCharacter: (name = null, distance = 1.45, angle = 0) => { state.qaFocusName = name; state.qaFocusDistance = Math.max(1.2, Math.min(6, Number(distance) || 1.45)); state.qaFocusAngle = Math.max(-180, Math.min(180, Number(angle) || 0)); if (state.camera?.camera) state.camera.camera.fov = name ? 42 : 63; return Boolean(!name || state.app?.root.findByName(name)); },
     previewAnimation: (name, animation = null) => { if (animation && !CHARACTER_ANIMATIONS[animation]) return false; if (animation) state.qaAnimationPreviews.set(name, animation); else state.qaAnimationPreviews.delete(name); const root = state.app?.root.findByName(name); if (root && animation) setCharacterAnimation(root, animation); return Boolean(root); },
