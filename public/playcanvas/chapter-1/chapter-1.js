@@ -10,7 +10,7 @@ void (async () => {
     objective: document.getElementById("objective-text"), detail: document.getElementById("objective-detail"), phaseKicker: document.getElementById("phase-kicker"),
     danger: document.getElementById("danger-card"), dangerTime: document.getElementById("danger-time"), reticle: document.getElementById("reticle"), waypoint: document.getElementById("waypoint-indicator"), waypointDistance: document.getElementById("waypoint-distance"),
     interaction: document.getElementById("interaction"), tutorial: document.getElementById("tutorial"), tutorialStep: document.getElementById("tutorial-step"), tutorialTitle: document.getElementById("tutorial-title"), tutorialCopy: document.getElementById("tutorial-copy"), caption: document.getElementById("caption"), captionSpeaker: document.getElementById("caption-speaker"), captionText: document.getElementById("caption-text"),
-    toast: document.getElementById("toast"), fps: document.getElementById("fps-value"), qa: document.getElementById("qa-overlay"), vignette: document.getElementById("vignette"),
+    toast: document.getElementById("toast"), fps: document.getElementById("fps-value"), qa: document.getElementById("qa-overlay"), damageFlash: document.getElementById("damage-flash"),
     modal: document.getElementById("modal"), modalTitle: document.getElementById("modal-title"), modalCopy: document.getElementById("modal-copy"), modalPrimary: document.getElementById("modal-primary"), modalSecondary: document.getElementById("modal-secondary"),
     storyPanel: document.getElementById("story-panel"), storyImage: document.getElementById("story-image"), storySpeaker: document.getElementById("story-speaker"), storyText: document.getElementById("story-text"), controls: document.getElementById("controls-grid"), settings: document.getElementById("settings-panel"), pointerNote: document.getElementById("pointer-note"),
     reconnect: document.getElementById("reconnect"), retry: document.getElementById("retry-connection"), connectionTitle: document.getElementById("connection-title"), connectionCopy: document.getElementById("connection-copy"), connectionSpinner: document.getElementById("connection-spinner"), captions: document.getElementById("captions-toggle"), mute: document.getElementById("mute-toggle"), pause: document.getElementById("pause-button"),
@@ -79,7 +79,7 @@ void (async () => {
     profile: null, token: null, settings: { locale: "en", voiceLocale: "en", voiceLinked: true, master: 1, music: 0.7, effects: 0.8, dialogue: 1, muteAll: false, captions: true, speakerNames: true, cameraShake: true, tutorials: true, tutorialDone: [] }, requestedAction: "continue",
     socket: null, reconnectTimer: 0, reconnectAttempts: 0, sessionAccepted: false, snapshot: null, reconnectPhase: null, intentionalSockets: new WeakSet(), lastPhase: null,
     keys: new Set(), pressed: new Set(), aim: false, yaw: 0, pitch: -0.1, lookYaw: 0, lookPitch: -0.1, visualYaw: 0, seq: 0, playing: false, paused: true, modalMode: "loading", storyIndex: 0,
-    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, roadEntity: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
+    playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraFrame: null, roadEntity: null, environmentAtlas: null, skyboxCubemap: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
     fpsFrames: 0, fpsElapsed: 0, fpsLast: 60, qaVisible: false, qaFocusName: null, qaFocusDistance: 1.45, qaFocusAngle: 0, qaAnimationPreviews: new Map(), qaAimPreview: false, captionTimer: 0, toastTimer: 0, effectsReady: false, readyTimer: 0, tutorialSeen: new Set(), mouseTurned: false,
     voiceEntries: new Map(), voiceAudio: null, pendingVoiceLine: null, lastBarkPhase: null, effectAudio: new Map(), localAction: null, lastVisualActionAt: { fire: 0, melee: 0 }, enemyWarnings: new Map(), lastPlayerHealth: null, damageFlashUntil: 0, lastFootstepAt: 0, footstepIndex: 0, lastMouseAt: 0,
     snapshotVelocity: { x: 0, z: 0 }, enemySnapshotVelocities: new Map(), snapshotReceivedAt: 0,
@@ -539,7 +539,7 @@ void (async () => {
   window.setInterval(sendInput, 50);
 
   function material(color, emissive = null) {
-    const value = new pc.StandardMaterial(); value.diffuse = new pc.Color(...color); value.metalness = 0.05; value.gloss = 0.25;
+    const value = new pc.StandardMaterial(); value.diffuse = new pc.Color(...color); value.useMetalness = true; value.metalness = 0; value.gloss = 0.25;
     if (emissive) { value.emissive = new pc.Color(...emissive); value.emissiveIntensity = 1.4; }
     value.update(); return value;
   }
@@ -955,6 +955,43 @@ void (async () => {
     const fill = new pc.Entity("Doorway fire fill"); fill.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .24), intensity: .62, range: 11, castShadows: false }); fill.setPosition(-4.6, 3.2, -31.7); registerFireLight(fill, .62, 4.2); state.app.root.addChild(fill);
   }
 
+  function loadImageBasedLighting() {
+    state.app.assets.loadFromUrl("./assets/environment/moonless_golf_2k.hdr", "texture", (error, asset) => {
+      if (error || !asset?.resource) { console.warn("Moonless Golf HDR failed to load; retaining authored moon and practical lights"); return; }
+      const source = asset.resource;
+      source.addressU = pc.ADDRESS_REPEAT;
+      source.addressV = pc.ADDRESS_CLAMP_TO_EDGE;
+      state.skyboxCubemap = pc.EnvLighting.generateSkyboxCubemap(source, 512);
+      state.environmentAtlas = pc.EnvLighting.generateAtlas(state.skyboxCubemap, { size: 512 });
+      state.app.scene.skybox = state.skyboxCubemap;
+      state.app.scene.envAtlas = state.environmentAtlas;
+      state.app.scene.skyboxIntensity = .16;
+    });
+  }
+
+  function createCameraFrame() {
+    const frame = new pc.CameraFrame(state.app, state.camera.camera);
+    frame.rendering.toneMapping = pc.TONEMAP_ACES;
+    frame.bloom.intensity = .035;
+    frame.bloom.blurLevel = 4;
+    frame.ssao.type = "lighting";
+    frame.ssao.intensity = .45;
+    frame.ssao.radius = 5;
+    frame.ssao.samples = 12;
+    frame.ssao.power = 4;
+    frame.vignette.intensity = .22;
+    frame.vignette.inner = .42;
+    frame.vignette.outer = .92;
+    frame.vignette.curvature = .68;
+    frame.grading.enabled = true;
+    frame.grading.brightness = .9;
+    frame.grading.contrast = 1.04;
+    frame.grading.saturation = .96;
+    frame.grading.tint = new pc.Color(.72, .82, 1);
+    frame.update();
+    return frame;
+  }
+
   function buildScene() {
     state.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window), graphicsDeviceOptions: { antialias: true, alpha: false, powerPreference: "high-performance" } });
     state.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW); state.app.setCanvasResolution(pc.RESOLUTION_AUTO); state.app.graphicsDevice.maxPixelRatio = Math.min(1, window.devicePixelRatio); state.app.start();
@@ -962,6 +999,11 @@ void (async () => {
     mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.30, 0.22, 0.25]); mats.roadSand = material([.72, .61, .46]); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
     mats.roadSand.gloss = .008; mats.roadSand.metalness = 0; mats.roadSand.update();
     mats.bowWood.diffuse = new pc.Color(.52, .16, .045); mats.bowWood.emissive = new pc.Color(.025, .006, .001); mats.bowWood.emissiveIntensity = .45; mats.bowWood.update();
+    for (const plaster of [mats.stone, mats.stoneLight, mats.sand, mats.sandLight, mats.sandDark, mats.roadSand]) { plaster.useMetalness = true; plaster.metalness = 0; plaster.gloss = plaster === mats.roadSand ? .008 : .16; plaster.update(); }
+    for (const cloth of [mats.indigo, mats.turquoise, mats.magenta]) { cloth.useMetalness = true; cloth.metalness = 0; cloth.gloss = .08; cloth.update(); }
+    mats.gold.useMetalness = true; mats.gold.metalness = .76; mats.gold.gloss = .62; mats.gold.update();
+    mats.iron.useMetalness = true; mats.iron.metalness = .64; mats.iron.gloss = .28; mats.iron.update();
+    mats.steel.useMetalness = true; mats.steel.metalness = .84; mats.steel.gloss = .56; mats.steel.update();
     primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark); const road = primitive("box", "Packed sand street", [0, STREET_SURFACE_Y - .04, -3], [22, .08, 82], mats.roadSand); road.castShadows = false; road.receiveShadows = false; state.roadEntity = road;
     for (const [x, z, radius] of [[-7.8, 25, .08], [7.2, 14, .06], [-8.3, 2, .075], [7.7, -10, .065], [-7.5, -23, .08], [7.9, -36, .07]]) { const pebble = primitive("sphere", "Road pebble", [x, STREET_SURFACE_Y + radius * .22, z], [radius * 1.4, radius * .42, radius], mats.sandDark); pebble.castShadows = false; }
     for (let z = 34; z > -44; z -= 6) {
@@ -995,12 +1037,12 @@ void (async () => {
     createRegionalSkyline();
     for (const [x, y, z, size] of [[-12, 23, -52, 2.8], [7, 20, -48, .16], [-8, 17, -44, .12], [16, 26, -50, .13], [-18, 25, -38, .10], [2, 29, -56, .12]]) { const star = primitive("sphere", size > 1 ? "Moon disc" : "Night star", [x, y, z], [size, size, size], mats.fireHot); star.castShadows = false; }
     for (const [x, z] of [[-9.4, 17.9], [9.4, 9.9], [-9.4, -10.1], [9.4, -25.9]]) { const lanternLight = new pc.Entity("Wall lantern glow"); lanternLight.addComponent("light", { type: "omni", color: new pc.Color(1, .54, .24), intensity: .6, range: 5.8, castShadows: false }); lanternLight.setPosition(x, 2.2, z); registerFireLight(lanternLight, .6, x * .29 + z * .13); state.app.root.addChild(lanternLight); }
-    const moon = new pc.Entity("Moonlight"); moon.addComponent("light", { type: "directional", color: new pc.Color(.58, .68, 1), intensity: 1.68, castShadows: true, shadowDistance: 42, shadowResolution: 1024, shadowBias: .22, normalOffsetBias: .06 }); moon.setEulerAngles(48, -32, 0); state.app.root.addChild(moon);
+    const moon = new pc.Entity("Moonlight"); moon.addComponent("light", { type: "directional", color: new pc.Color(.58, .68, 1), intensity: 1.68, castShadows: true, shadowDistance: 42, shadowResolution: 2048, shadowBias: .05, normalOffsetBias: .02, numCascades: 2 }); moon.setEulerAngles(48, -32, 0); state.app.root.addChild(moon);
     const fill = new pc.Entity("Warm reflected fire fill"); fill.addComponent("light", { type: "directional", color: new pc.Color(1, .49, .26), intensity: .17, castShadows: false }); fill.setEulerAngles(28, 148, 0); state.app.root.addChild(fill);
     batchStaticEnvironment(); createObjectiveMarker(); createTargetMarker();
     state.playerEntity = createCharacter("Vrishaketu", mats.player, 1); state.chitra = createCharacter("Chitra", mats.chitra, .73); state.chitra.setPosition(0, CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale, 14);
     state.camera = new pc.Entity("Right shoulder camera"); state.camera.addComponent("camera", { clearColor: new pc.Color(.075, .035, .16), fov: 63, nearClip: .08, farClip: 110 }); state.app.root.addChild(state.camera);
-    loadApprovedAssets();
+    state.cameraFrame = createCameraFrame(); loadImageBasedLighting(); loadApprovedAssets();
     state.app.on("update", updateScene);
     window.addEventListener("resize", () => state.app.resizeCanvas());
   }
@@ -1112,6 +1154,7 @@ void (async () => {
   }
 
   function updateScene(dt) {
+    state.cameraFrame?.update();
     state.fpsFrames += 1; state.fpsElapsed += dt; if (state.fpsElapsed >= .5) { state.fpsLast = Math.round(state.fpsFrames / state.fpsElapsed); ui.fps.textContent = String(state.fpsLast); state.fpsFrames = 0; state.fpsElapsed = 0; }
     state.captionTimer -= dt; if (state.captionTimer <= 0) ui.caption.hidden = true; state.toastTimer -= dt; if (state.toastTimer <= 0) ui.toast.hidden = true;
     const visualDt = Math.min(.05, Math.max(0, dt)); const lookBlend = 1 - Math.exp(-visualDt * 38);
@@ -1156,7 +1199,7 @@ void (async () => {
       const actor = state.app.root.findByName(state.qaFocusName); const head = actor?.dwarkaVisual?.findByName("Head");
       if (actor && head) { const face = head.getPosition(); const facing = actor.forward; const right = actor.right; const radians = state.qaFocusAngle * Math.PI / 180; state.camera.setPosition(face.x + (facing.x * Math.cos(radians) + right.x * Math.sin(radians)) * state.qaFocusDistance, face.y + .03, face.z + (facing.z * Math.cos(radians) + right.z * Math.sin(radians)) * state.qaFocusDistance); state.camera.lookAt(face.x, face.y + .05, face.z); }
     }
-    ui.vignette?.classList.toggle("damaged", performance.now() < state.damageFlashUntil);
+    ui.damageFlash?.classList.toggle("damaged", performance.now() < state.damageFlashUntil);
     if (state.objectiveMarker?.enabled && state.objectiveTarget) { const bob = Math.sin(performance.now() * .0032) * .13; state.objectiveMarker.setPosition(state.objectiveTarget[0], state.objectiveTarget[1] + bob, state.objectiveTarget[2]); state.objectiveMarker.rotateLocal(0, dt * 38, 0); }
     updateObjectiveGuidance(snapshot);
     for (const fire of state.app.root.findByTag("fire")) { const pulse = 1 + Math.sin(performance.now() * .006 + fire.getPosition().x) * .12; fire.setLocalScale(pulse, .92 + pulse * .12, pulse); fire.setLocalEulerAngles(0, Math.sin(performance.now() * .002 + fire.getPosition().z) * 5, 0); }
@@ -1216,6 +1259,8 @@ void (async () => {
       cameraLightCount: state.camera?.findComponents("light").length || 0,
       roadTiling: state.roadEntity?.render?.material?.diffuseMapTiling ? [state.roadEntity.render.material.diffuseMapTiling.x, state.roadEntity.render.material.diffuseMapTiling.y] : null,
       fireLightIntensities: state.app.root.findByTag("fire-light").map((light) => light.light.intensity),
+      iblReady: Boolean(state.app.scene.skybox && state.app.scene.envAtlas),
+      post: state.cameraFrame ? { bloom: state.cameraFrame.bloom.intensity, ssao: state.cameraFrame.ssao.type, vignette: state.cameraFrame.vignette.intensity } : null,
     }),
     focusCharacter: (name = null, distance = 1.45, angle = 0) => { state.qaFocusName = name; state.qaFocusDistance = Math.max(1.2, Math.min(6, Number(distance) || 1.45)); state.qaFocusAngle = Math.max(-180, Math.min(180, Number(angle) || 0)); if (state.camera?.camera) state.camera.camera.fov = name ? 42 : 63; return Boolean(!name || state.app?.root.findByName(name)); },
     previewAnimation: (name, animation = null) => { if (animation && !CHARACTER_ANIMATIONS[animation]) return false; if (animation) state.qaAnimationPreviews.set(name, animation); else state.qaAnimationPreviews.delete(name); const root = state.app?.root.findByName(name); if (root && animation) setCharacterAnimation(root, animation); return Boolean(root); },

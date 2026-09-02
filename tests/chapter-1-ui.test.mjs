@@ -183,6 +183,31 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   assert.match(runtime, /renderingSummary/, "visual QA must expose the A0 lighting contract in the running scene");
 });
 
+test("A1 uses the ledgered HDR, physical materials, post effects, and production shadows", async () => {
+  const [runtime, html, css, hdr, sourceHdr] = await Promise.all([
+    readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/chapter-1.css", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonless_golf_2k.hdr", root)),
+    readFile(new URL("../../game/assets/raw/polyhaven/moonless_golf_2k.hdr", import.meta.url)),
+  ]);
+  assert.deepEqual(hdr, sourceHdr, "the runtime HDR must be the exact ledgered CC0 source");
+  assert.match(runtime, /EnvLighting\.generateSkyboxCubemap/);
+  assert.match(runtime, /EnvLighting\.generateAtlas/);
+  assert.match(runtime, /scene\.skybox = state\.skyboxCubemap/);
+  assert.match(runtime, /scene\.envAtlas = state\.environmentAtlas/);
+  assert.match(runtime, /new pc\.CameraFrame/);
+  assert.match(runtime, /frame\.bloom\.intensity = \.035/);
+  assert.match(runtime, /frame\.ssao\.type = "lighting"/);
+  assert.match(runtime, /frame\.vignette\.intensity = \.22/);
+  assert.match(runtime, /value\.useMetalness = true/);
+  assert.match(runtime, /mats\.gold\.metalness = \.76/);
+  assert.match(runtime, /shadowResolution: 2048, shadowBias: \.05, normalOffsetBias: \.02, numCascades: 2/);
+  assert.doesNotMatch(html, /id="vignette"/, "the general vignette belongs to CameraFrame, not a CSS overlay");
+  assert.match(html, /id="damage-flash"/);
+  assert.match(css, /#damage-flash\.damaged/);
+});
+
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {
   const progress = await readFile(new URL("app/game/chapter-1/progress.ts", root), "utf8");
   assert.match(progress, /incoming\.nextPhase.*existing\.nextPhase/);
