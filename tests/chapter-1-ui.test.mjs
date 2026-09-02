@@ -4,6 +4,8 @@ import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 const runtimeSource = new URL("../../game/client-scripts/chapter-1.js", import.meta.url);
+const chapterSourceFiles = [runtimeSource, ...["combat/targeting.js", "character/animation.js", "net/session.js", "scene/assets.js", "sim/shared.ts", "ui/content.js"].map((path) => new URL(`../../game/client-scripts/${path}`, import.meta.url))];
+const readRuntime = async () => (await Promise.all(chapterSourceFiles.map((url) => readFile(url, "utf8")))).join("\n");
 
 test("Chapter 0 uses the five required panels in order with keyboard controls", async () => {
   const [home, localization] = await Promise.all([
@@ -34,7 +36,7 @@ test("homepage localization covers five languages, phases, settings, and context
 });
 
 test("Chapter 1 keeps directional signs, input cleanup, collision, and exact ending text", async () => {
-  const runtime = await readFile(runtimeSource, "utf8");
+  const runtime = await readRuntime();
   assert.match(runtime, /KeyD.*\? 1 : 0.*KeyA/);
   assert.match(runtime, /KeyW.*\? 1 : 0.*KeyS/);
   assert.match(runtime, /Math\.hypot\(x, z\)/);
@@ -55,7 +57,7 @@ test("production connection wiring is environment-configured and explains free-t
   const [page, shell, runtime, html, i18n] = await Promise.all([
     readFile(new URL("app/game/chapter-1/page.tsx", root), "utf8"),
     readFile(new URL("app/game/chapter-1/ChapterGameClient.tsx", root), "utf8"),
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/game-i18n.js", root), "utf8"),
   ]);
@@ -70,7 +72,7 @@ test("production connection wiring is environment-configured and explains free-t
 
 test("every character variant uses one face-safe skeleton and all blades stay hand-rigged", async () => {
   const [runtime, combatGlb, variantReport] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/assets/animations/Dwarka_Combat.glb", root)),
     readFile(new URL("../../game/assets/work/character-variants-report.json", import.meta.url), "utf8"),
   ]);
@@ -104,7 +106,7 @@ test("every character variant uses one face-safe skeleton and all blades stay ha
   assert.match(runtime, /dwarkaImpactUntil/);
   assert.match(runtime, /enemy\.kind === "archer" \? "fire" : enemy\.kind === "brute" \? "bruteWarn" : "melee"/);
   assert.doesNotMatch(runtime, /entity\.lookAt\(player\.x, 0, player\.z\)/, "enemy roots must never pitch toward a ground-level look target");
-  assert.match(runtime, /entity\.lookAt\(player\.x, entity\.getPosition\(\)\.y, player\.z\)/, "enemy facing must remain yaw-only and upright");
+  assert.match(runtime, /smoothEnemyFacing\(entity, player\.x, player\.z, dt\)/, "enemy facing must remain yaw-only, upright, and smoothed");
   const jsonLength = combatGlb.readUInt32LE(12);
   const combatJson = JSON.parse(combatGlb.subarray(20, 20 + jsonLength).toString().replace(/\0+$/, ""));
   assert.deepEqual(combatJson.animations.map((animation) => animation.name), ["Bow_Aim_Loop", "Bow_Release", "Heavy_Overhead"]);
@@ -113,7 +115,7 @@ test("every character variant uses one face-safe skeleton and all blades stay ha
 
 test("bow aim uses a stable automatic target lock and an edge-aware objective waypoint", async () => {
   const [runtime, gameHtml, gameCss, gameI18n] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/chapter-1.css", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/game-i18n.js", root), "utf8"),
@@ -133,7 +135,7 @@ test("bow aim uses a stable automatic target lock and an edge-aware objective wa
 
 test("locomotion, camera, and grounded props share one visual frame of reference", async () => {
   const [runtime, collision, layoutText] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("../../game/server/src/chapter-1/collision.ts", import.meta.url), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root), "utf8"),
   ]);
@@ -141,12 +143,12 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   assert.match(runtime, /visualYaw/, "the player mesh needs a facing direction independent from the orbit camera");
   assert.match(runtime, /lookYaw/, "mouse input needs a smoothed view target rather than rotating the camera and mesh in one raw step");
   assert.match(runtime, /networkSnapshots/, "20 Hz enemy snapshots need a bounded interpolation buffer");
-  assert.match(runtime, /performance\.now\(\) - 100/, "enemy rendering must sample 100 ms behind the newest server snapshot");
+  assert.match(runtime, /performance\.now\(\) - CHAPTER_CONFIG\.network\.enemyInterpolationMs/, "enemy rendering must use the shared interpolation delay");
   assert.match(runtime, /const planarSpeed = Math\.hypot\(playerVelocity\.x, playerVelocity\.z\)/, "locomotion state must come from simulated displacement, not held keys");
   assert.match(runtime, /function locomotionPlaybackSpeed/, "walk and sprint clips must be retimed from real travel speed so planted feet do not slide");
   assert.match(runtime, /setCharacterAnimation\(state\.playerEntity, playerAnim, planarSpeed\)/, "the measured speed must drive the active locomotion clip every frame");
   assert.match(runtime, /planarSpeed > \.65/, "blocked movement must settle to idle and stop footsteps");
-  assert.match(runtime, /DODGE_CLIP_SECONDS \/ DODGE_ACTION_SECONDS/, "the roll clip must finish with the 0.65 second authoritative dodge");
+  assert.match(runtime, /config\.feel\.dodgeClipSeconds \/ config\.feel\.dodgeActionSeconds/, "the roll clip must finish with the 0.65 second authoritative dodge");
   assert.match(runtime, /aimBlend/, "aim camera distance, shoulder, height, and FOV must blend instead of popping between booleans");
   assert.match(runtime, /Jog_Fwd_Loop/, "4.5 m/s locomotion must use the authored forward jog rather than the slow walk cycle");
   assert.match(runtime, /GROUND_ALIGNED_MODELS/, "road props need an explicit ground-alignment pass");
@@ -169,7 +171,7 @@ test("locomotion, camera, and grounded props share one visual frame of reference
 
 test("A0 night rendering exposes the skyline and lets practical fire lights breathe", async () => {
   const [runtime, servedBundle] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
   ]);
   assert.ok(servedBundle.length > 80_000, "the served runtime must contain the Vite-built Chapter 1 bundle");
@@ -188,7 +190,7 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
 
 test("A1 uses the ledgered HDR, physical materials, post effects, and production shadows", async () => {
   const [runtime, html, css, hdr, sourceHdr] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/chapter-1.css", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonless_golf_2k.hdr", root)),
@@ -213,7 +215,7 @@ test("A1 uses the ledgered HDR, physical materials, post effects, and production
 
 test("A2 builds the street from unit-scale plaster bays and terraced roof modules", async () => {
   const [runtime, layoutText] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root), "utf8"),
   ]);
   const layout = JSON.parse(layoutText);
@@ -233,7 +235,7 @@ test("A2 builds the street from unit-scale plaster bays and terraced roof module
 
 test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB batching", async () => {
   const [runtime, fireAtlas, smokeAtlas, fabric] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/assets/textures/kenney-explosion-fire-atlas.webp", root)),
     readFile(new URL("public/playcanvas/chapter-1/assets/textures/kenney-black-smoke-atlas.webp", root)),
     readFile(new URL("public/playcanvas/chapter-1/assets/textures/fabric_pattern_07_col_1_512.webp", root)),
@@ -254,7 +256,7 @@ test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB ba
 
 test("A7 gives the street distinct houses, Indian set dressing, real L-turns, and vista landmarks", async () => {
   const [runtime, layoutText, moonlit] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonlit_golf_2k.hdr", root)),
   ]);
@@ -281,14 +283,14 @@ test("A7 gives the street distinct houses, Indian set dressing, real L-turns, an
 
 test("A4 shares the authoritative simulation and remains playable without a socket", async () => {
   const [runtime, simulation, packageJson, viteConfig, html] = await Promise.all([
-    readFile(runtimeSource, "utf8"),
+    readRuntime(),
     readFile(new URL("../../game/server/src/chapter-1/simulation.ts", import.meta.url), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
     readFile(new URL("vite.chapter-1.config.mjs", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
   ]);
-  assert.match(runtime, /import \{ ChapterSimulation \}/);
-  assert.match(runtime, /tickLocalSimulation\(visualDt\)/, "the shared simulation must run from the browser frame loop with real dt");
+  assert.match(runtime, /import \{ ChapterSimulation, CHAPTER_CONFIG \}/);
+  assert.match(runtime, /tickLocalSimulation\(simulationDt\)/, "the shared simulation must run from the browser frame loop with real dt");
   assert.match(runtime, /state\.networkSnapshots\.push/);
   assert.match(runtime, /startLocalSession\(\)/, "a missing WebSocket URL must start local play instead of blocking");
   assert.match(runtime, /progress will save when reconnected/);
@@ -299,7 +301,7 @@ test("A4 shares the authoritative simulation and remains playable without a sock
 });
 
 test("A5 layers responsive aim, blended locomotion, impact feel, and camera spring", async () => {
-  const runtime = await readFile(runtimeSource, "utf8");
+  const runtime = await readRuntime();
   assert.match(runtime, /state\.yaw = state\.lookYaw/, "mouse yaw must reach aiming in the input frame");
   assert.match(runtime, /type: "1D", parameter: "locomotionSpeed"/);
   for (const point of ["idle", "walk", "jog", "sprint"]) assert.match(runtime, new RegExp(`name: "${point}", point:`));
@@ -309,6 +311,22 @@ test("A5 layers responsive aim, blended locomotion, impact feel, and camera spri
   assert.match(runtime, /entity\.dwarkaHitUntil/);
   assert.match(runtime, /function smoothEnemyFacing/);
   assert.match(runtime, /function springCameraAxis/);
+});
+
+test("A6 builds the served export from focused source modules and content revisions", async () => {
+  const [runtime, simulation, viteConfig, prettierConfig] = await Promise.all([
+    readRuntime(),
+    readFile(new URL("../../game/server/src/chapter-1/simulation.ts", import.meta.url), "utf8"),
+    readFile(new URL("vite.chapter-1.config.mjs", root), "utf8"),
+    readFile(new URL(".prettierrc.json", root), "utf8"),
+  ]);
+  for (const boundary of ["scene/assets.js", "character/animation.js", "net/session.js", "sim/shared.ts", "ui/content.js", "combat/targeting.js"]) assert.match(runtime, new RegExp(boundary.replace(".", "\\.")));
+  assert.match(runtime, /CHAPTER_CONFIG/);
+  assert.match(simulation, /config\/chapter-1\.json/);
+  assert.match(viteConfig, /hashAssetTree/);
+  assert.match(viteConfig, /__CHAPTER_ASSET_REVISION__/);
+  assert.match(runtime, /assetUrl\(url\)/);
+  assert.equal(JSON.parse(prettierConfig).printWidth, 100);
 });
 
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {
