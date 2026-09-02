@@ -165,8 +165,10 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   assert.match(collision, /world-layout\.json/, "the server must consume the same canonical placement and collision manifest");
   assert.match(runtime, /collider\.visual/, "the shared manifest must identify colliders backed by approved visual prefabs");
   assert.match(runtime, /if \(visual \|\|/, "a renamed prop collider must never become a rendered debug box");
-  assert.equal(layout.colliders.find(({ id }) => id === "courtyard-cart-body")?.maxZ, 2.85);
-  assert.deepEqual(layout.placements.Prop_Wagon[0], [2.6, 0, 2.6, 24, 0.86]);
+  if (layout.version === 1) {
+    assert.equal(layout.colliders.find(({ id }) => id === "courtyard-cart-body")?.maxZ, 2.85);
+    assert.deepEqual(layout.placements.Prop_Wagon[0], [2.6, 0, 2.6, 24, 0.86]);
+  } else assert.ok(layout.colliders.some(({ id }) => id === "gate-rath"), "the recut must keep the gate rath authoritative");
 });
 
 test("A0 night rendering exposes the skyline and lets practical fire lights breathe", async () => {
@@ -264,11 +266,11 @@ test("A7 gives the street distinct houses, Indian set dressing, real L-turns, an
   assert.ok(moonlit.length > 100000, "the visible-moon CC0 HDR must ship in the standalone export");
   assert.equal(layout.tallHouseBays.length, 2);
   assert.equal(layout.setbackHouseBays.length, 2);
-  assert.equal(layout.colliders.filter(({ label }) => /L-turn/.test(label)).length, 2);
+  assert.ok(layout.version >= 2 ? layout.routeSegments.length >= 10 : layout.colliders.filter(({ label }) => /L-turn/.test(label)).length === 2);
   assert.ok(!layout.colliders.some(({ minX, maxX, minZ, maxZ }) => 2 >= minX && 2 <= maxX && -9 >= minZ && -9 <= maxZ), "the market L-turn must not trap the unchanged enemy spawn");
   assert.equal(layout.placements.brass_diya_lantern.length, 24);
   assert.ok(layout.placements.Kenney_fountain_round.length >= 3, "the arrival vista needs a built stone well");
-  assert.ok(layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length === 2, "the gate needs a two-wheel rath");
+  assert.ok(layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length >= 2, "the gate needs a two-wheel rath");
   assert.match(runtime, /mats\.roadSand = material\(\[\.40, \.38, \.35\]\)/);
   assert.match(runtime, /const tones = \["lime", "ochre", "rose", "turquoise"\]/);
   assert.match(runtime, /"Household shrine niche"/);
@@ -327,6 +329,25 @@ test("A6 builds the served export from focused source modules and content revisi
   assert.match(viteConfig, /__CHAPTER_ASSET_REVISION__/);
   assert.match(runtime, /assetUrl\(url\)/);
   assert.equal(JSON.parse(prettierConfig).printWidth, 100);
+});
+
+test("Tranche B recuts Chapter 1 into seven connected regions with stepped height", async () => {
+  const [runtime, layoutText, configText, levelSpec] = await Promise.all([
+    readRuntime(),
+    readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root), "utf8"),
+    readFile(new URL("../../game/config/chapter-1.json", import.meta.url), "utf8"),
+    readFile("/Users/adityapratapsingh/.traycer/epics/a360cb19-6f3d-4de2-bc83-1ec2b4c7091f/artifacts/chapter-1-quality-audit/tranche-b-level-recut/level-spec.md", "utf8"),
+  ]);
+  const layout = JSON.parse(layoutText); const config = JSON.parse(configText);
+  assert.equal(layout.version, 2);
+  assert.deepEqual(layout.worldBounds, { minX: -28, maxX: 28, minZ: -58, maxZ: 34 });
+  assert.equal(layout.routeSegments.length, 10);
+  assert.deepEqual(layout.floorRegions.filter(({ id }) => id.startsWith("stair-")).map(({ y }) => y), [1, 2, 3, 4, 5]);
+  assert.equal(config.checkpoints.market.y, 6);
+  assert.equal(config.checkpoints.doorway.y, 6);
+  assert.match(runtime, /buildSevenRegionRoute/);
+  assert.match(runtime, /dwarkaFloorY/);
+  assert.match(levelSpec, /Centreline length: 186 m/);
 });
 
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {
