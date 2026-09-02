@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>DWARKA — The Boy with the Paper Sun</title>
+    <link rel="stylesheet" href="./chapter-1.css" />
+  </head>
+  <body>
+    <canvas id="application-canvas" aria-label="Playable third-person Chapter 1 game"></canvas>
+    <div id="vignette" aria-hidden="true"></div>
+    <main id="game-ui">
+      <header id="hud" hidden>
+        <section class="status-card health-card" aria-label="Player status">
+          <span class="hud-kicker">VRISHAKETU</span>
+          <div class="meter"><i id="health-fill"></i></div>
+          <strong id="health-text">100 / 100</strong>
+        </section>
+        <section class="status-card objective-card" aria-live="polite">
+          <span class="hud-kicker" id="phase-kicker">OBJECTIVE</span>
+          <strong id="objective-text">Return to the quarter</strong>
+          <span id="objective-detail">Find Chitra and press E</span>
+        </section>
+        <section class="status-card danger-card" id="danger-card" hidden>
+          <span class="danger-icon" aria-hidden="true">◇</span>
+          <span><b>FAMILY IN DANGER</b><strong id="danger-time">20.0</strong></span>
+        </section>
+        <div class="hud-actions">
+          <button id="captions-toggle" type="button" aria-pressed="true">CC On</button>
+          <button id="mute-toggle" type="button" aria-pressed="false">Sound On</button>
+          <button id="pause-button" type="button">Pause</button>
+        </div>
+      </header>
+
+      <div id="reticle" hidden aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div id="waypoint-indicator" hidden aria-hidden="true"><i></i><b id="waypoint-distance">0 m</b></div>
+      <div id="interaction" hidden><kbd>E</kbd><span>Speak with Chitra</span></div>
+      <aside id="tutorial" class="tutorial" hidden aria-live="polite">
+        <span id="tutorial-step">1 / 7</span>
+        <strong id="tutorial-title">Move through the lane</strong>
+        <p id="tutorial-copy">Use W A S D. Movement always follows the camera.</p>
+      </aside>
+      <div id="caption" hidden aria-live="polite"><b id="caption-speaker">SOUND</b><span id="caption-text"></span></div>
+      <div id="toast" hidden role="status"></div>
+      <div id="fps" aria-label="Performance"><span id="fps-value">60</span> FPS</div>
+      <pre id="qa-overlay" hidden></pre>
+
+      <section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card controls-card" id="modal-card">
+          <p class="sun-mark" aria-hidden="true">☀</p>
+          <p class="modal-kicker">CHAPTER 1</p>
+          <h1 id="modal-title">The Boy with the Paper Sun</h1>
+          <p id="modal-copy">A playable night in Karna's quarter.</p>
+          <div id="story-panel" hidden>
+            <img id="story-image" alt="" />
+            <div><b id="story-speaker"></b><p id="story-text"></p></div>
+          </div>
+          <div id="controls-grid" class="control-blueprint">
+            <div class="control-cluster movement-cluster">
+              <p class="blueprint-label" data-i18n="moveLabel">MOVE RELATIVE TO CAMERA</p>
+              <div class="key-map" aria-label="W above A S D"><kbd>W</kbd><span></span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div>
+              <p data-i18n="moveHelp">Approach, retreat, and strafe. The mouse turns the camera.</p>
+              <div class="utility-keys"><span><kbd>Shift</kbd><b data-i18n="sprint">Sprint</b></span><span><kbd>Space</kbd><b data-i18n="dodge">Dodge</b></span><span><kbd>E</kbd><b data-i18n="interact">Interact</b></span><span><kbd>Esc</kbd><b data-i18n="pause">Pause</b></span></div>
+            </div>
+            <div class="control-cluster mouse-cluster">
+              <p class="blueprint-label" data-i18n="combatLabel">ONE MOUSE · TWO CONTEXTS</p>
+              <div class="mouse-diagram" aria-hidden="true"><i class="mouse-left">L</i><i class="mouse-wheel"></i><i class="mouse-right">R</i></div>
+              <div class="combat-flow"><span><kbd>Hold RMB</kbd><b data-i18n="bowMode">Bow aim</b><em>→</em><kbd>LMB</kbd><b data-i18n="fireBow">Fire bow</b></span><span><kbd>Release RMB</kbd><b data-i18n="bladeMode">Blade mode</b><em>→</em><kbd>LMB</kbd><b data-i18n="bladeAttack">Blade attack</b></span></div>
+              <p class="context-note" data-i18n="noSwitch">There is no weapon-switch key. Holding aim automatically locks a valid enemy in view.</p>
+            </div>
+          </div>
+          <div id="settings-panel" hidden>
+            <fieldset><legend data-i18n="language">Language</legend><label><span data-i18n="textLanguage">Text</span><select id="text-locale"><option value="en">English</option><option value="hi">हिन्दी</option><option value="ta">தமிழ்</option><option value="kn">ಕನ್ನಡ</option><option value="te">తెలుగు</option></select></label><label><span data-i18n="voiceLanguage">Voice</span><select id="voice-locale"><option value="en">English</option><option value="hi">हिन्दी</option><option value="ta">தமிழ்</option><option value="kn">ಕನ್ನಡ</option><option value="te">తెలుగు</option></select></label></fieldset>
+            <fieldset><legend data-i18n="audio">Audio</legend><label><span data-i18n="master">Master</span><input id="master-volume" type="range" min="0" max="1" step="0.1" value="1" /></label><label><span data-i18n="music">Music</span><input id="music-volume" type="range" min="0" max="1" step="0.1" value="0.7" /></label><label><span data-i18n="effects">Effects</span><input id="effects-volume" type="range" min="0" max="1" step="0.1" value="0.8" /></label><label><span data-i18n="voice">Voice</span><input id="dialogue-volume" type="range" min="0" max="1" step="0.1" value="1" /></label><label class="check"><input id="mute-all" type="checkbox" /> <span data-i18n="muteAll">Mute all</span></label></fieldset>
+            <fieldset><legend data-i18n="accessibility">Accessibility</legend><label class="check"><input id="settings-captions" type="checkbox" checked /> <span data-i18n="captions">Captions</span></label><label class="check"><input id="speaker-names" type="checkbox" checked /> <span data-i18n="speakerNames">Speaker names</span></label><label class="check"><input id="camera-shake" type="checkbox" checked /> <span data-i18n="cameraShake">Camera shake</span></label><label class="check"><input id="tutorial-prompts" type="checkbox" checked /> <span data-i18n="tutorialPrompts">Tutorial prompts</span></label></fieldset>
+            <fieldset><legend data-i18n="controls">Controls</legend><button id="reopen-controls" type="button" data-i18n="openBlueprint">Open control blueprint</button><button id="reset-tutorials" type="button" data-i18n="resetTutorials">Reset tutorial prompts</button></fieldset>
+          </div>
+          <div class="modal-actions" id="modal-actions">
+            <button class="primary" id="modal-primary" type="button">Enter the street</button>
+            <button id="modal-secondary" type="button" hidden>Return home</button>
+          </div>
+          <p class="pointer-note" id="pointer-note">Clicking starts mouse look. Press Escape at any time to pause.</p>
+        </div>
+      </section>
+      <section id="reconnect" class="reconnect" hidden role="alert">
+        <span class="spinner" id="connection-spinner" aria-hidden="true"></span><div><b id="connection-title">Waking the game server…</b><p id="connection-copy">Free hosting can take up to a minute to wake. Your progress is safe.</p></div>
+        <button id="retry-connection" type="button">Retry now</button>
+      </section>
+    </main>
+    <script src="./playcanvas.min.js"></script>
+    <script src="./game-i18n.js?v=20260902w"></script>
+    <script src="./chapter-1.js?v=20260902ch"></script>
+  </body>
+</html>

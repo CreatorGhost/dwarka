@@ -192,7 +192,7 @@ export default function VrishaketuPage() {
         <h1>Vrishaketu</h1>
         <p className={styles.subtitle}>The Last Arrow of the Sun</p>
         <p className={styles.logline}>
-          You play Karna's surviving son. The man who killed your father becomes your teacher.
+          You play Karna’s surviving son. The man who killed your father becomes your teacher.
           When raiders murder the boy who still believed in Karna, you follow the royal horse
           across Bharat to find them.
         </p>

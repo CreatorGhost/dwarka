@@ -4,19 +4,24 @@ This repository contains the public story-review website for a proposed Mahabhar
 
 Public site: <https://dwarka-story-review.adityapratap2307.chatgpt.site>
 
-The website compares four story candidates and gives each one a complete illustrated chapter. Story A, Vrishaketu, is the recommended direction.
+The website compares four story candidates and gives each one a complete illustrated chapter. Story A, Vrishaketu, is confirmed for implementation.
 
 ## Start here
 
-Game-planning agents should read [`docs/game-planning-handoff.md`](docs/game-planning-handoff.md) before inspecting the application code. It separates settled story rules, current recommendations, open decisions, existing assets, and the expected planning output.
+Current Chapter 1 implementation agents should read only [`docs/chapter-1-game-handoff.md`](docs/chapter-1-game-handoff.md). It contains Chapter 0, playable Chapter 1, session progress, PlayCanvas and server design, approved assets, EgoLite workflow, UI tests, acceptance criteria, and the copy-paste autonomous prompt.
+
+Agents working after Chapter 1 is complete must also read [`docs/future-chapters-game-handoff.md`](docs/future-chapters-game-handoff.md). It contains the approved biome map, weapon progression, system-reuse contract, campaign progress rules, future asset workflow, environment acceptance tests, and the next autonomous prompt. Future decisions must not expand the current Chapter 1 build.
 
 ## Project map
 
 | Path | Purpose |
 | --- | --- |
-| `docs/game-planning-handoff.md` | Canonical local handoff for the next planning agent |
+| `docs/chapter-1-game-handoff.md` | Complete autonomous specification for non-playable Chapter 0 and playable Chapter 1 |
+| `docs/future-chapters-game-handoff.md` | Approved implementation handoff for Bhadravati and later chapters |
+| `docs/game-planning-handoff.md` | Complete story sequence and cultural background |
+| `docs/research/mahabharata-future-weapons-progression.md` | Cited weapon research and approved ownership rules |
 | `app/page.tsx` | Four-story comparison page |
-| `app/vrishaketu/page.tsx` | Complete recommended story with 32 panels |
+| `app/vrishaketu/page.tsx` | Complete confirmed story with 32 panels |
 | `app/emberborn/page.tsx` | Complete Story B chapter |
 | `app/babhruvahana/page.tsx` | Complete Story C chapter |
 | `app/abhimanyu/page.tsx` | Complete Story D chapter |
@@ -26,7 +31,7 @@ Game-planning agents should read [`docs/game-planning-handoff.md`](docs/game-pla
 | `public/story-d/` | Abhimanyu storyboard images |
 | `.openai/hosting.json` | ChatGPT Sites project reference |
 
-The deployed application is a story reader, not a game runtime. There is no player controller, combat system, enemy AI, level loader, save system, or game state machine yet.
+The deployed application is still the story reader. Local Chapter 1 runtime work may be present, but it remains incomplete until the Chapter 1 handoff's browser, session, combat, accessibility, and performance checks pass.
 
 ## Local development
 

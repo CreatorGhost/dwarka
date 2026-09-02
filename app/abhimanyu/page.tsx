@@ -185,7 +185,7 @@ export default function AbhimanyuPage() {
           be won, and no amount of skill changes that.
         </p>
         <p>
-          Story A, <Link href="/">Vrishaketu</Link>, is the recommended build. It keeps this
+          Story A, <Link href="/vrishaketu">Vrishaketu</Link>, is the recommended build. It keeps this
           chapter&apos;s clean structure and gives the player an ending they can actually earn.
         </p>
       </div>
