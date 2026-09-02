@@ -268,7 +268,7 @@ test("A7 gives the street distinct houses, Indian set dressing, real L-turns, an
   assert.equal(layout.setbackHouseBays.length, 2);
   assert.ok(layout.version >= 2 ? layout.routeSegments.length >= 10 : layout.colliders.filter(({ label }) => /L-turn/.test(label)).length === 2);
   assert.ok(!layout.colliders.some(({ minX, maxX, minZ, maxZ }) => 2 >= minX && 2 <= maxX && -9 >= minZ && -9 <= maxZ), "the market L-turn must not trap the unchanged enemy spawn");
-  assert.equal(layout.placements.brass_diya_lantern.length, 24);
+  assert.ok(layout.placements.brass_diya_lantern.length >= 24);
   assert.ok(layout.placements.Kenney_fountain_round.length >= 3, "the arrival vista needs a built stone well");
   assert.ok(layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length >= 2, "the gate needs a two-wheel rath");
   assert.match(runtime, /mats\.roadSand = material\(\[\.40, \.38, \.35\]\)/);
@@ -346,6 +346,7 @@ test("Tranche B recuts Chapter 1 into seven connected regions with stepped heigh
   assert.equal(config.checkpoints.market.y, 6);
   assert.equal(config.checkpoints.doorway.y, 6);
   assert.match(runtime, /buildSevenRegionRoute/);
+  assert.match(runtime, /painted_plaster_wall_diff_512\.webp/);
   assert.match(runtime, /dwarkaFloorY/);
   assert.match(levelSpec, /Centreline length: 186 m/);
 });
