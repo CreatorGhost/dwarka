@@ -177,9 +177,9 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   assert.doesNotMatch(runtime, /new pc\.Entity\("Camera soft fill"\)/, "the camera must not carry a flattening headlight");
   assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
   assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
-  assert.match(runtime, /diffuseMapTiling = new pc\.Vec2\(11, 41\)/, "the 22 by 82 metre road needs an approximately two-metre texture repeat");
+  assert.match(runtime, /diffuseMapTiling = new pc\.Vec2\(11, 4\)/, "each 22 by 8 metre road slab needs an approximately two-metre texture repeat");
   assert.match(runtime, /function flickerFireLight/);
-  assert.match(runtime, /findByTag\("fire-light"\).*flickerFireLight/, "every registered practical light must animate each frame");
+  assert.match(runtime, /state\.fireLights.*flickerFireLight/, "every cached practical light must animate each frame");
   assert.match(runtime, /renderingSummary/, "visual QA must expose the A0 lighting contract in the running scene");
 });
 
@@ -226,6 +226,27 @@ test("A2 builds the street from unit-scale plaster bays and terraced roof module
   for (const key of ["Kenney_column", "Prop_ExteriorBorder_Straight1", "Kenney_pillar_wood"]) {
     assert.ok(layout.placements[key].every((placement) => placement[4] === 1), `${key} must remain at source scale`);
   }
+});
+
+test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB batching", async () => {
+  const [runtime, fireAtlas, smokeAtlas, fabric] = await Promise.all([
+    readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
+    readFile(new URL("public/playcanvas/chapter-1/assets/textures/kenney-explosion-fire-atlas.webp", root)),
+    readFile(new URL("public/playcanvas/chapter-1/assets/textures/kenney-black-smoke-atlas.webp", root)),
+    readFile(new URL("public/playcanvas/chapter-1/assets/textures/fabric_pattern_07_col_1_512.webp", root)),
+  ]);
+  assert.ok(fireAtlas.length > 1000 && smokeAtlas.length > 1000 && fabric.length > 1000);
+  assert.match(runtime, /addComponent\("particlesystem"/);
+  assert.match(runtime, /animTilesX: 3, animTilesY: 3, animNumFrames: 9/);
+  assert.match(runtime, /animTilesX: 5, animTilesY: 5, animNumFrames: 25/);
+  assert.doesNotMatch(runtime, /primitive\("sphere", "Smoke plume"/);
+  assert.doesNotMatch(runtime, /state\.app\.root\.findByTag\("fire"\)/, "the frame loop must use the cached emitter list");
+  assert.doesNotMatch(runtime, /state\.app\.root\.findByTag\("smoke"\)/, "GPU smoke must not need per-frame scene scans");
+  assert.match(runtime, /primitive\("plane", "Textured sagging festival pennant"/);
+  assert.match(runtime, /fabric_pattern_07_col_1_512\.webp/);
+  assert.match(runtime, /"Packed earth street slab"/);
+  assert.match(runtime, /"Wet ash fire decal"/);
+  assert.match(runtime, /assignStaticModelToBatch\(entity\)/, "late-loaded GLBs must join the active static batch group");
 });
 
 test("profile bridge ranks progress monotonically and reset preserves preferences", async () => {

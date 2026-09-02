@@ -84,6 +84,7 @@ void (async () => {
     playerEntity: null, enemyEntities: new Map(), enemyHealth: new Map(), familyEntities: [], characterRoots: new Set(), modelAssets: {}, animationTracks: {}, environmentEntities: [], environmentMaterials: new Map(), projectiles: [], impacts: [], chitra: null, objectiveMarker: null, targetMarker: null, targetEnemyId: null, app: null, camera: null, cameraFrame: null, roadEntity: null, environmentAtlas: null, skyboxCubemap: null, cameraDistance: 4.5, aimBlend: 0, staticBatchGroup: null,
     fpsFrames: 0, fpsElapsed: 0, fpsLast: 60, qaVisible: false, qaFocusName: null, qaFocusDistance: 1.45, qaFocusAngle: 0, qaAnimationPreviews: new Map(), qaAimPreview: false, captionTimer: 0, toastTimer: 0, effectsReady: false, readyTimer: 0, tutorialSeen: new Set(), mouseTurned: false,
     voiceEntries: new Map(), voiceAudio: null, pendingVoiceLine: null, lastBarkPhase: null, effectAudio: new Map(), localAction: null, lastVisualActionAt: { fire: 0, melee: 0 }, enemyWarnings: new Map(), lastPlayerHealth: null, damageFlashUntil: 0, lastFootstepAt: 0, footstepIndex: 0, lastMouseAt: 0,
+    fireEffects: [], fireLights: [], vfxAssets: {}, batchedModelRenders: 0,
     snapshotVelocity: { x: 0, z: 0 }, enemySnapshotVelocities: new Map(), snapshotReceivedAt: 0,
   };
 
@@ -568,6 +569,11 @@ void (async () => {
     }
   }
 
+  function assignStaticModelToBatch(entity) {
+    if (!entity || !state.staticBatchGroup) return;
+    for (const render of entity.findComponents?.("render") || []) { render.batchGroupId = state.staticBatchGroup.id; state.batchedModelRenders += 1; }
+  }
+
   function instantiateModel(key, name, position, scale = 1, yaw = 0, parent = state.app.root) {
     const asset = state.modelAssets[key]; if (!asset?.resource) return null;
     const entity = asset.resource.instantiateRenderEntity(); entity.name = name; parent.addChild(entity);
@@ -776,7 +782,7 @@ void (async () => {
       const entity = instantiateModel(key, key, [x, y, z], scale, yaw);
       if (entity && key.startsWith("Wall_Plaster_")) tintStreetHouse(entity, [x, y, z]);
       if (entity && GROUND_ALIGNED_MODELS.has(key)) alignEnvironmentModelToStreet(entity, y);
-      if (entity) state.environmentEntities.push(entity);
+      if (entity) { assignStaticModelToBatch(entity); state.environmentEntities.push(entity); }
     }
   }
 
@@ -798,11 +804,19 @@ void (async () => {
     const applyPackedSand = (asset) => {
       if (!asset?.resource) { console.warn("Packed sand texture failed to load; using the rough matte fallback"); return; }
       const texture = asset.resource; texture.addressU = texture.addressV = pc.ADDRESS_REPEAT; texture.minFilter = pc.FILTER_LINEAR_MIPMAP_LINEAR; texture.magFilter = pc.FILTER_LINEAR; texture.anisotropy = 8;
-      mats.roadSand.diffuseMap = texture; mats.roadSand.diffuseMapTiling = new pc.Vec2(11, 41); mats.roadSand.update();
+      mats.roadSand.diffuseMap = texture; mats.roadSand.diffuseMapTiling = new pc.Vec2(11, 4); mats.roadSand.update();
     };
     const packedSandAsset = state.app.assets.find("packed-sand-v1.webp", "texture");
     if (packedSandAsset) { packedSandAsset.ready(applyPackedSand); state.app.assets.load(packedSandAsset); }
     else state.app.assets.loadFromUrl("./assets/textures/packed-sand-v1.webp?v=20260902b", "texture", (error, asset) => { if (error) console.warn("Packed sand texture failed to load; using the rough matte fallback"); else applyPackedSand(asset); });
+    state.app.assets.loadFromUrl("./assets/textures/fabric_pattern_07_col_1_512.webp?v=20260903a", "texture", (error, asset) => {
+      if (error || !asset?.resource) return;
+      asset.resource.addressU = asset.resource.addressV = pc.ADDRESS_REPEAT; mats.bunting.diffuseMap = asset.resource; mats.bunting.diffuseMapTiling = new pc.Vec2(1, 1); mats.bunting.update();
+    });
+    for (const [kind, url] of [["fire", "./assets/textures/kenney-explosion-fire-atlas.webp"], ["smoke", "./assets/textures/kenney-black-smoke-atlas.webp"]]) state.app.assets.loadFromUrl(`${url}?v=20260903a`, "texture", (error, asset) => {
+      if (error || !asset?.resource) { console.warn(`Kenney ${kind} atlas failed to load`); return; }
+      asset.resource.addressU = asset.resource.addressV = pc.ADDRESS_CLAMP_TO_EDGE; state.vfxAssets[kind] = asset; upgradeFireEffects();
+    });
     for (const [key, url] of Object.entries(MODEL_URLS)) state.app.assets.loadFromUrl(`${url}?v=20260902k`, "container", (error, asset) => {
       if (error || !asset) { console.warn(`Optional model failed: ${key}`); return; }
       state.modelAssets[key] = asset; if (ENVIRONMENT_PLACEMENTS[key] || STREET_HOUSE_MODEL_KEYS.has(key)) placeEnvironmentFor(key);
@@ -838,6 +852,7 @@ void (async () => {
     light.tags.add("fire-light");
     light.dwarkaBaseIntensity = baseIntensity;
     light.dwarkaFlickerPhase = phase;
+    if (!state.fireLights.includes(light)) state.fireLights.push(light);
   }
 
   function flickerFireLight(light, timeMs) {
@@ -847,21 +862,61 @@ void (async () => {
     light.light.intensity = light.dwarkaBaseIntensity * (1 + lowFrequency * .12 + highFrequency * .045);
   }
 
+  function upgradeFireEffect(root) {
+    if (!root || root.dwarkaParticleReady || !state.vfxAssets.fire || !state.vfxAssets.smoke) return false;
+    for (const fallback of root.dwarkaFallback || []) fallback.destroy();
+    root.dwarkaFallback = [];
+    const size = root.dwarkaFireKind === "torch" ? .52 : 1;
+    const flame = new pc.Entity("Kenney animated fire particles");
+    flame.addComponent("particlesystem", {
+      numParticles: root.dwarkaFireKind === "torch" ? 8 : 18, lifetime: .72, rate: .055,
+      emitterShape: pc.EMITTERSHAPE_SPHERE, emitterRadius: .13 * size, colorMap: state.vfxAssets.fire.resource,
+      animTilesX: 3, animTilesY: 3, animNumFrames: 9, animSpeed: 8, animLoop: true,
+      localVelocityGraph: new pc.CurveSet([0, 0, 1, 0], [0, .55 * size, 1, 1.15 * size], [0, 0, 1, 0]),
+      scaleGraph: new pc.Curve([0, .22 * size, .25, .62 * size, .72, .42 * size, 1, 0]),
+      alphaGraph: new pc.Curve([0, 0, .08, 1, .7, .82, 1, 0]),
+      colorGraph: new pc.CurveSet([0, 1, 1, 1], [0, .48, 1, .12], [0, .04, 1, 0]),
+      blendType: pc.BLEND_ADDITIVE, depthWrite: false, lighting: false, halfLambert: false,
+    });
+    flame.setLocalPosition(0, root.dwarkaFireKind === "torch" ? .08 : .14, 0); root.addChild(flame);
+    const smoke = new pc.Entity("Kenney animated smoke particles");
+    smoke.tags.add("smoke");
+    smoke.addComponent("particlesystem", {
+      numParticles: root.dwarkaFireKind === "torch" ? 5 : 12, lifetime: 2.6, rate: .24,
+      emitterShape: pc.EMITTERSHAPE_SPHERE, emitterRadius: .1 * size, colorMap: state.vfxAssets.smoke.resource,
+      animTilesX: 5, animTilesY: 5, animNumFrames: 25, animSpeed: 9, animLoop: false,
+      localVelocityGraph: new pc.CurveSet([0, -.05, 1, .13], [0, .48 * size, 1, .9 * size], [0, -.04, 1, .12]),
+      scaleGraph: new pc.Curve([0, .16 * size, .45, .42 * size, 1, .7 * size]),
+      alphaGraph: new pc.Curve([0, 0, .12, .32, .72, .18, 1, 0]),
+      colorGraph: new pc.CurveSet([0, .22, 1, .08], [0, .18, 1, .07], [0, .16, 1, .1]),
+      blendType: pc.BLEND_NORMAL, depthWrite: false, lighting: false, depthSoftening: 1,
+    });
+    smoke.setLocalPosition(0, root.dwarkaFireKind === "torch" ? .22 : .48, 0); root.addChild(smoke);
+    root.dwarkaParticleReady = true; root.dwarkaFlameEmitter = flame; root.dwarkaSmokeEmitter = smoke;
+    return true;
+  }
+
+  function createFireEffect(parent, position, kind) {
+    const root = new pc.Entity(kind === "torch" ? "Torch fire particles" : "Brazier fire particles");
+    root.setLocalPosition(...position); root.tags.add("fire"); root.dwarkaFireKind = kind; parent.addChild(root);
+    const scale = kind === "torch" ? .55 : 1;
+    const fallback = primitive("cone", "Loading flame", [0, kind === "torch" ? .05 : .34, 0], [.3 * scale, .62 * scale, .3 * scale], mats.fireHot, root); fallback.castShadows = false;
+    root.dwarkaFallback = [fallback]; state.fireEffects.push(root); upgradeFireEffect(root); return root;
+  }
+
+  function upgradeFireEffects() { for (const root of state.fireEffects) upgradeFireEffect(root); }
+
   function createBrazier(x, z) {
     const bowl = primitive("cylinder", "Iron fire bowl", [x, .48, z], [.72, .18, .72], mats.iron); bowl.setLocalEulerAngles(0, 0, 0);
     primitive("cylinder", "Brazier stem", [x, .25, z], [.12, .28, .12], mats.iron);
-    const fire = new pc.Entity("Layered fire"); fire.setPosition(x, .73, z); fire.tags.add("fire"); state.app.root.addChild(fire);
-    const outer = primitive("cone", "Amber flame", [0, .38, 0], [.52, .82, .52], mats.fire, fire);
-    const inner = primitive("cone", "Gold flame", [.08, .28, .02], [.27, .62, .27], mats.fireHot, fire); inner.setLocalEulerAngles(0, 0, -8);
-    outer.castShadows = false; inner.castShadows = false;
-    for (let index = 0; index < 4; index += 1) { const smoke = primitive("sphere", "Smoke plume", [0, .82 + index * .32, 0], [.24 + index * .09, .18 + index * .06, .24 + index * .09], mats.smoke, fire); smoke.tags.add("smoke"); smoke.dwarkaSmokeIndex = index; smoke.castShadows = false; }
+    createFireEffect(state.app.root, [x, .73, z], "brazier");
     const light = new pc.Entity("Fire light"); light.addComponent("light", { type: "omni", color: new pc.Color(1, .48, .18), intensity: 1.45, range: 8.5, castShadows: false }); light.setPosition(x, 1.35, z); registerFireLight(light, 1.45, x * .31 + z * .17); state.app.root.addChild(light);
   }
 
   function createWallTorch(x, y, z, facing = 0) {
     const torch = new pc.Entity("Wall torch"); torch.setPosition(x, y, z); torch.setEulerAngles(0, facing, 0); state.app.root.addChild(torch);
     primitive("cylinder", "Torch bracket", [0, -.28, .05], [.045, .34, .045], mats.iron, torch);
-    const flameRoot = new pc.Entity("Torch flame root"); flameRoot.setLocalPosition(0, .15, 0); flameRoot.tags.add("fire"); torch.addChild(flameRoot); const flame = primitive("cone", "Torch flame", [0, 0, 0], [.22, .48, .22], mats.fireHot, flameRoot); flame.castShadows = false;
+    createFireEffect(torch, [0, .15, 0], "torch");
     const light = new pc.Entity("Torch glow"); light.addComponent("light", { type: "omni", color: new pc.Color(1, .52, .24), intensity: 1.0, range: 7, castShadows: false }); light.setPosition(x, y + .25, z); registerFireLight(light, 1, x * .23 + z * .19); state.app.root.addChild(light);
   }
 
@@ -948,11 +1003,10 @@ void (async () => {
 
   function createBunting(z, height, paletteOffset = 0) {
     const cord = primitive("box", "Festival cord", [0, 0, 0], [.015, .015, 1], mats.wood); cord.castShadows = false;
-    boxBetweenLocal(cord, state.app.root, new pc.Vec3(-9.5, height, z), new pc.Vec3(9.5, height - .22, z), .015);
-    const colors = [mats.turquoise, mats.magenta, mats.gold];
-    for (let index = 0; index < 9; index += 1) {
-      const x = -8.2 + index * 2.05; const y = height - .1 - Math.sin(index / 8 * Math.PI) * .22;
-      const pennant = primitive("box", "Woven festival pennant", [x, y - .25, z], [.34, .52, .028], colors[(index + paletteOffset) % colors.length]); pennant.setEulerAngles(0, 0, index % 2 ? 43 : -43); pennant.castShadows = false;
+    boxBetweenLocal(cord, state.app.root, new pc.Vec3(-9.5, height, z), new pc.Vec3(9.5, height, z), .015);
+    for (let index = 0; index < 11; index += 1) {
+      const progress = index / 10; const x = -8.65 + index * 1.73; const sag = Math.sin(progress * Math.PI) * .64; const y = height - sag;
+      const pennant = primitive("plane", "Textured sagging festival pennant", [x, y - .3, z], [.38, 1, .58], mats.bunting); pennant.setEulerAngles(90, 0, (index + paletteOffset) % 2 ? 7 : -7); pennant.castShadows = false;
     }
   }
 
@@ -1034,7 +1088,7 @@ void (async () => {
     state.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window), graphicsDeviceOptions: { antialias: true, alpha: false, powerPreference: "high-performance" } });
     state.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW); state.app.setCanvasResolution(pc.RESOLUTION_AUTO); state.app.graphicsDevice.maxPixelRatio = Math.min(1, window.devicePixelRatio); state.app.start();
     state.app.scene.ambientLight = new pc.Color(.03, .04, .09); state.app.scene.exposure = 1.0; state.app.scene.toneMapping = pc.TONEMAP_ACES; state.app.scene.gammaCorrection = pc.GAMMA_SRGB; state.app.scene.fog.type = pc.FOG_EXP2; state.app.scene.fog.color = new pc.Color(.038, .028, .085); state.app.scene.fog.density = .0055;
-    mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.30, 0.22, 0.25]); mats.roadSand = material([.72, .61, .46]); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
+    mats.stone = material([0.42, 0.34, 0.31]); mats.stoneLight = material([0.72, 0.58, 0.42]); mats.sand = material([0.53, 0.40, 0.30]); mats.sandLight = material([0.67, 0.52, 0.38]); mats.sandDark = material([0.30, 0.22, 0.25]); mats.roadSand = material([.72, .61, .46]); mats.bunting = material([.42, .12, .3]); mats.ash = translucentMaterial([.055, .045, .06], .54); mats.rut = translucentMaterial([.18, .10, .06], .34); mats.wood = material([0.16, 0.07, 0.065]); mats.bowWood = material([.36, .105, .042]); mats.bowWood.gloss = .42; mats.bowWood.update(); mats.bowGrip = material([.115, .045, .025]); mats.bowGrip.gloss = .18; mats.bowGrip.update(); mats.bowCord = material([.72, .66, .52]); mats.iron = material([0.08, .07, .09]); mats.steel = material([.48, .50, .54]); mats.indigo = material([0.11, 0.075, 0.22]); mats.turquoise = material([0.035, 0.31, 0.31]); mats.magenta = material([0.30, 0.045, 0.17]); mats.gold = material([0.70, 0.39, 0.055]); mats.targetLock = material([1, .18, .12], [1, .045, .02]); mats.warningGold = material([1, .72, .08], [1, .46, .02]); mats.warningArrow = material([1, .28, .20], [1, .055, .025]); mats.warningRed = material([.72, .025, .018], [1, .02, .01]); mats.fire = material([0.95, 0.20, 0.01], [1, 0.16, 0.01]); mats.fireHot = material([1, .67, .08], [1, .45, .02]); mats.smoke = translucentMaterial([.16, .13, .22], .22); mats.weaponTrail = translucentMaterial([1, .52, .18], .34); mats.hitImpact = translucentMaterial([1, .36, .12], .68); mats.healthBack = material([.08, .035, .06]); mats.healthEnemy = material([.9, .12, .09], [1, .04, .025]); mats.objective = material([.92, .56, .08], [1, .45, .06]); mats.objectiveGlow = translucentMaterial([1, .48, .10], .18); mats.player = material([0.05, 0.25, 0.35]); mats.skin = material([0.42, 0.22, 0.13]); mats.enemy = material([0.38, 0.06, 0.08]); mats.archer = material([0.24, 0.09, 0.31]); mats.brute = material([0.34, 0.12, 0.04]); mats.family = material([0.06, 0.42, 0.38]); mats.chitra = material([0.70, 0.41, 0.09]);
     mats.roadSand.gloss = .008; mats.roadSand.metalness = 0; mats.roadSand.update();
     mats.bowWood.diffuse = new pc.Color(.52, .16, .045); mats.bowWood.emissive = new pc.Color(.025, .006, .001); mats.bowWood.emissiveIntensity = .45; mats.bowWood.update();
     for (const plaster of [mats.stone, mats.stoneLight, mats.sand, mats.sandLight, mats.sandDark, mats.roadSand]) { plaster.useMetalness = true; plaster.metalness = 0; plaster.gloss = plaster === mats.roadSand ? .008 : .16; plaster.update(); }
@@ -1042,7 +1096,10 @@ void (async () => {
     mats.gold.useMetalness = true; mats.gold.metalness = .76; mats.gold.gloss = .62; mats.gold.update();
     mats.iron.useMetalness = true; mats.iron.metalness = .64; mats.iron.gloss = .28; mats.iron.update();
     mats.steel.useMetalness = true; mats.steel.metalness = .84; mats.steel.gloss = .56; mats.steel.update();
-    primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark); const road = primitive("box", "Packed sand street", [0, STREET_SURFACE_Y - .04, -3], [22, .08, 82], mats.roadSand); road.castShadows = false; road.receiveShadows = false; state.roadEntity = road;
+    primitive("box", "Outer earth", [0, -.52, -4], [82, .35, 102], mats.sandDark);
+    for (let index = 0; index < 10; index += 1) { const road = primitive("box", "Packed earth street slab", [0, STREET_SURFACE_Y - .04 - (index % 2) * .003, 34 - index * 8], [22, .08, 8.08], mats.roadSand); road.castShadows = false; road.receiveShadows = false; if (!state.roadEntity) state.roadEntity = road; }
+    for (const [x, z, sx, sz, yaw] of [[-6, 9.8, 1.5, .8, 18], [8, -3, 1.35, .72, -12], [-9, -17, 1.25, .68, 21], [5, -29, 1.45, .76, -18]]) { const ash = primitive("plane", "Wet ash fire decal", [x, STREET_SURFACE_Y + .012, z], [sx, 1, sz], mats.ash); ash.setEulerAngles(0, yaw, 0); ash.castShadows = false; ash.receiveShadows = false; }
+    for (const [x, z, yaw] of [[-1.4, 16, -4], [2.1, 3.5, 6], [-2.8, -9, -5], [1.7, -23, 4]]) { const rut = primitive("plane", "Cart rut decal", [x, STREET_SURFACE_Y + .01, z], [.16, 1, 3.6], mats.rut); rut.setEulerAngles(0, yaw, 0); rut.castShadows = false; rut.receiveShadows = false; }
     for (const [x, z, radius] of [[-7.8, 25, .08], [7.2, 14, .06], [-8.3, 2, .075], [7.7, -10, .065], [-7.5, -23, .08], [7.9, -36, .07]]) { const pebble = primitive("sphere", "Road pebble", [x, STREET_SURFACE_Y + radius * .22, z], [radius * 1.4, radius * .42, radius], mats.sandDark); pebble.castShadows = false; }
     for (const [x, z, color, lean] of [[-7.8, -9.8, mats.turquoise, -7], [7.7, -14.2, mats.magenta, 7], [-7.6, -22.0, mats.gold, -7]]) {
       const awning = primitive("box", "Woven market awning", [x, 3.25, z], [4.3, .09, 3.0], color); awning.setEulerAngles(0, 0, lean); awning.castShadows = false;
@@ -1231,9 +1288,8 @@ void (async () => {
     ui.damageFlash?.classList.toggle("damaged", performance.now() < state.damageFlashUntil);
     if (state.objectiveMarker?.enabled && state.objectiveTarget) { const bob = Math.sin(performance.now() * .0032) * .13; state.objectiveMarker.setPosition(state.objectiveTarget[0], state.objectiveTarget[1] + bob, state.objectiveTarget[2]); state.objectiveMarker.rotateLocal(0, dt * 38, 0); }
     updateObjectiveGuidance(snapshot);
-    for (const fire of state.app.root.findByTag("fire")) { const pulse = 1 + Math.sin(performance.now() * .006 + fire.getPosition().x) * .12; fire.setLocalScale(pulse, .92 + pulse * .12, pulse); fire.setLocalEulerAngles(0, Math.sin(performance.now() * .002 + fire.getPosition().z) * 5, 0); }
-    for (const light of state.app.root.findByTag("fire-light")) flickerFireLight(light, performance.now());
-    for (const smoke of state.app.root.findByTag("smoke")) { const index = smoke.dwarkaSmokeIndex || 0; const drift = performance.now() * .00016 + index * .24; const rise = .78 + (drift % 1.35); smoke.setLocalPosition(Math.sin(drift * 5.3) * .13, rise, Math.cos(drift * 4.1) * .09); const size = .16 + rise * .15; smoke.setLocalScale(size, size * .72, size); }
+    for (const fire of state.fireEffects) { const pulse = 1 + Math.sin(performance.now() * .006 + fire.getPosition().x) * .05; fire.setLocalScale(pulse, .96 + pulse * .04, pulse); }
+    for (const light of state.fireLights) flickerFireLight(light, performance.now());
     for (let index = state.projectiles.length - 1; index >= 0; index -= 1) {
       const projectile = state.projectiles[index]; projectile.elapsed += dt; const progress = Math.min(1, projectile.elapsed / projectile.duration);
       const currentPosition = { x: pc.math.lerp(projectile.start.x, projectile.end.x, progress), y: pc.math.lerp(projectile.start.y, projectile.end.y, progress), z: pc.math.lerp(projectile.start.z, projectile.end.z, progress) };
@@ -1287,7 +1343,7 @@ void (async () => {
       skySphereCount: state.app.root.findByName("Indigo night sky") ? 1 : 0,
       cameraLightCount: state.camera?.findComponents("light").length || 0,
       roadTiling: state.roadEntity?.render?.material?.diffuseMapTiling ? [state.roadEntity.render.material.diffuseMapTiling.x, state.roadEntity.render.material.diffuseMapTiling.y] : null,
-      fireLightIntensities: state.app.root.findByTag("fire-light").map((light) => light.light.intensity),
+      fireLightIntensities: state.fireLights.map((light) => light.light.intensity),
       iblReady: Boolean(state.app.scene.skybox && state.app.scene.envAtlas),
       post: state.cameraFrame ? { bloom: state.cameraFrame.bloom.intensity, ssao: state.cameraFrame.ssao.type, vignette: state.cameraFrame.vignette.intensity } : null,
     }),
@@ -1298,6 +1354,17 @@ void (async () => {
       authoredAwningPosts: state.environmentEntities.filter((entity) => entity.name === "Kenney_pillar_wood").length,
       authoredTurnColumns: state.environmentEntities.filter((entity) => entity.name === "Kenney_column").length,
       nonUnitArchitecture: state.environmentEntities.filter((entity) => ["Wall_Plaster_Door_Flat", "Wall_Plaster_Straight", "Wall_Plaster_Window_Wide_Round", "Kenney_roof_flat_square", "Kenney_pillar_wood", "Kenney_column", "Prop_ExteriorBorder_Straight1"].includes(entity.name) && Math.abs(entity.getLocalScale().x - 1) > .001).map((entity) => entity.name),
+    }),
+    environmentFxSummary: () => ({
+      fireEmitters: state.fireEffects.filter((root) => root.dwarkaFlameEmitter?.particlesystem).length,
+      smokeEmitters: state.fireEffects.filter((root) => root.dwarkaSmokeEmitter?.particlesystem).length,
+      cachedFireRoots: state.fireEffects.length,
+      cachedFireLights: state.fireLights.length,
+      taggedSceneQueriesInUpdate: false,
+      texturedPennants: state.app.root.find((entity) => entity.name === "Textured sagging festival pennant").length,
+      roadSlabs: state.app.root.find((entity) => entity.name === "Packed earth street slab").length,
+      roadDecals: state.app.root.find((entity) => /decal$/.test(entity.name)).length,
+      batchedModelRenders: state.batchedModelRenders,
     }),
     focusCharacter: (name = null, distance = 1.45, angle = 0) => { state.qaFocusName = name; state.qaFocusDistance = Math.max(1.2, Math.min(6, Number(distance) || 1.45)); state.qaFocusAngle = Math.max(-180, Math.min(180, Number(angle) || 0)); if (state.camera?.camera) state.camera.camera.fov = name ? 42 : 63; return Boolean(!name || state.app?.root.findByName(name)); },
     previewAnimation: (name, animation = null) => { if (animation && !CHARACTER_ANIMATIONS[animation]) return false; if (animation) state.qaAnimationPreviews.set(name, animation); else state.qaAnimationPreviews.delete(name); const root = state.app?.root.findByName(name); if (root && animation) setCharacterAnimation(root, animation); return Boolean(root); },
