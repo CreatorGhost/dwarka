@@ -26,6 +26,8 @@ import {
 } from "../../game/client-scripts/runtime/loop.js";
 import { installModals } from "../../game/client-scripts/ui/modals.js";
 import { doorVisualPose } from "../../game/client-scripts/scene/doors.js";
+import { createEmbeddedHandshake } from "../../game/client-scripts/net/handshake.js";
+import { postProfileResume } from "../app/game/chapter-1/profile-bridge.js";
 
 function element(overrides = {}) {
   return {
@@ -42,6 +44,86 @@ function element(overrides = {}) {
 const worldLayout = JSON.parse(
   readFileSync(new URL("../../game/client-scripts/world-layout.json", import.meta.url), "utf8"),
 );
+
+test("a late parent listener catches a repeated ready signal before the fallback deadline", () => {
+  const scheduled = { interval: null, fallback: null };
+  const clock = {
+    setInterval(callback) {
+      scheduled.interval = callback;
+      return 1;
+    },
+    clearInterval() {
+      scheduled.interval = null;
+    },
+    setTimeout(callback) {
+      scheduled.fallback = callback;
+      return 2;
+    },
+    clearTimeout() {
+      scheduled.fallback = null;
+    },
+  };
+  let parentListening = false;
+  let parentProfile = false;
+  let standaloneFallbacks = 0;
+  let readySignals = 0;
+  let handshake;
+  handshake = createEmbeddedHandshake({
+    clock,
+    hasParentProfile: () => parentProfile,
+    sendReady: () => {
+      readySignals += 1;
+      if (parentListening) {
+        const frameMessages = [];
+        postProfileResume(
+          { postMessage: (message) => frameMessages.push(message) },
+          "https://dwarka.test",
+          { anonymousPlayerId: "late-parent" },
+          "continue",
+        );
+        parentProfile = frameMessages.at(-1)?.type === "dwarka:resume";
+        handshake.stop();
+      }
+    },
+    useStandalone: () => {
+      standaloneFallbacks += 1;
+    },
+  });
+
+  handshake.start();
+  assert.equal(readySignals, 1);
+  parentListening = true;
+  scheduled.interval();
+  assert.equal(parentProfile, true);
+  assert.equal(readySignals, 2);
+  assert.equal(standaloneFallbacks, 0);
+  assert.equal(scheduled.fallback, null);
+});
+
+test("an unanswered embedded handshake enters standalone play after three seconds", () => {
+  let fallback;
+  let introShown = false;
+  const handshake = createEmbeddedHandshake({
+    clock: {
+      setInterval: () => 1,
+      clearInterval() {},
+      setTimeout(callback, delay) {
+        assert.equal(delay, 3_000);
+        fallback = callback;
+        return 2;
+      },
+      clearTimeout() {},
+    },
+    hasParentProfile: () => false,
+    sendReady() {},
+    useStandalone: () => {
+      introShown = true;
+    },
+  });
+  handshake.start();
+  fallback();
+  assert.equal(introShown, true);
+});
 
 test("rescue door presentation swings around its authored hinge", () => {
   const door = worldLayout.doors.find(({ id }) => id === "courtyard-rescue-door");

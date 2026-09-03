@@ -46,11 +46,14 @@ test("Chapter 0 uses the five required panels in order with keyboard controls", 
 });
 
 test("the served Chapter 1 world layout is emitted from the game source", async () => {
-  const [sourceLayout, servedLayout] = await Promise.all([
+  const [sourceLayout, servedLayout, sourceI18n, servedI18n] = await Promise.all([
     readFile(new URL("../../game/client-scripts/world-layout.json", import.meta.url)),
     readFile(new URL("public/playcanvas/chapter-1/world-layout.json", root)),
+    readFile(new URL("../../game/client-scripts/game-i18n.js", import.meta.url)),
+    readFile(new URL("public/playcanvas/chapter-1/game-i18n.js", root)),
   ]);
   assert.deepEqual(servedLayout, sourceLayout);
+  assert.deepEqual(servedI18n, sourceI18n);
   const layout = JSON.parse(sourceLayout);
   assert.deepEqual(
     layout.qaVistas.find(({ id }) => id === "alley-climb"),
@@ -104,6 +107,14 @@ test("homepage localization covers five languages, phases, settings, and context
   assert.match(home, /keyboard-map/);
   assert.match(home, /leftMouse/);
   assert.match(home, /rightMouse/);
+  assert.match(home, /title-key-art\.jpeg/);
+  assert.match(home, /title-primary/);
+  assert.match(home, /title-archive/);
+  assert.doesNotMatch(home, /<section className="premise"/);
+  assert.doesNotMatch(home, /<section className="story-grid"/);
+  assert.doesNotMatch(home, /<section className="decision"/);
+  for (const label of ["Language", "भाषा", "மொழி", "ಭಾಷೆ", "భాష"])
+    assert.match(home, new RegExp(label));
   assert.match(
     home,
     /document\.documentElement\.lang = profile\?\.settings\.locale \?\? "en"/,
@@ -176,8 +187,13 @@ test("production connection wiring is environment-configured and explains free-t
   assert.match(page, /process\.env\.DWARKA_WS_URL/);
   assert.match(page, /url\.protocol === "wss:"/);
   assert.match(shell, /encodeURIComponent\(websocketUrl\)/);
+  assert.match(shell, /event\.data\.type === "dwarka:ready"\) sendResume\(\)/);
+  assert.match(shell, /onLoad=\{sendResume\}/);
   assert.doesNotMatch(runtime, /location\.hostname}:3210/);
   assert.match(runtime, /safeWebSocketEndpoint/);
+  assert.match(runtime, /startEmbeddedHandshake/);
+  assert.match(runtime, /3_000/);
+  assert.match(runtime, /loadingRetryAvailable/);
   assert.match(html, /Waking the game server/);
   assert.match(i18n, /Free hosting can take up to a minute to wake/);
 });

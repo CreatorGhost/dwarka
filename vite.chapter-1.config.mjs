@@ -7,6 +7,7 @@ const source = fileURLToPath(new URL("../game/client-scripts/chapter-1.js", impo
 const worldLayout = fileURLToPath(
   new URL("../game/client-scripts/world-layout.json", import.meta.url),
 );
+const gameI18n = fileURLToPath(new URL("../game/client-scripts/game-i18n.js", import.meta.url));
 const output = fileURLToPath(new URL("./public/playcanvas/chapter-1", import.meta.url));
 const assets = fileURLToPath(new URL("./public/playcanvas/chapter-1/assets", import.meta.url));
 
@@ -37,6 +38,11 @@ export default defineConfig({
           type: "asset",
           fileName: "world-layout.json",
           source: readFileSync(worldLayout),
+        });
+        this.emitFile({
+          type: "asset",
+          fileName: "game-i18n.js",
+          source: readFileSync(gameI18n),
         });
       },
     },
