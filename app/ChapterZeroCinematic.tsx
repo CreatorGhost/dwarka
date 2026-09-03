@@ -7,6 +7,7 @@ import type { ChapterProfile, ChapterSettings } from "./game/chapter-1/progress"
 import EmberField from "./EmberField";
 import {
   BEATS,
+  MANUSCRIPT,
   BEAT_TAIL_MS,
   CAPTION_FADE_MS,
   CAPTION_HOLD_AFTER_VOICE_MS,
@@ -29,12 +30,12 @@ type VoiceEntry = {
   assets: { codec: string; runtimePath: string }[];
 };
 
-const interfaceCopy: Record<Locale, { chapter: string; advance: string; handing: string }> = {
-  en: { chapter: "Chapter 1", advance: "skip scene", handing: "Entering the street" },
-  hi: { chapter: "अध्याय 1", advance: "दृश्य छोड़ें", handing: "गली में प्रवेश" },
-  ta: { chapter: "அத்தியாயம் 1", advance: "காட்சியைத் தாண்டு", handing: "தெருவில் நுழைகிறது" },
-  kn: { chapter: "ಅಧ್ಯಾಯ 1", advance: "ದೃಶ್ಯ ಬಿಡಿ", handing: "ಬೀದಿಗೆ ಪ್ರವೇಶ" },
-  te: { chapter: "అధ్యాయం 1", advance: "దృశ్యాన్ని దాటండి", handing: "వీధిలోకి ప్రవేశం" },
+const interfaceCopy: Record<Locale, { chapter: string; advance: string; handing: string; sourceEyebrow: string; open: string }> = {
+  en: { chapter: "Chapter 1", advance: "skip scene", handing: "Entering the street",  sourceEyebrow: "From the Jaiminiya Ashvamedha Parva", open: "Open the account" },
+  hi: { chapter: "अध्याय 1", advance: "दृश्य छोड़ें", handing: "गली में प्रवेश",  sourceEyebrow: "जैमिनीय अश्वमेध पर्व से", open: "वृत्तांत खोलें" },
+  ta: { chapter: "அத்தியாயம் 1", advance: "காட்சியைத் தாண்டு", handing: "தெருவில் நுழைகிறது",  sourceEyebrow: "ஜைமினிய அசுவமேத பர்வத்திலிருந்து", open: "பதிவைத் திற" },
+  kn: { chapter: "ಅಧ್ಯಾಯ 1", advance: "ದೃಶ್ಯ ಬಿಡಿ", handing: "ಬೀದಿಗೆ ಪ್ರವೇಶ",  sourceEyebrow: "ಜೈಮಿನೀಯ ಅಶ್ವಮೇಧ ಪರ್ವದಿಂದ", open: "ವೃತ್ತಾಂತ ತೆರೆಯಿರಿ" },
+  te: { chapter: "అధ్యాయం 1", advance: "దృశ్యాన్ని దాటండి", handing: "వీధిలోకి ప్రవేశం",  sourceEyebrow: "జైమినీయ అశ్వమేధ పర్వం నుండి", open: "వృత్తాంతాన్ని తెరవండి" },
 };
 
 let voiceManifestPromise: Promise<VoiceEntry[]> | null = null;
@@ -80,7 +81,7 @@ type Props = {
 export default function ChapterZeroCinematic({ copy, locale, profile, chapterTitle, onSaveSetting, onComplete }: Props) {
   const [beat, setBeat] = useState(0);
   const [outgoingBeat, setOutgoingBeat] = useState<number | null>(null);
-  const [mode, setMode] = useState<"panels" | "title" | "leaving">("panels");
+  const [mode, setMode] = useState<"source" | "panels" | "title" | "leaving">("source");
   const [skipConfirm, setSkipConfirm] = useState(false);
   const [voiceNotice, setVoiceNotice] = useState(false);
   const [beatDuration, setBeatDuration] = useState<number>(BEATS[0].hold);
@@ -174,8 +175,14 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     }, duration);
   }, [leave]);
 
+  const openAccount = useCallback(() => {
+    clearFallback();
+    setMode("panels");
+  }, [clearFallback]);
+
   const advance = useCallback(() => {
     if (advancingRef.current || skipConfirm || mode === "leaving") return;
+    if (mode === "source") { openAccount(); return; }
     advancingRef.current = true;
     window.setTimeout(() => { advancingRef.current = false; }, 450);
     clearFallback();
@@ -200,7 +207,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     setMode("title");
     if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
     outgoingTimerRef.current = window.setTimeout(() => setOutgoingBeat(null), CROSSFADE_MS);
-  }, [beat, clearFallback, clearTitleHold, leave, mode, skipConfirm]);
+  }, [beat, clearFallback, clearTitleHold, leave, mode, openAccount, skipConfirm]);
 
   useEffect(() => { advanceRef.current = advance; }, [advance]);
 
@@ -214,9 +221,9 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   }, [beat, bedVolume, mode]);
 
   useEffect(() => {
-    BEATS.forEach((item) => {
+    [MANUSCRIPT.image, ...BEATS.map((item) => item.image)].forEach((source) => {
       const image = new window.Image();
-      image.src = item.image;
+      image.src = source;
     });
   }, []);
 
@@ -355,6 +362,12 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   }, [armFallback, beat, clearFallback, duckBeds, mode, profile.settings.voiceLocale]);
 
   useEffect(() => {
+    if (mode !== "source") return;
+    armFallback(MANUSCRIPT.hold);
+    return clearFallback;
+  }, [armFallback, clearFallback, mode]);
+
+  useEffect(() => {
     if (mode !== "title") return;
     armTitleHold();
     return clearTitleHold;
@@ -422,6 +435,28 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     return () => window.removeEventListener("keydown", trapFocus);
   }, [skipConfirm]);
 
+  // ponytail: write the pointer offset to CSS variables on the root rather than
+  // into state — a re-render per mousemove would be the expensive way to do this.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const root = rootRef.current;
+    if (!root) return;
+    let frame = 0;
+    const onMove = (event: PointerEvent) => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        root.style.setProperty("--parallax-x", ((event.clientX / window.innerWidth) * 2 - 1).toFixed(3));
+        root.style.setProperty("--parallax-y", ((event.clientY / window.innerHeight) * 2 - 1).toFixed(3));
+      });
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {
       if (skipConfirm) {
@@ -452,7 +487,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   const storyMuted = profile.settings.muteAll || profile.settings.dialogue === 0;
   const ui = interfaceCopy[locale];
   // The hero frame opens on picture alone: no chrome, no counter, a later caption.
-  const bare = mode === "panels" && current.hero;
+  const bare = mode === "source" || (mode === "panels" && current.hero);
   const motionStyle = {
     "--panel-duration": `${beatDuration}ms`,
     "--pan-x": beat % 2 === 0 ? "1.4%" : "-1.4%",
@@ -468,6 +503,9 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
 
   return <div ref={rootRef} className={`chapter-zero-cinematic mode-${mode}${bare ? " is-bare" : ""}`} role="dialog" aria-modal="true" aria-labelledby="cinematic-title" tabIndex={-1}>
     <div className="cinematic-frame">
+      {mode === "source" ? <div className="cinematic-image cinematic-image-current is-source">
+        <Image src={MANUSCRIPT.image} alt="" fill sizes="100vw" priority unoptimized />
+      </div> : null}
       {outgoingBeat !== null ? <div className="cinematic-image cinematic-image-outgoing" aria-hidden="true"><Image src={BEATS[outgoingBeat].image} alt="" fill sizes="100vw" priority unoptimized /></div> : null}
       {mode === "panels" ? <div className={`cinematic-image cinematic-image-current${current.hero ? " is-hero" : ""}`} key={beat} style={motionStyle}><Image src={current.image} alt={currentCopy.text} fill sizes="100vw" priority unoptimized /></div> : null}
       <div className="cinematic-shade" aria-hidden="true" />
@@ -493,6 +531,15 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       <p>{ui.chapter}</p>
       <h2>{chapterTitle}</h2>
       <p className="cinematic-handing" role="status">{ui.handing}</p>
+    </div> : null}
+
+    {mode === "source" ? <div className="cinematic-source">
+      <p className="cinematic-source-eyebrow">{ui.sourceEyebrow}</p>
+      <button className="cinematic-open" type="button" onClick={openAccount}>
+        <span className="cinematic-open-ring" aria-hidden="true" />
+        <span className="cinematic-open-ring cinematic-open-ring-late" aria-hidden="true" />
+        <span>{ui.open}</span>
+      </button>
     </div> : null}
 
     <div className="cinematic-bloom" aria-hidden="true" />

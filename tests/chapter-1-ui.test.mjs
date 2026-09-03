@@ -215,7 +215,9 @@ test("homepage localization covers five languages, phases, settings, and context
   assert.match(home, /keyboard-map/);
   assert.match(home, /leftMouse/);
   assert.match(home, /rightMouse/);
-  assert.match(home, /title-key-art\.jpeg/);
+  assert.match(home, /title-key-art\.webp/);
+  // The wordmark is live type now, so it must still be the page's h1.
+  assert.match(home, /className="title-wordmark" id="page-title"/);
   assert.match(home, /title-primary/);
   assert.match(home, /title-archive/);
   assert.doesNotMatch(home, /<section className="premise"/);

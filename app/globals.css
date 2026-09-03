@@ -102,10 +102,12 @@ a { color: inherit; }
 
 .title-vignette {
   z-index: -3;
+  /* A deeper scrim down the left third so the lockup sits on quiet ground and
+     never fights the figure standing behind it. */
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, .18) 0%, transparent 44%, rgba(0, 0, 0, .1) 100%),
-    linear-gradient(0deg, #000 0%, rgba(0, 0, 0, .82) 9%, transparent 36%),
-    radial-gradient(ellipse at center, transparent 48%, rgba(0, 0, 0, .62) 100%);
+    linear-gradient(90deg, rgba(0, 0, 0, .88) 0%, rgba(0, 0, 0, .72) 22%, rgba(0, 0, 0, .28) 40%, transparent 56%),
+    linear-gradient(0deg, #000 0%, rgba(0, 0, 0, .84) 9%, transparent 38%),
+    radial-gradient(ellipse at 62% 46%, transparent 42%, rgba(0, 0, 0, .6) 100%);
   pointer-events: none;
 }
 
@@ -124,18 +126,61 @@ a { color: inherit; }
 .title-lockup {
   position: absolute;
   z-index: 1;
-  left: clamp(54px, 6vw, 116px);
-  bottom: clamp(94px, 10vh, 130px);
-  width: min(380px, calc(100vw - 108px));
+  left: clamp(58px, 5.5vw, 104px);
+  bottom: clamp(84px, 9vh, 118px);
+  width: min(520px, calc(100vw - 108px));
   text-shadow: 0 2px 18px #000, 0 1px 3px #000;
 }
 
-.title-chapter {
-  margin: 0 0 10px;
-  color: #f4eee2;
-  font: 700 14px/1.4 var(--face-display);
-  letter-spacing: .13em;
+/* Live wordmark in Cinzel rather than baked into the plate: crisp at any size,
+   and it can take the ember glow the rest of the front uses. */
+.title-wordmark {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 26px;
+}
+
+.title-wordmark-main {
+  color: #f6efe1;
+  font: 700 clamp(62px, 6.4vw, 118px)/.9 var(--face-display);
+  letter-spacing: .06em;
   text-transform: uppercase;
+  text-shadow: 0 0 60px rgba(var(--ember), .32), 0 4px 26px #000, 0 1px 2px #000;
+}
+
+.title-wordmark-sub {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: rgba(240, 200, 119, .92);
+  font: 400 clamp(14px, 1.05vw, 19px)/1 var(--face-display);
+  letter-spacing: .52em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 16px #000;
+}
+
+.title-wordmark-sub::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(var(--ember), .6), transparent);
+}
+
+.title-chapter {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 14px;
+  color: rgba(246, 240, 228, .62);
+  font: 700 11px/1 var(--face-display);
+  letter-spacing: .34em;
+  text-transform: uppercase;
+}
+
+.title-chapter b {
+  color: #f4eee2;
+  font: 400 clamp(21px, 1.5vw, 27px)/1.2 var(--face-narration);
+  letter-spacing: .01em;
+  text-transform: none;
 }
 
 .title-chapter span {
@@ -144,11 +189,32 @@ a { color: inherit; }
 }
 
 .title-status {
-  margin: 0 0 19px;
-  color: rgba(246, 240, 228, .7);
-  font: 500 12px/1.4 var(--face-ui);
-  letter-spacing: .05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 20px;
+  color: rgba(246, 240, 228, .58);
+  font: 600 10px/1 var(--face-ui);
+  letter-spacing: .2em;
+  text-transform: uppercase;
 }
+
+.title-status::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: rgba(var(--ember), .8);
+}
+
+/* Finishing the chapter should feel earned, not like a status line. */
+.title-status.is-complete {
+  padding: 7px 14px 7px 12px;
+  border: 1px solid rgba(var(--ember), .5);
+  background: rgba(var(--ember), .1);
+  color: #f0c877;
+}
+
+.title-status.is-complete::before { background: #f0c877; }
 
 .title-primary {
   width: 100%;
@@ -194,24 +260,43 @@ a { color: inherit; }
 .title-menu {
   display: flex;
   flex-direction: column;
-  margin-top: 13px;
-  border-top: 1px solid rgba(246, 240, 228, .28);
+  margin-top: 16px;
+  border-top: 1px solid rgba(246, 240, 228, .2);
 }
 
 .title-menu button {
-  min-height: 38px;
-  padding: 0;
+  position: relative;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
   border: 0;
-  border-bottom: 1px solid rgba(246, 240, 228, .18);
+  border-bottom: 1px solid rgba(246, 240, 228, .14);
   background: transparent;
-  color: #f4eee2;
-  font: 610 12px/1 var(--face-ui);
-  letter-spacing: .11em;
+  color: rgba(244, 238, 226, .82);
+  font: 700 11px/1 var(--face-display);
+  letter-spacing: .24em;
   text-align: left;
   text-transform: uppercase;
   cursor: pointer;
-  transition: color 140ms ease, translate 140ms ease;
+  transition: color 160ms ease, translate 160ms ease, border-color 160ms ease;
 }
+
+/* A gold marker slides in on the focused row. */
+.title-menu button::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  width: 2px;
+  height: 13px;
+  background: #d8a84f;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.title-menu button:hover::before,
+.title-menu button:focus-visible::before { opacity: 1; }
+.title-menu button:hover { border-bottom-color: rgba(var(--ember), .4); }
 
 .title-menu button:hover {
   translate: 7px 0;
@@ -369,6 +454,84 @@ a { color: inherit; }
 }
 
 .mode-leaving .cinematic-bloom { animation: ember-bloom 900ms cubic-bezier(.16, 1, .3, 1) forwards; }
+
+/* ── The account ────────────────────────────────────────────────────────────
+   Begin opens on the source text rather than cutting straight to panel 01, so
+   the story reads as something being read. Hands-free: it opens itself after
+   MANUSCRIPT.hold, and the affordance only lets an impatient player go early. */
+.cinematic-image-current.is-source img { animation: cinematic-source-drift 6s ease-out forwards; }
+
+@keyframes cinematic-source-drift {
+  from { transform: scale(1.06) translate3d(0, 0, 0); }
+  to { transform: scale(1) translate3d(0, 0, 0); }
+}
+
+.cinematic-source {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  bottom: clamp(58px, 10vh, 116px);
+  display: grid;
+  justify-items: center;
+  gap: 26px;
+  text-align: center;
+  animation: cinematic-rise 900ms 600ms ease both;
+}
+
+.cinematic-source-eyebrow {
+  margin: 0;
+  color: #e3b45e;
+  font: 700 13px/1.5 var(--face-display);
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 14px #000;
+}
+
+.cinematic-open {
+  position: relative;
+  min-height: 62px;
+  padding: 0 40px;
+  border: 1px solid rgba(var(--ember), .65);
+  background: rgba(10, 12, 26, .5);
+  backdrop-filter: blur(6px);
+  color: #f8f1e5;
+  font: 700 14px/1 var(--face-display);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  animation: ember-breathe 3s ease-in-out infinite;
+  transition: scale 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.cinematic-open:hover { scale: 1.05; background: rgba(var(--ember), .92); color: #120c04; }
+.cinematic-open:active { scale: .97; }
+.cinematic-open:focus-visible { outline: 3px solid #e3b45e; outline-offset: 5px; }
+
+/* Aura rings pinging outward from the affordance. */
+.cinematic-open-ring {
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  border: 1px solid rgba(var(--ember), .55);
+  pointer-events: none;
+  animation: ember-ping 2.8s ease-out infinite;
+}
+
+.cinematic-open-ring-late { animation-delay: 1.4s; }
+
+@keyframes ember-ping {
+  0% { opacity: .75; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+/* Cursor parallax: the panel drifts a little against the pointer, so the art
+   feels held rather than pasted on. Driven by --parallax-x/y from the client. */
+.cinematic-image-current img,
+.cinematic-image-outgoing img {
+  translate: calc(var(--parallax-x, 0) * 14px) calc(var(--parallax-y, 0) * 9px);
+  transition: translate 420ms cubic-bezier(.22, 1, .36, 1);
+}
 
 /* ── Glass dialogs ──────────────────────────────────────────────────────────*/
 .credits-dialog > div,
@@ -844,6 +1007,11 @@ h1 {
   to { transform: scale(1.13) translate3d(0, -1.1%, 0); }
 }
 
+@keyframes cinematic-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes cinematic-caption-in {
   from { opacity: 0; transform: translate(-50%, 12px); }
   to { opacity: 1; transform: translate(-50%, 0); }
@@ -950,5 +1118,6 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .title-art img, .title-grain, .cinematic-image-current, .cinematic-image-current img, .cinematic-image-outgoing, .cinematic-caption, .cinematic-title-card, .cinematic-handing, .cinematic-title-card > h2, .title-primary { animation: none; opacity: 1; }
-  .ember-field, .cinematic-bloom { display: none; }
+  .ember-field, .cinematic-bloom, .cinematic-open-ring { display: none; }
+  .cinematic-image-current img, .cinematic-image-outgoing img { translate: none; }
 }

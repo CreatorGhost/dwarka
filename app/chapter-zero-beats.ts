@@ -12,6 +12,13 @@ export type Beat = {
   mission?: boolean;
 };
 
+/** The framing beat: the account the story is read from. Hands-free, but the
+ *  player may open it early. Held short so a judge is never blocked. */
+export const MANUSCRIPT = {
+  image: "/story-a/00-manuscript.webp",
+  hold: 6_000,
+} as const;
+
 export const BEATS: readonly Beat[] = [
   { image: "/story-a/01-battlefield.webp", voice: "ch0-panel-01-battlefield", hold: 11_000, hero: true },
   { image: "/story-a/02-karna-looses.webp", voice: "ch0-panel-02-last-stand", hold: 7_000 },
