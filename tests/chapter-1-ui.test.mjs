@@ -22,8 +22,9 @@ const readRuntime = async () => {
   return (await Promise.all(files.map((url) => readFile(url, "utf8")))).join("\n");
 };
 
-test("Chapter 0 uses the five required panels in order with keyboard controls", async () => {
-  const [home, localization] = await Promise.all([
+test("Chapter 0 uses the five required panels in a hands-free cinematic", async () => {
+  const [cinematic, home, localization] = await Promise.all([
+    readFile(new URL("app/ChapterZeroCinematic.tsx", root), "utf8"),
     readFile(new URL("app/page.tsx", root), "utf8"),
     readFile(new URL("app/game/chapter-1/localization.ts", root), "utf8"),
   ]);
@@ -33,15 +34,19 @@ test("Chapter 0 uses the five required panels in order with keyboard controls", 
     "03-wheel-sinks.webp",
     "04-karna-lifts.webp",
     "05-ash.webp",
-  ].map((name) => home.indexOf(name));
+  ].map((name) => cinematic.indexOf(name));
   assert.ok(positions.every((value) => value >= 0));
   assert.deepEqual(
     [...positions].sort((a, b) => a - b),
     positions,
   );
-  assert.match(home, /ArrowLeft/);
-  assert.match(home, /ArrowRight/);
-  assert.match(home, /skipConfirm/);
+  assert.match(cinematic, /FALLBACK_DURATION_MS = 7_000/);
+  assert.match(cinematic, /audio\.addEventListener\("ended"/);
+  assert.match(cinematic, /event\.key === " " \|\| event\.key === "Enter"/);
+  assert.match(cinematic, /event\.key === "Escape"/);
+  assert.match(cinematic, /TITLE_HOLD_MS = 2_000/);
+  assert.match(home, /entry=cinematic/);
+  assert.doesNotMatch(cinematic, /ArrowLeft|ArrowRight/);
   assert.match(localization, /Adapted from the Jaiminiya Ashvamedha Parva/);
 });
 

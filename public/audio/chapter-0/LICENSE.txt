@@ -1,0 +1,8 @@
+Searching.ogg
+Author: yd
+Source: https://opengameart.org/content/searching
+License: Creative Commons CC0 1.0 Universal / Public Domain
+Downloaded: 2026-09-04
+
+The source Ogg file was transcoded to 44.1 kHz stereo Vorbis at 64 kbps and
+renamed ambience.ogg for the DWARKA Chapter 0 cinematic.
