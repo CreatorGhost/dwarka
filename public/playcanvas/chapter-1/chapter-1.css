@@ -38,3 +38,119 @@
 @keyframes story-caption-in{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes story-caption-out{to{opacity:0;transform:translate(-50%,-8px)}}
 @keyframes story-ken-burns{from{transform:scale(1) translateX(-.7%)}to{transform:scale(1.08) translateX(.7%)}}
+
+/* ── Front-end craft alignment ───────────────────────────────────────────────
+   The pause panel and story modals now match the title screen: engraved Cinzel
+   display type, Cormorant body, ember/gold instead of the old teal, glass
+   surfaces, and controls that are not default browser widgets. Appended as an
+   override block so the minified rules above stay untouched. */
+@font-face { font-family: "Cinzel"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/Cinzel-400.woff2") format("woff2"); }
+@font-face { font-family: "Cinzel"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/Cinzel-600.woff2") format("woff2"); }
+@font-face { font-family: "Cinzel"; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/Cinzel-700.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/CormorantGaramond-400.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/CormorantGaramond-600.woff2") format("woff2"); }
+
+:root {
+  --ember: 245, 158, 11;
+  --face-display: "Cinzel", Georgia, serif;
+  --face-narration: "Cormorant Garamond", Georgia, serif;
+}
+
+.modal:not(.story-beat) .modal-card {
+  border: 1px solid rgba(var(--ember), .45);
+  border-radius: 0;
+  background: rgba(10, 12, 26, .88);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .92), 0 0 38px rgba(var(--ember), .16);
+}
+
+.modal-kicker, .blueprint-label, .hud-kicker {
+  color: #e3b45e;
+  font-family: var(--face-display);
+  font-weight: 700;
+  letter-spacing: .3em;
+}
+
+#modal-title, .modal-card h1 {
+  font-family: var(--face-display);
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+#modal-copy, .context-note {
+  color: rgba(248, 241, 229, .78);
+  font: 400 19px/1.55 var(--face-narration);
+}
+
+.context-note { color: rgba(227, 180, 94, .8); }
+.sun-mark { color: #e3b45e; }
+
+/* Buttons pick up the title screen's response. */
+.modal-card button, .hud button, #settings-panel button {
+  font-family: var(--face-display);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  transition: scale 140ms ease, background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.modal-card button:hover, #settings-panel button:hover { scale: 1.03; box-shadow: 0 0 22px rgba(var(--ember), .3); }
+.modal-card button:active, #settings-panel button:active { scale: .97; }
+.modal-card button.primary { border-color: #d8a84f; background: #d8a84f; color: #120c04; }
+.modal-card button.primary:hover { background: #f0c877; }
+
+/* Default blue range sliders and checkboxes were the loudest off-brand note. */
+#settings-panel input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(var(--ember), .85), rgba(var(--ember), .3));
+  outline: none;
+}
+
+#settings-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #120c04;
+  border-radius: 50%;
+  background: #f0c877;
+  box-shadow: 0 0 10px rgba(var(--ember), .6);
+  cursor: pointer;
+}
+
+#settings-panel input[type="range"]:focus-visible { outline: 3px solid #e3b45e; outline-offset: 6px; }
+
+#settings-panel input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #d8a84f;
+  cursor: pointer;
+}
+
+#settings-panel select {
+  border: 1px solid rgba(var(--ember), .4);
+  background: rgba(8, 10, 25, .9);
+  color: #f6efe1;
+  font-family: var(--face-display);
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+#settings-panel select:focus-visible { outline: 3px solid #e3b45e; outline-offset: 3px; }
+
+/* The teal accent belonged to an older palette and fights the title screen. */
+.status-card { border-left-color: rgba(var(--ember), .8); }
+.status-card strong { font-family: var(--face-narration); font-size: 19px; }
+
+#settings-panel legend {
+  color: #e3b45e;
+  font-family: var(--face-display);
+  font-weight: 700;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+}
+
+#settings-panel fieldset { border-color: rgba(var(--ember), .28); }
