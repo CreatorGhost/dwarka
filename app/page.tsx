@@ -156,7 +156,11 @@ export default function Home() {
     if (languageOpen) {
       setLanguageOpen(false);
       requestAnimationFrame(() => languageInvokerRef.current?.focus());
+      return;
     }
+    // First run has no invoker to return to, so send the keyboard to the primary
+    // action rather than dropping focus on a container.
+    requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(".title-primary")?.focus());
   }
   function chooseTextLanguage(nextLocale: Locale) {
     const current = profile ?? readProfile();
