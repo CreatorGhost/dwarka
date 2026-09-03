@@ -234,11 +234,11 @@
   "streaming": {
     "instantiateRadius": 24,
     "destroyRadius": 30,
-    "environmentRadius": 22,
-    "routeRadius": 22,
-    "fireRadius": 18,
+    "environmentRadius": 18,
+    "routeRadius": 20,
+    "fireRadius": 16,
     "fireLightRadius": 12,
-    "routeLightRadius": 22
+    "routeLightRadius": 18
   },
   "checkpointLights": [
     { "phase": "arrival", "x": -4.8, "y": 1.9, "z": 25, "intensity": 0.75 },

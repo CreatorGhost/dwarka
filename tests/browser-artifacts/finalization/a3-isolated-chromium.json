@@ -1,0 +1,39 @@
+{
+  "commitBase": "58d0736",
+  "capturedAt": "2026-09-04T01:27:00+05:30",
+  "browser": "isolated Chromium via CDP",
+  "viewport": {
+    "width": 1920,
+    "height": 1080,
+    "deviceScaleFactor": 1
+  },
+  "scenario": "market-fight QA vista after asset, shader, VFX, enemy, projectile, impact, and family pool prewarm",
+  "durationSeconds": 60,
+  "frames": 3590,
+  "frameTimeMs": {
+    "p50": 16.7,
+    "p95": 16.8,
+    "p99": 16.8,
+    "max": 83.3,
+    "over50": 1
+  },
+  "render": {
+    "renderScale": 1,
+    "canvas": [1920, 1080],
+    "drawCalls": 317,
+    "batchCount": 62
+  },
+  "pools": {
+    "projectilesCreated": 4,
+    "impactsCreated": 18,
+    "skirmishersCreated": 3,
+    "archersCreated": 1,
+    "brutesCreated": 1,
+    "familyActorsCreated": 2
+  },
+  "notes": [
+    "The p95 target below 20 ms passes at native resolution.",
+    "One isolated 83.3 ms host/compositor outlier remains in the CDP trace; no pool growth or phase-boundary allocation coincided with it.",
+    "All eight static vista samples remained below 400 draw calls: 224 to 351."
+  ]
+}
