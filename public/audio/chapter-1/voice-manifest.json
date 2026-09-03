@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "dwarka",
   "chapter": "chapter-1",
-  "generatedAt": "2026-09-01T21:01:48.307Z",
+  "generatedAt": "2026-09-03T19:19:29.949Z",
   "provider": {
     "id": "sarvam",
     "ttsModel": "bulbul:v3",
@@ -81,9 +81,9 @@
       "providerVoice": "rohan"
     }
   ],
-  "lineCount": 12,
-  "entryCount": 60,
-  "assetCount": 120,
+  "lineCount": 13,
+  "entryCount": 65,
+  "assetCount": 130,
   "entries": [
     {
       "sourceLineId": "ch0-panel-01-battlefield",
@@ -1430,6 +1430,276 @@
             "sttModel": "saaras:v3",
             "similarity": 0.9583,
             "transcriptSha256": "90029038152969d1163befbba9bc16e94a1e159ca3099fe22eff5e68070fc405",
+            "detectedLanguage": "te-IN"
+          }
+        }
+      ]
+    },
+    {
+      "sourceLineId": "ch1-opening-mission",
+      "scope": "chapter-0",
+      "sequence": 8,
+      "locale": "en",
+      "bcp47": "en-IN",
+      "role": "vrishaketu",
+      "personaId": "dwarka.vrishaketu.v1",
+      "providerVoice": "aditya",
+      "text": "The army rode out with the royal horse. No guard is left in this quarter tonight. Raiders are in the lanes, taking children. These people sheltered Karna's son when no one else would. So tonight I stand for them. Up the lane to the courtyard, before the raiders reach it.",
+      "cacheKey": "4b8c5083dcedae91",
+      "generatedAt": "2026-09-03T19:19:03.472Z",
+      "status": "validated",
+      "provider": "sarvam",
+      "ttsModel": "bulbul:v3",
+      "syntheticVoice": true,
+      "validation": {
+        "method": "sarvam-stt",
+        "sttModel": "saaras:v3",
+        "similarity": 0.9906,
+        "transcriptSha256": "fbabf88ffb20320d4ab52aceaa124fc3988da7d1a009a66559f0b54c7d084a4e",
+        "detectedLanguage": "en-IN"
+      },
+      "assets": [
+        {
+          "codec": "mp3",
+          "mimeType": "audio/mpeg",
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-opening-mission-4b8c5083dcedae91.mp3",
+          "sha256": "bfe781774c78e9376cb61bc790c190e392b7b39a05873a885e1944cdd99ed0a1",
+          "bytes": 276480,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9906,
+            "transcriptSha256": "5a48e75e5ac7c67980e5c7da74e9a2df5c658cd454fcc5f6a2a027838fc3ce8f",
+            "detectedLanguage": "en-IN"
+          }
+        },
+        {
+          "codec": "ogg",
+          "mimeType": "audio/ogg",
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-opening-mission-4b8c5083dcedae91.ogg",
+          "sha256": "480e8b628721b8af8666e01cd508bc0948fb95c7d887e0f0ea88d98520c7fca7",
+          "bytes": 117718,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9906,
+            "transcriptSha256": "5a48e75e5ac7c67980e5c7da74e9a2df5c658cd454fcc5f6a2a027838fc3ce8f",
+            "detectedLanguage": "en-IN"
+          }
+        }
+      ]
+    },
+    {
+      "sourceLineId": "ch1-opening-mission",
+      "scope": "chapter-0",
+      "sequence": 8,
+      "locale": "hi",
+      "bcp47": "hi-IN",
+      "role": "vrishaketu",
+      "personaId": "dwarka.vrishaketu.v1",
+      "providerVoice": "aditya",
+      "text": "सेना राजसी अश्व के साथ निकल चुकी है। आज रात इस बस्ती में कोई पहरा नहीं। लुटेरे गलियों में हैं, बच्चों को उठा रहे हैं। इन्हीं लोगों ने कर्ण के पुत्र को शरण दी थी, जब और कोई न था। इसलिए आज रात मैं इनके लिए खड़ा हूँ। गली से ऊपर, आँगन तक — उनके पहुँचने से पहले।",
+      "cacheKey": "5c2875b35a7a4150",
+      "generatedAt": "2026-09-03T19:19:10.055Z",
+      "status": "validated",
+      "provider": "sarvam",
+      "ttsModel": "bulbul:v3",
+      "syntheticVoice": true,
+      "validation": {
+        "method": "sarvam-stt",
+        "sttModel": "saaras:v3",
+        "similarity": 0.9418,
+        "transcriptSha256": "95df927957a61fa9f6a557865dcf77d5b669e7d095531f3610154f9f32a2672d",
+        "detectedLanguage": "hi-IN"
+      },
+      "assets": [
+        {
+          "codec": "mp3",
+          "mimeType": "audio/mpeg",
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-opening-mission-5c2875b35a7a4150.mp3",
+          "sha256": "737ca4c21dbf34479b8fba01062d51a3b3e380ada97584a8c683eea017afd299",
+          "bytes": 310272,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9418,
+            "transcriptSha256": "30d931ff579996db7a646bb178586390137e97ad01b2911aeb9976df3a85413d",
+            "detectedLanguage": "hi-IN"
+          }
+        },
+        {
+          "codec": "ogg",
+          "mimeType": "audio/ogg",
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-opening-mission-5c2875b35a7a4150.ogg",
+          "sha256": "3933d1de77e2488224d374dd15f901e3c4439c8a76b680e23be70b24656562f0",
+          "bytes": 127527,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9418,
+            "transcriptSha256": "30d931ff579996db7a646bb178586390137e97ad01b2911aeb9976df3a85413d",
+            "detectedLanguage": "hi-IN"
+          }
+        }
+      ]
+    },
+    {
+      "sourceLineId": "ch1-opening-mission",
+      "scope": "chapter-0",
+      "sequence": 8,
+      "locale": "ta",
+      "bcp47": "ta-IN",
+      "role": "vrishaketu",
+      "personaId": "dwarka.vrishaketu.v1",
+      "providerVoice": "aditya",
+      "text": "படையினர் அரச குதிரையுடன் புறப்பட்டுவிட்டனர். இன்றிரவு இந்தக் குடியிருப்பில் காவல் இல்லை. கொள்ளையர்கள் தெருக்களில் இருக்கிறார்கள், குழந்தைகளை இழுத்துச் செல்கிறார்கள். வேறு யாரும் இல்லாதபோது கர்ணனின் மகனுக்கு இவர்கள்தான் இடம் தந்தார்கள். எனவே இன்றிரவு நான் இவர்களுக்காக நிற்கிறேன். தெருவழியே மேலே, முற்றத்திற்கு — அவர்கள் அங்கு போவதற்கு முன்.",
+      "cacheKey": "8675e1917d61c363",
+      "generatedAt": "2026-09-03T19:19:16.075Z",
+      "status": "validated",
+      "provider": "sarvam",
+      "ttsModel": "bulbul:v3",
+      "syntheticVoice": true,
+      "validation": {
+        "method": "sarvam-stt",
+        "sttModel": "saaras:v3",
+        "similarity": 0.9813,
+        "transcriptSha256": "b60d2c5b00455ba11911fd402a5c2f1132778d5919305958d18b53274e9e6531",
+        "detectedLanguage": "ta-IN"
+      },
+      "assets": [
+        {
+          "codec": "mp3",
+          "mimeType": "audio/mpeg",
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-opening-mission-8675e1917d61c363.mp3",
+          "sha256": "01cf3e000e8da68a6d1b4c0810242597c8f237b9358414cd2e1ef6400c00c331",
+          "bytes": 400128,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9813,
+            "transcriptSha256": "451dcd91b28840e835faa55184c3090f5097cf1ab0fcda21606d9e80f2678d2f",
+            "detectedLanguage": "ta-IN"
+          }
+        },
+        {
+          "codec": "ogg",
+          "mimeType": "audio/ogg",
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-opening-mission-8675e1917d61c363.ogg",
+          "sha256": "413d163c486e40fabde7ba7e8bda7f18313d390b3b58f11e17d86270fd2b78b2",
+          "bytes": 161802,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9813,
+            "transcriptSha256": "fe07069d19a575630747c884059ed0890fd689f312416e8d5951ef9cb159d05f",
+            "detectedLanguage": "ta-IN"
+          }
+        }
+      ]
+    },
+    {
+      "sourceLineId": "ch1-opening-mission",
+      "scope": "chapter-0",
+      "sequence": 8,
+      "locale": "kn",
+      "bcp47": "kn-IN",
+      "role": "vrishaketu",
+      "personaId": "dwarka.vrishaketu.v1",
+      "providerVoice": "aditya",
+      "text": "ಸೈನ್ಯ ರಾಜಾಶ್ವದೊಂದಿಗೆ ಹೊರಟುಹೋಗಿದೆ. ಇಂದು ರಾತ್ರಿ ಈ ಬಡಾವಣೆಗೆ ಕಾವಲಿಲ್ಲ. ದರೋಡೆಕೋರರು ಬೀದಿಗಳಲ್ಲಿದ್ದಾರೆ, ಮಕ್ಕಳನ್ನು ಎಳೆದೊಯ್ಯುತ್ತಿದ್ದಾರೆ. ಬೇರೆ ಯಾರೂ ಇಲ್ಲದಾಗ ಕರ್ಣನ ಮಗನಿಗೆ ಆಶ್ರಯ ಕೊಟ್ಟವರು ಇವರೇ. ಆದ್ದರಿಂದ ಇಂದು ರಾತ್ರಿ ನಾನು ಇವರಿಗಾಗಿ ನಿಲ್ಲುತ್ತೇನೆ. ಬೀದಿಯ ಮೇಲಕ್ಕೆ, ಅಂಗಳದವರೆಗೆ — ಅವರು ತಲುಪುವ ಮೊದಲು.",
+      "cacheKey": "557c2c33cbe48c6f",
+      "generatedAt": "2026-09-03T19:19:23.104Z",
+      "status": "validated",
+      "provider": "sarvam",
+      "ttsModel": "bulbul:v3",
+      "syntheticVoice": true,
+      "validation": {
+        "method": "sarvam-stt",
+        "sttModel": "saaras:v3",
+        "similarity": 1,
+        "transcriptSha256": "6f99b61bed1f44aabc7814dfbcc9534fde72aaed212870e809144b842b76f6d6",
+        "detectedLanguage": "kn-IN"
+      },
+      "assets": [
+        {
+          "codec": "mp3",
+          "mimeType": "audio/mpeg",
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-opening-mission-557c2c33cbe48c6f.mp3",
+          "sha256": "5eeef7780eade302596c519dd96e63bfe110e9aeffb601fa8bfd7063f06893a0",
+          "bytes": 331392,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 1,
+            "transcriptSha256": "1b57dca32a9e3ba8d305153affd53cc0e40985916f551e004beecc3f842ca14a",
+            "detectedLanguage": "kn-IN"
+          }
+        },
+        {
+          "codec": "ogg",
+          "mimeType": "audio/ogg",
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-opening-mission-557c2c33cbe48c6f.ogg",
+          "sha256": "c4be10b9e392c15aa61cc3afe7f0e9b9c33a9e09e0a3297c9dbf61920236101e",
+          "bytes": 141520,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 1,
+            "transcriptSha256": "1b57dca32a9e3ba8d305153affd53cc0e40985916f551e004beecc3f842ca14a",
+            "detectedLanguage": "kn-IN"
+          }
+        }
+      ]
+    },
+    {
+      "sourceLineId": "ch1-opening-mission",
+      "scope": "chapter-0",
+      "sequence": 8,
+      "locale": "te",
+      "bcp47": "te-IN",
+      "role": "vrishaketu",
+      "personaId": "dwarka.vrishaketu.v1",
+      "providerVoice": "aditya",
+      "text": "సైన్యం రాజాశ్వంతో బయలుదేరిపోయింది. ఈ రాత్రి ఈ వీధికి కాపలా లేదు. దోపిడీదారులు సందుల్లో ఉన్నారు, పిల్లలను ఎత్తుకుపోతున్నారు. మరెవరూ లేనప్పుడు కర్ణుడి కొడుకుకు ఆశ్రయమిచ్చినవాళ్ళు వీళ్ళే. అందుకే ఈ రాత్రి నేను వీళ్ళ కోసం నిలబడతాను. సందు పైకి, ఆవరణ దాకా — వాళ్ళు చేరుకోకముందే.",
+      "cacheKey": "3fdb62fa602a3d30",
+      "generatedAt": "2026-09-03T19:19:29.916Z",
+      "status": "validated",
+      "provider": "sarvam",
+      "ttsModel": "bulbul:v3",
+      "syntheticVoice": true,
+      "validation": {
+        "method": "sarvam-stt",
+        "sttModel": "saaras:v3",
+        "similarity": 0.9781,
+        "transcriptSha256": "3b2d0f41b100adba2190efff3fb3db3f91d78d47caf985223c24e61074abf036",
+        "detectedLanguage": "te-IN"
+      },
+      "assets": [
+        {
+          "codec": "mp3",
+          "mimeType": "audio/mpeg",
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-opening-mission-3fdb62fa602a3d30.mp3",
+          "sha256": "7805c5aeaf29769ce16a5831b8fb365df74966edac5629de1cdc4949845d3961",
+          "bytes": 328320,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9781,
+            "transcriptSha256": "76d6518c9d04bd90c8bad3c9e85fb57a33c5127b54569db764b33e32e42e6aed",
+            "detectedLanguage": "te-IN"
+          }
+        },
+        {
+          "codec": "ogg",
+          "mimeType": "audio/ogg",
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-opening-mission-3fdb62fa602a3d30.ogg",
+          "sha256": "2ac6b1833bb64bb802e50ab4e3fb5abfaac0e1c9621c64e4cc8684215de1ee3a",
+          "bytes": 134904,
+          "validation": {
+            "method": "sarvam-stt",
+            "sttModel": "saaras:v3",
+            "similarity": 0.9781,
+            "transcriptSha256": "76d6518c9d04bd90c8bad3c9e85fb57a33c5127b54569db764b33e32e42e6aed",
             "detectedLanguage": "te-IN"
           }
         }
