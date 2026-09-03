@@ -89,9 +89,9 @@ export function installHud(rt) {
     const next = TUTORIAL_STEPS.find(([id]) => !state.tutorialSeen.has(id));
     const visible = Boolean(
       next &&
-        state.settings.tutorials !== false &&
-        state.snapshot?.phase === "arrival" &&
-        state.playing,
+      state.settings.tutorials !== false &&
+      state.snapshot?.phase === "arrival" &&
+      state.playing,
     );
     ui.tutorial.hidden = !visible;
     if (!visible) return;
@@ -175,9 +175,17 @@ export function installHud(rt) {
 
   function stopVoice() {
     if (!state.voiceAudio) return;
-    state.voiceAudio.pause();
-    state.voiceAudio.currentTime = 0;
+    const audio = state.voiceAudio;
     state.voiceAudio = null;
+    audio.pause();
+    audio.currentTime = 0;
+    try {
+      audio.removeAttribute?.("src");
+      audio.src = "";
+      audio.load?.();
+    } catch {
+      /* Browser audio teardown is best-effort on page shutdown. */
+    }
   }
 
   function syncVoiceVolume() {
@@ -193,22 +201,29 @@ export function installHud(rt) {
         );
   }
 
-  function playVoice(lineId) {
+  function playVoice(lineId, options = {}) {
     const entry = voiceEntry(lineId);
     stopVoice();
     if (!entry) {
-      state.deferredVoiceLine = lineId;
-      return;
+      if (options.allowDeferred !== false) {
+        state.deferredVoiceLine = lineId;
+        state.deferredVoiceOptions = options;
+      }
+      return null;
     }
     state.deferredVoiceLine = null;
+    state.deferredVoiceOptions = null;
     if (
       entry.status !== "validated" ||
       state.settings.muteAll ||
       (state.settings.master ?? 1) <= 0 ||
       (state.settings.dialogue ?? 1) <= 0
     ) {
-      state.deferredVoiceLine = lineId;
-      return;
+      if (options.allowDeferred !== false) {
+        state.deferredVoiceLine = lineId;
+        state.deferredVoiceOptions = options;
+      }
+      return null;
     }
     const probe = document.createElement("audio");
     const asset =
@@ -217,15 +232,23 @@ export function installHud(rt) {
       ) ||
       entry.assets.find((item) => item.codec === "mp3") ||
       entry.assets[0];
-    if (!asset?.runtimePath) return;
+    if (!asset?.runtimePath) return null;
     const audio = new Audio(asset.runtimePath);
     audio.preload = "auto";
     state.voiceAudio = audio;
     syncVoiceVolume();
     audio.addEventListener(
+      "loadedmetadata",
+      () => options.onLoadedMetadata?.(audio),
+      { once: true },
+    );
+    audio.addEventListener("playing", () => options.onPlaying?.(audio));
+    audio.addEventListener("pause", () => options.onPause?.(audio));
+    audio.addEventListener(
       "ended",
       () => {
         if (state.voiceAudio === audio) state.voiceAudio = null;
+        options.onEnded?.(audio);
       },
       { once: true },
     );
@@ -234,14 +257,20 @@ export function installHud(rt) {
       () => {
         if (state.voiceAudio === audio) state.voiceAudio = null;
         showToast(rt.t("voiceUnavailable"), 4);
+        options.onError?.(audio);
       },
       { once: true },
     );
     audio.play().catch(() => {
       if (state.voiceAudio === audio) state.voiceAudio = null;
-      state.deferredVoiceLine = lineId;
+      if (options.allowDeferred !== false) {
+        state.deferredVoiceLine = lineId;
+        state.deferredVoiceOptions = options;
+      }
       showToast(rt.t("voiceUnavailable"), 4);
+      options.onError?.(audio);
     });
+    return audio;
   }
 
   async function loadVoiceManifest() {
@@ -257,7 +286,8 @@ export function installHud(rt) {
             `${entry.sourceLineId}:${entry.locale}`,
             entry,
           );
-      if (state.deferredVoiceLine) playVoice(state.deferredVoiceLine);
+      if (state.deferredVoiceLine)
+        playVoice(state.deferredVoiceLine, state.deferredVoiceOptions || {});
       if (!ui.storyPanel.hidden && state.pendingVoiceLine) {
         const entry = voiceEntry(state.pendingVoiceLine, state.settings.locale);
         if (entry?.text) {

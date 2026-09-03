@@ -338,6 +338,24 @@ export function installQa(rt) {
       ui.reconnect.hidden = true;
       return true;
     },
+    previewStory: (phase, index = 0) => {
+      if (!qaSessionAllowed()) return false;
+      if (phase === "ending") rt.showEnding(Number(index) || 0);
+      else if (phase === "arrival" || phase === "courtyard")
+        rt.showIntro(phase);
+      else return false;
+      return true;
+    },
+    storySummary: () => ({
+      mode: state.modalMode,
+      index: state.storyIndex,
+      narrating: state.storyNarrating,
+      image: ui.storyImage?.getAttribute?.("src") || ui.storyImage?.src || "",
+      speaker: ui.storySpeaker?.textContent || "",
+      text: ui.storyText?.textContent || "",
+      fullBleed: ui.modal?.classList?.contains("story-beat") || false,
+      voiceActive: Boolean(state.voiceAudio),
+    }),
     checkpointReadabilityAssertion: () => {
       if (!qaSessionAllowed() || !state.snapshot?.player) return null;
       return new Promise((resolve) => {

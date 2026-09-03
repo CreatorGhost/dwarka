@@ -4,12 +4,13 @@ export function shouldPauseForPointerUnlock({
   activeElement,
   playing,
   qaSession,
+  hadPointerLock = false,
 }) {
   return (
     playing &&
     pointerLockElement !== canvas &&
     !qaSession &&
-    activeElement !== canvas
+    (hadPointerLock || activeElement !== canvas)
   );
 }
 
@@ -156,24 +157,20 @@ export function installInput(rt) {
         if (state.loadingRetryAvailable) rt.connect();
         return;
       }
+      if (state.storyNarrating) {
+        rt.skipNarratedBeat();
+        return;
+      }
       if (
         state.modalMode === "arrival-intro" ||
-        state.modalMode === "courtyard-intro" ||
-        state.modalMode === "pause"
+        state.modalMode === "courtyard-intro"
       )
-        rt.enterPlay();
-      else if (state.modalMode === "ending") {
-        if (state.storyIndex < STORY.ending.length - 1)
-          rt.showEnding(state.storyIndex + 1);
-        else if (state.localMode) {
-          state.localSimulation.completeEnding();
-          rt.processLocalEvents();
-          rt.applySnapshot(state.localSimulation.snapshot(), "local");
-        } else {
-          state.socket?.send(JSON.stringify({ type: "story.complete" }));
-          ui.modalPrimary.disabled = true;
-        }
-      } else if (state.modalMode === "complete") {
+        rt.beginNarratedIntro(
+          state.modalMode === "courtyard-intro" ? "courtyard" : "arrival",
+        );
+      else if (state.modalMode === "pause") rt.enterPlay();
+      else if (state.modalMode === "ending") rt.advanceEnding();
+      else if (state.modalMode === "complete") {
         state.requestedAction = "replay";
         state.snapshot = null;
         state.reconnectPhase = null;
@@ -234,6 +231,11 @@ export function installInput(rt) {
         if (state.playing) rt.showPause();
         return;
       }
+      if (!state.playing && state.storyNarrating && event.code === "Space") {
+        event.preventDefault();
+        rt.skipNarratedBeat();
+        return;
+      }
       if (event.code === "F3") {
         state.qaVisible = !state.qaVisible;
         ui.qa.hidden = !state.qaVisible;
@@ -262,15 +264,25 @@ export function installInput(rt) {
     });
     window.addEventListener("blur", () => {
       rt.clearInput();
+      if (state.storyNarrating) state.voiceAudio?.pause();
       if (state.playing) rt.showPause();
+    });
+    window.addEventListener("focus", () => {
+      if (state.storyNarrating && state.voiceAudio?.paused)
+        state.voiceAudio.play().catch(() => {});
     });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         rt.clearInput();
+        if (state.storyNarrating) state.voiceAudio?.pause();
         if (state.playing) rt.showPause();
+      } else if (state.storyNarrating && state.voiceAudio?.paused) {
+        state.voiceAudio.play().catch(() => {});
       }
     });
     document.addEventListener("pointerlockchange", () => {
+      const hadPointerLock = state.pointerLockHeld;
+      state.pointerLockHeld = document.pointerLockElement === canvas;
       if (
         shouldPauseForPointerUnlock({
           pointerLockElement: document.pointerLockElement,
@@ -278,6 +290,7 @@ export function installInput(rt) {
           activeElement: document.activeElement,
           playing: state.playing,
           qaSession: Boolean(rt.qaSessionAllowed?.()),
+          hadPointerLock,
         })
       )
         rt.showPause();

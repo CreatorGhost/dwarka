@@ -1,3 +1,15 @@
+export const STORY_TAIL_MS = 450;
+
+export function storyFallbackDuration(text, audioDuration = null) {
+  if (Number.isFinite(audioDuration) && audioDuration > 0)
+    return Math.ceil(audioDuration * 1000 + STORY_TAIL_MS * 2);
+  const words = String(text || "")
+    .trim()
+    .split(/\s+/u)
+    .filter(Boolean).length;
+  return Math.max(5_000, Math.min(12_000, words * 430 + 1_600));
+}
+
 export function installModals(rt) {
   const { state, ui, pc, canvas, mats } = rt;
   const WORLD_BOUNDS = rt.WORLD_BOUNDS;
@@ -49,7 +61,9 @@ export function installModals(rt) {
     controls = false,
     settings = false,
     story = null,
+    pointerNote = controls,
   }) {
+    ui.modal.classList.toggle("story-beat", Boolean(story));
     ui.modalTitle.textContent = title;
     ui.modalCopy.textContent = copy;
     ui.modalPrimary.textContent = primary;
@@ -59,14 +73,90 @@ export function installModals(rt) {
     ui.settings.hidden = !settings;
     ui.storyPanel.hidden = !story;
     if (story) {
+      ui.storyPanel.classList.remove("caption-out");
       ui.storyImage.src = story.image;
       ui.storyImage.alt = story.text;
       ui.storySpeaker.textContent = story.speaker;
       ui.storyText.textContent = story.text;
     }
-    ui.pointerNote.hidden = !controls;
+    ui.pointerNote.hidden = !pointerNote;
+    ui.modalPrimary.disabled = false;
     ui.modal.hidden = false;
     queueMicrotask(() => ui.modalPrimary.focus());
+  }
+
+  function clearStoryTimers() {
+    globalThis.clearTimeout(state.storyAdvanceTimer);
+    globalThis.clearTimeout(state.storyFallbackTimer);
+    state.storyAdvanceTimer = 0;
+    state.storyFallbackTimer = 0;
+  }
+
+  function finishNarratedBeat() {
+    if (!state.storyNarrating) return;
+    const complete = state.storyComplete;
+    state.storyNarrating = false;
+    state.storyComplete = null;
+    clearStoryTimers();
+    ui.storyPanel.classList.remove("caption-out");
+    complete?.();
+  }
+
+  function armStoryFallback(duration) {
+    globalThis.clearTimeout(state.storyFallbackTimer);
+    state.storyFallbackTimer = globalThis.setTimeout(
+      finishNarratedBeat,
+      duration,
+    );
+  }
+
+  function startNarratedBeat(lineId, story, complete) {
+    clearStoryTimers();
+    state.storyNarrating = true;
+    state.storyComplete = complete;
+    ui.storyPanel.classList.remove("caption-out");
+    ui.storyPanel.style.setProperty(
+      "--story-duration",
+      `${storyFallbackDuration(story.text)}ms`,
+    );
+    const scheduleFromAudio = (audio) => {
+      if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+      const duration = storyFallbackDuration(story.text, audio.duration);
+      ui.storyPanel.style.setProperty("--story-duration", `${duration}ms`);
+      armStoryFallback(duration);
+    };
+    const audio = rt.playVoice(lineId, {
+      allowDeferred: false,
+      onLoadedMetadata: scheduleFromAudio,
+      onPlaying: scheduleFromAudio,
+      onPause: () => globalThis.clearTimeout(state.storyFallbackTimer),
+      onEnded: () => {
+        globalThis.clearTimeout(state.storyFallbackTimer);
+        ui.storyPanel.classList.add("caption-out");
+        state.storyAdvanceTimer = globalThis.setTimeout(
+          finishNarratedBeat,
+          STORY_TAIL_MS,
+        );
+      },
+      onError: () => armStoryFallback(storyFallbackDuration(story.text)),
+    });
+    if (!audio) armStoryFallback(storyFallbackDuration(story.text));
+    else {
+      armStoryFallback(storyFallbackDuration(story.text));
+      if (Number.isFinite(audio.duration)) scheduleFromAudio(audio);
+    }
+  }
+
+  function skipNarratedBeat() {
+    if (!state.storyNarrating) return false;
+    const complete = state.storyComplete;
+    state.storyNarrating = false;
+    state.storyComplete = null;
+    clearStoryTimers();
+    ui.storyPanel.classList.remove("caption-out");
+    rt.stopVoice();
+    complete?.();
+    return true;
   }
 
   function localizedStory(phase, index = 0) {
@@ -123,6 +213,10 @@ export function installModals(rt) {
     rt.stopVoice();
     state.pendingVoiceLine = STORY_VOICE_LINES[phase]?.[0] || null;
     const story = localizedStory(phase, 0);
+    const cinematicEntry =
+      phase === "arrival" &&
+      new URLSearchParams(globalThis.location?.search || "").get("entry") ===
+        "cinematic";
     state.modalMode =
       phase === "courtyard" ? "courtyard-intro" : "arrival-intro";
     configureModal({
@@ -133,11 +227,18 @@ export function installModals(rt) {
           ? rt.t("raidIntroCopy")
           : rt.t("arrivalIntroCopy"),
       primary:
-        phase === "courtyard" ? rt.t("courtyardStart") : rt.t("enterStreet"),
-      controls: phase === "arrival",
+        phase === "courtyard"
+          ? rt.t("courtyardStart")
+          : rt.t(cinematicEntry ? "clickEnterStreet" : "enterStreet"),
+      controls: false,
+      pointerNote: phase === "arrival",
       story,
     });
     sendPause(true);
+    if (phase === "courtyard")
+      queueMicrotask(() => {
+        if (state.modalMode === "courtyard-intro") beginNarratedIntro(phase);
+      });
   }
 
   function showPause() {
@@ -147,6 +248,9 @@ export function installModals(rt) {
     state.playing = false;
     rt.clearInput();
     rt.stopVoice();
+    clearStoryTimers();
+    state.storyNarrating = false;
+    state.storyComplete = null;
     state.modalMode = "pause";
     state.resumeModalPhase = null;
     sendPause(true);
@@ -168,6 +272,7 @@ export function installModals(rt) {
     state.playing = false;
     rt.clearInput();
     rt.stopVoice();
+    clearStoryTimers();
     sendPause(true);
     const story = localizedStory("ending", index);
     state.modalMode = "ending";
@@ -180,9 +285,26 @@ export function installModals(rt) {
           : rt.t("continue"),
       story,
     });
-    rt.setCaption(story.speaker, story.text, 7);
     state.pendingVoiceLine = STORY_VOICE_LINES.ending[index];
-    rt.playVoice(state.pendingVoiceLine);
+    queueMicrotask(() => {
+      if (state.modalMode !== "ending" || state.storyIndex !== index) return;
+      startNarratedBeat(state.pendingVoiceLine, story, advanceEnding);
+    });
+  }
+
+  function advanceEnding() {
+    if (state.storyIndex < STORY.ending.length - 1) {
+      showEnding(state.storyIndex + 1);
+      return;
+    }
+    if (state.localMode) {
+      state.localSimulation.completeEnding();
+      rt.processLocalEvents();
+      rt.applySnapshot(state.localSimulation.snapshot(), "local");
+      return;
+    }
+    state.socket?.send(JSON.stringify({ type: "story.complete" }));
+    ui.modalPrimary.disabled = true;
   }
 
   function showComplete() {
@@ -191,6 +313,11 @@ export function installModals(rt) {
     state.paused = true;
     state.playing = false;
     rt.clearInput();
+    state.storyNarrating = false;
+    state.storyComplete = null;
+    clearStoryTimers();
+    ui.storyPanel.classList.remove("caption-out");
+    rt.stopVoice();
     state.modalMode = "complete";
     configureModal({
       title: rt.t("completeTitle"),
@@ -250,8 +377,17 @@ export function installModals(rt) {
             ? rt.t("raidIntroCopy")
             : rt.t("arrivalIntroCopy"),
         primary:
-          phase === "courtyard" ? rt.t("courtyardStart") : rt.t("enterStreet"),
-        controls: phase === "arrival",
+          phase === "courtyard"
+            ? rt.t("courtyardStart")
+            : rt.t(
+                new URLSearchParams(globalThis.location?.search || "").get(
+                  "entry",
+                ) === "cinematic"
+                  ? "clickEnterStreet"
+                  : "enterStreet",
+              ),
+        controls: false,
+        pointerNote: phase === "arrival",
         story: localizedStory(phase, 0),
       });
       return;
@@ -341,6 +477,20 @@ export function installModals(rt) {
     rt.renderTutorial();
   }
 
+  function beginNarratedIntro(phase) {
+    if (state.storyNarrating) return skipNarratedBeat();
+    const story = localizedStory(phase, 0);
+    const lineId = STORY_VOICE_LINES[phase]?.[0];
+    if (!story || !lineId) {
+      enterPlay();
+      return false;
+    }
+    state.pendingVoiceLine = null;
+    requestGamePointerLock();
+    startNarratedBeat(lineId, story, enterPlay);
+    return true;
+  }
+
   function sendPause(paused) {
     state.localSimulation?.setPaused(paused);
     if (state.socket?.readyState === WebSocket.OPEN && state.sessionAccepted)
@@ -355,6 +505,10 @@ export function installModals(rt) {
   rt.showEnding = showEnding;
   rt.showComplete = showComplete;
   rt.showResume = showResume;
+  rt.startNarratedBeat = startNarratedBeat;
+  rt.skipNarratedBeat = skipNarratedBeat;
+  rt.beginNarratedIntro = beginNarratedIntro;
+  rt.advanceEnding = advanceEnding;
   rt.refreshOpenModalLocale = refreshOpenModalLocale;
   rt.requestGamePointerLock = requestGamePointerLock;
   rt.enterPlay = enterPlay;
