@@ -1,11 +1,24 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
-const runtimeSource = new URL("../../game/client-scripts/chapter-1.js", import.meta.url);
-const chapterSourceFiles = [runtimeSource, ...["combat/targeting.js", "character/animation.js", "net/session.js", "scene/assets.js", "sim/shared.ts", "ui/content.js"].map((path) => new URL(`../../game/client-scripts/${path}`, import.meta.url))];
-const readRuntime = async () => (await Promise.all(chapterSourceFiles.map((url) => readFile(url, "utf8")))).join("\n");
+const clientSourceRoot = new URL("../../game/client-scripts/", import.meta.url);
+
+async function clientSourceFiles(directory = clientSourceRoot) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(entries.map(async (entry) => {
+    const url = new URL(entry.name, directory);
+    if (entry.isDirectory()) return clientSourceFiles(new URL(`${entry.name}/`, directory));
+    return /\.(?:js|ts)$/.test(entry.name) ? [url] : [];
+  }));
+  return files.flat();
+}
+
+const readRuntime = async () => {
+  const files = await clientSourceFiles();
+  return (await Promise.all(files.map((url) => readFile(url, "utf8")))).join("\n");
+};
 
 test("Chapter 0 uses the five required panels in order with keyboard controls", async () => {
   const [home, localization] = await Promise.all([
@@ -43,8 +56,8 @@ test("Chapter 1 keeps directional signs, input cleanup, collision, and exact end
   assert.match(runtime, /pointerlockchange/); assert.match(runtime, /visibilitychange/); assert.match(runtime, /clearInput/);
   assert.match(runtime, /WORLD_COLLIDERS/); assert.match(runtime, /segmentCameraDistance/);
   assert.match(runtime, /enteringPhase \|\| \(!state\.playing && !state\.qaAimPreview\)/, "live snapshots must not overwrite active mouse yaw or the QA aim preview");
-  assert.match(runtime, /setEulerAngles\(0, -state\.visualYaw \* 180 \/ Math\.PI, 0\)/, "the visual character must face its travel direction rather than being welded to the orbit camera");
-  assert.match(runtime, /arrow\.setEulerAngles\(90 - state\.pitch \* 180 \/ Math\.PI, -state\.yaw \* 180 \/ Math\.PI, 0\)/, "visible arrow must use the same PlayCanvas yaw convention");
+  assert.match(runtime, /setEulerAngles\([\s\S]{0,40}-state\.visualYaw \* 180\) \/ Math\.PI[\s\S]{0,20}\)/, "the visual character must face its travel direction rather than being welded to the orbit camera");
+  assert.match(runtime, /arrow\.setEulerAngles\(90 - \(state\.pitch \* 180\) \/ Math\.PI, \(-state\.yaw \* 180\) \/ Math\.PI, 0\)/, "visible arrow must use the same PlayCanvas yaw convention");
   assert.match(runtime, /visualNow - entity\.dwarkaDeadAt < 800/, "dead enemies must remain visible long enough to play their down animation");
   assert.match(runtime, /const authoritativeAction = \["down", "hit", "dodge", "interact"\]/, "authoritative reactions must override predicted attacks");
   assert.match(runtime, /let distance = 22[\s\S]*step <= 22/, "visible arrows must cover the authoritative bow range");
@@ -96,7 +109,7 @@ test("every character variant uses one face-safe skeleton and all blades stay ha
   assert.match(runtime, /root\.addChild\(bow\)/, "bow socket should not inherit an unstable wrist rotation");
   assert.match(runtime, /function mountApprovedSword\(root\)/, "a late sword asset must replace the loading fallback instead of leaving a wrist-bound placeholder");
   assert.match(runtime, /root\.dwarkaSwordFallback\.forEach\(\(part\) => part\.destroy\(\)\)/, "approved sword mounting must remove every fallback part");
-  assert.match(runtime, /Visible bronze blade", \[0, \.43, 0\]/, "fallback blade must extend away from the grip along the approved sword's positive-Y pivot");
+  assert.match(runtime, /Visible bronze blade",[\s\S]{0,40}\[0, 0\.43, 0\]/, "fallback blade must extend away from the grip along the approved sword's positive-Y pivot");
   assert.match(runtime, /bowDrawHandDistance/, "the visual QA surface must measure whether the drawn string remains attached to the right hand");
   assert.match(runtime, /pull\.copy\(localHand\)/, "the nock and both string halves must follow the actual draw-hand socket without a visible gap");
   assert.doesNotMatch(runtime, /pc\.math\.clamp\(localHand\.x/, "a placeholder axis clamp can detach the drawn string from the animated hand");
@@ -121,7 +134,7 @@ test("bow aim uses a stable automatic target lock and an edge-aware objective wa
     readFile(new URL("public/playcanvas/chapter-1/game-i18n.js", root), "utf8"),
   ]);
   assert.match(runtime, /angularError \* 5/, "target choice must prioritize reticle angle over a nearer off-axis enemy");
-  assert.match(runtime, /previous\.score <= target\.score \+ \.22/, "target lock needs hysteresis so it cannot jump every frame");
+  assert.match(runtime, /previous\.score <= target\.score \+ 0\.22/, "target lock needs hysteresis so it cannot jump every frame");
   assert.match(runtime, /targetLineBlocked/); assert.match(runtime, /distance > 22/);
   assert.match(runtime, /TARGET|targetAcquired/); assert.match(runtime, /Math\.round\(target\.distance\).* m/);
   assert.match(gameHtml, /id="waypoint-indicator"/); assert.match(runtime, /function updateObjectiveGuidance/); assert.match(runtime, /worldToScreen/);
@@ -129,7 +142,7 @@ test("bow aim uses a stable automatic target lock and an edge-aware objective wa
   assert.match(gameCss, /#waypoint-indicator\.edge/);
   for (const locale of ["en", "hi", "ta", "kn", "te"]) assert.match(gameI18n, new RegExp(`DWARKA_GAME_I18N\\.${locale}|\\n  ${locale}:`));
   assert.match(gameI18n, /TARGET LOCKED/);
-  assert.match(runtime, /new pc\.Vec3\(-\.055, \.86, -\.45\)/, "the over-shoulder bow must have a visible recurve instead of reading as a rigid pole");
+  assert.match(runtime, /new pc\.Vec3\(-0\.055, 0\.86, -0\.45\)/, "the over-shoulder bow must have a visible recurve instead of reading as a rigid pole");
   assert.match(runtime, /new pc\.Vec3\(points\[index\]\.x, points\[index\]\.y \* sign, points\[index\]\.z\)/, "the authored bow curvature must reach the rendered limb segments");
 });
 
@@ -143,11 +156,11 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   assert.match(runtime, /visualYaw/, "the player mesh needs a facing direction independent from the orbit camera");
   assert.match(runtime, /lookYaw/, "mouse input needs a smoothed view target rather than rotating the camera and mesh in one raw step");
   assert.match(runtime, /networkSnapshots/, "20 Hz enemy snapshots need a bounded interpolation buffer");
-  assert.match(runtime, /performance\.now\(\) - CHAPTER_CONFIG\.network\.enemyInterpolationMs/, "enemy rendering must use the shared interpolation delay");
+  assert.match(runtime, /interpolationClockMs - CHAPTER_CONFIG\.network\.enemyInterpolationMs/, "enemy rendering must use the shared interpolation delay and freeze it during hit-stop");
   assert.match(runtime, /const planarSpeed = Math\.hypot\(playerVelocity\.x, playerVelocity\.z\)/, "locomotion state must come from simulated displacement, not held keys");
   assert.match(runtime, /function locomotionPlaybackSpeed/, "walk and sprint clips must be retimed from real travel speed so planted feet do not slide");
   assert.match(runtime, /setCharacterAnimation\(state\.playerEntity, playerAnim, planarSpeed\)/, "the measured speed must drive the active locomotion clip every frame");
-  assert.match(runtime, /planarSpeed > \.65/, "blocked movement must settle to idle and stop footsteps");
+  assert.match(runtime, /planarSpeed > 0\.65/, "blocked movement must settle to idle and stop footsteps");
   assert.match(runtime, /config\.feel\.dodgeClipSeconds \/ config\.feel\.dodgeActionSeconds/, "the roll clip must finish with the 0.65 second authoritative dodge");
   assert.match(runtime, /aimBlend/, "aim camera distance, shoulder, height, and FOV must blend instead of popping between booleans");
   assert.match(runtime, /Jog_Fwd_Loop/, "4.5 m/s locomotion must use the authored forward jog rather than the slow walk cycle");
@@ -164,7 +177,7 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   assert.match(runtime, /document\.currentScript\?\.src/, "the static export fallback must resolve the manifest beside the runtime script");
   assert.match(collision, /world-layout\.json/, "the server must consume the same canonical placement and collision manifest");
   assert.match(runtime, /collider\.visual/, "the shared manifest must identify colliders backed by approved visual prefabs");
-  assert.match(runtime, /if \(visual \|\|/, "a renamed prop collider must never become a rendered debug box");
+  assert.match(runtime, /if \([\s\S]{0,40}visual \|\|/, "a renamed prop collider must never become a rendered debug box");
   if (layout.version === 1) {
     assert.equal(layout.colliders.find(({ id }) => id === "courtyard-cart-body")?.maxZ, 2.85);
     assert.deepEqual(layout.placements.Prop_Wagon[0], [2.6, 0, 2.6, 24, 0.86]);
@@ -179,18 +192,18 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   assert.ok(servedBundle.length > 80_000, "the served runtime must contain the Vite-built Chapter 1 bundle");
   assert.match(servedBundle, /Offline play/, "the served bundle must be generated from the readable runtime source");
   assert.doesNotMatch(runtime, /primitive\("sphere", "Indigo night sky"/, "an opaque sky mesh must not hide distant scenery");
-  assert.match(runtime, /ambientLight = new pc\.Color\(\.065, \.072, \.12\)/);
-  assert.match(runtime, /scene\.exposure = 1\.12/);
+  assert.match(runtime, /ambientLight = new pc\.Color\(0\.16, 0\.18, 0\.29\)/);
+  assert.match(runtime, /scene\.exposure = 0\.86/);
   assert.doesNotMatch(runtime, /new pc\.Entity\("Camera soft fill"\)/, "the camera must not carry a flattening headlight");
   assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
   assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
   assert.match(runtime, /diffuseMapTiling = new pc\.Vec2\(7, 4\)/, "each 13 by 8 metre centre-road slab needs an approximately two-metre texture repeat");
   assert.match(runtime, /function flickerFireLight/);
-  assert.match(runtime, /state\.fireLights.*flickerFireLight/, "every cached practical light must animate each frame");
+  assert.match(runtime, /state\.fireLights[\s\S]{0,160}flickerFireLight/, "every cached practical light must animate each frame");
   assert.match(runtime, /renderingSummary/, "visual QA must expose the A0 lighting contract in the running scene");
 });
 
-test("A1 uses the ledgered HDR, physical materials, post effects, and production shadows", async () => {
+test("A1 uses the ledgered HDR, physical materials, native grading, and production shadows", async () => {
   const [runtime, html, css, hdr, sourceHdr] = await Promise.all([
     readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
@@ -203,13 +216,13 @@ test("A1 uses the ledgered HDR, physical materials, post effects, and production
   assert.match(runtime, /EnvLighting\.generateAtlas/);
   assert.match(runtime, /scene\.skybox = state\.skyboxCubemap/);
   assert.match(runtime, /scene\.envAtlas = state\.environmentAtlas/);
-  assert.match(runtime, /new pc\.CameraFrame/);
-  assert.match(runtime, /frame\.bloom\.intensity = \.035/);
-  assert.match(runtime, /frame\.ssao\.type = "lighting"/);
-  assert.match(runtime, /frame\.vignette\.intensity = \.22/);
+  assert.match(runtime, /toneMapping = pc\.TONEMAP_ACES/);
+  assert.match(runtime, /state\.cameraFrame = null/, "native rendering must not pay for a full-screen intermediate frame");
+  assert.match(runtime, /maxPixelRatio = Math\.min\(1, window\.devicePixelRatio\)/);
+  assert.match(runtime, /state\.renderScale === 1 && state\.lowFpsSeconds >= 2/);
+  assert.match(runtime, /state\.renderScale === 0\.9 && state\.lowFpsSeconds >= 2/);
   assert.match(runtime, /value\.useMetalness = true/);
-  assert.match(runtime, /mats\.gold\.metalness = \.76/);
-  assert.match(runtime, /shadowResolution: 2048, shadowBias: \.05, normalOffsetBias: \.02, numCascades: 2/);
+  assert.match(runtime, /shadowResolution: 1024,[\s\S]{0,120}shadowBias: 0\.05,[\s\S]{0,120}normalOffsetBias: 0\.02,[\s\S]{0,120}numCascades: 1/);
   assert.doesNotMatch(html, /id="vignette"/, "the general vignette belongs to CameraFrame, not a CSS overlay");
   assert.match(html, /id="damage-flash"/);
   assert.match(css, /#damage-flash\.damaged/);
@@ -244,8 +257,8 @@ test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB ba
   ]);
   assert.ok(fireAtlas.length > 1000 && smokeAtlas.length > 1000 && fabric.length > 1000);
   assert.match(runtime, /addComponent\("particlesystem"/);
-  assert.match(runtime, /animTilesX: 3, animTilesY: 3, animNumFrames: 9/);
-  assert.match(runtime, /animTilesX: 5, animTilesY: 5, animNumFrames: 25/);
+  assert.match(runtime, /animTilesX: 3,[\s\S]{0,60}animTilesY: 3,[\s\S]{0,60}animNumFrames: 9/);
+  assert.match(runtime, /animTilesX: 5,[\s\S]{0,60}animTilesY: 5,[\s\S]{0,60}animNumFrames: 25/);
   assert.doesNotMatch(runtime, /primitive\("sphere", "Smoke plume"/);
   assert.doesNotMatch(runtime, /state\.app\.root\.findByTag\("fire"\)/, "the frame loop must use the cached emitter list");
   assert.doesNotMatch(runtime, /state\.app\.root\.findByTag\("smoke"\)/, "GPU smoke must not need per-frame scene scans");
@@ -271,22 +284,24 @@ test("A7 gives the street distinct houses, Indian set dressing, real L-turns, an
   assert.ok(layout.placements.brass_diya_lantern.length >= 24);
   assert.ok(layout.placements.Kenney_fountain_round.length >= 3, "the arrival vista needs a built stone well");
   assert.ok(layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length >= 2, "the gate needs a two-wheel rath");
-  assert.match(runtime, /mats\.roadSand = material\(\[\.40, \.38, \.35\]\)/);
+  assert.match(runtime, /mats\.roadSand = material\(\[0\.66, 0\.65, 0\.63\]\)/);
   assert.match(runtime, /const tones = \["lime", "ochre", "rose", "turquoise"\]/);
   assert.match(runtime, /"Household shrine niche"/);
   assert.match(runtime, /"Cool moon rim"/);
   assert.match(runtime, /"Palace horizon glow"/);
   assert.match(runtime, /"Triangular festival pennant"/);
-  assert.match(runtime, /if \(!target\) \{ state\.targetEnemyId = null;/, "occluded or defeated enemies must clear the target lock");
+  assert.match(runtime, /if \(!target\) \{[\s\S]{0,40}state\.targetEnemyId = null;/, "occluded or defeated enemies must clear the target lock");
   assert.doesNotMatch(runtime, /primitive\("sphere", "Moon disc"/);
   assert.doesNotMatch(runtime, /primitive\("sphere", `Night star/);
   assert.match(runtime, /setDressingSummary/);
 });
 
 test("A4 shares the authoritative simulation and remains playable without a socket", async () => {
-  const [runtime, simulation, packageJson, viteConfig, html] = await Promise.all([
+  const [runtime, simulation, server, progressStore, packageJson, viteConfig, html] = await Promise.all([
     readRuntime(),
     readFile(new URL("../../game/server/src/chapter-1/simulation.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../game/server/src/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../game/server/src/progress-store.ts", import.meta.url), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
     readFile(new URL("vite.chapter-1.config.mjs", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
@@ -296,7 +311,18 @@ test("A4 shares the authoritative simulation and remains playable without a sock
   assert.match(runtime, /state\.networkSnapshots\.push/);
   assert.match(runtime, /startLocalSession\(\)/, "a missing WebSocket URL must start local play instead of blocking");
   assert.match(runtime, /progress will save when reconnected/);
+  assert.match(runtime, /if \(state\.localMode\) processLocalEvents\(\)/, "connected prediction cannot drive outcome UI");
+  assert.match(runtime, /else state\.localSimulation\.drainEvents\(\)/);
+  assert.match(runtime, /window\.setTimeout\(\(\) => connect\(true\), delay\)/, "offline fallback must keep retrying the server");
+  assert.match(runtime, /const position = player[\s\S]{0,160}x: player\.x,[\s\S]{0,100}y:[\s\S]{0,300}position,/, "the movement-owning client must send its validated position");
+  assert.doesNotMatch(runtime, /local\.x \* \.82 \+ authoritativePlayer\.x \* \.18/, "the removed blend reconciliation path must not return");
   assert.match(simulation, /\.\.\.this\.input\.pressed, \.\.\.sanitized\.pressed/, "presses must survive two packets in one server tick");
+  assert.match(simulation, /acceptClientPosition/);
+  assert.match(simulation, /readonly movementOnly = false/);
+  assert.match(server, /!parsed \|\| typeof parsed !== "object" \|\| Array\.isArray\(parsed\)/);
+  assert.match(server, /new BoundedProgressStore/);
+  assert.match(progressStore, /capacity = 10_000/);
+  assert.match(progressStore, /ttlMs = 24 \* 60 \* 60 \* 1_000/);
   assert.match(packageJson, /build:chapter-1/);
   assert.match(viteConfig, /game\/client-scripts\/chapter-1\.js/);
   assert.match(html, /type="module" src="\.\/chapter-1\.js/);
@@ -305,7 +331,7 @@ test("A4 shares the authoritative simulation and remains playable without a sock
 test("A5 layers responsive aim, blended locomotion, impact feel, and camera spring", async () => {
   const runtime = await readRuntime();
   assert.match(runtime, /state\.yaw = state\.lookYaw/, "mouse yaw must reach aiming in the input frame");
-  assert.match(runtime, /type: "1D", parameter: "locomotionSpeed"/);
+  assert.match(runtime, /type: "1D",[\s\S]{0,60}parameter: "locomotionSpeed"/);
   for (const point of ["idle", "walk", "jog", "sprint"]) assert.match(runtime, new RegExp(`name: "${point}", point:`));
   assert.match(runtime, /name: "Upper body aim"/);
   assert.match(runtime, /upperBody\.mask = \{ \[spine\.path\]: \{ children: true \} \}/);
@@ -322,7 +348,12 @@ test("A6 builds the served export from focused source modules and content revisi
     readFile(new URL("vite.chapter-1.config.mjs", root), "utf8"),
     readFile(new URL(".prettierrc.json", root), "utf8"),
   ]);
-  for (const boundary of ["scene/assets.js", "character/animation.js", "net/session.js", "sim/shared.ts", "ui/content.js", "combat/targeting.js"]) assert.match(runtime, new RegExp(boundary.replace(".", "\\.")));
+  for (const boundary of [
+    "scene/build.js", "scene/materials.js", "scene/dressing.js",
+    "character/animation.js", "character/equipment.js",
+    "combat/targeting.js", "combat/effects.js", "net/session.js",
+    "sim/shared.ts", "ui/hud.js", "ui/modals.js",
+  ]) assert.match(runtime, new RegExp(boundary.replaceAll(".", "\\.")));
   assert.match(runtime, /CHAPTER_CONFIG/);
   assert.match(simulation, /config\/chapter-1\.json/);
   assert.match(viteConfig, /hashAssetTree/);

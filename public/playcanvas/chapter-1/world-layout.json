@@ -33,6 +33,16 @@
     { "id": "gate", "x": 12, "z": -41, "width": 12, "length": 18, "y": 6, "yaw": 0 },
     { "id": "doorway", "x": 6, "z": -50, "width": 12, "length": 12, "y": 6, "yaw": 90 }
   ],
+  "checkpointLights": [
+    { "phase": "arrival", "x": -4.8, "y": 1.9, "z": 25, "intensity": 0.5 },
+    { "phase": "arrival", "x": 4.8, "y": 1.9, "z": 20, "intensity": 0.5 },
+    { "phase": "courtyard", "x": 18, "y": 1.9, "z": 10, "intensity": 0.5 },
+    { "phase": "courtyard", "x": 25, "y": 1.9, "z": 7, "intensity": 0.5 },
+    { "phase": "market", "x": -23, "y": 7.9, "z": -24, "intensity": 0.42 },
+    { "phase": "market", "x": -17, "y": 7.9, "z": -29, "intensity": 0.42 },
+    { "phase": "doorway", "x": 8, "y": 7.9, "z": -46, "intensity": 0.42 },
+    { "phase": "doorway", "x": 4, "y": 7.9, "z": -51, "intensity": 0.42 }
+  ],
   "streetHouseBays": [22, 18, 14, 10, 6, 2, -2, -6, -10, -14, -18, -22, -26, -30, -34],
   "tallHouseBays": [{ "side": -1, "z": 10 }, { "side": 1, "z": -14 }],
   "setbackHouseBays": [{ "side": 1, "z": 6 }, { "side": -1, "z": -22 }],
