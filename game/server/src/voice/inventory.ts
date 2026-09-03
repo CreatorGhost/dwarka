@@ -1,7 +1,14 @@
 export const VOICE_LOCALES = ["en", "hi", "ta", "kn", "te"] as const;
 export type VoiceLocale = (typeof VOICE_LOCALES)[number];
 
-export const VOICE_ROLES = ["narrator", "vrishaketu", "kunti", "chitra", "raider-one", "raider-two"] as const;
+export const VOICE_ROLES = [
+  "narrator",
+  "vrishaketu",
+  "kunti",
+  "chitra",
+  "raider-one",
+  "raider-two",
+] as const;
 export type VoiceRole = (typeof VOICE_ROLES)[number];
 
 export type VoiceLine = {
@@ -12,7 +19,10 @@ export type VoiceLine = {
   text: Record<VoiceLocale, string>;
 };
 
-export const LOCALE_METADATA: Record<VoiceLocale, { label: string; bcp47: string; macOSVoice: string }> = {
+export const LOCALE_METADATA: Record<
+  VoiceLocale,
+  { label: string; bcp47: string; macOSVoice: string }
+> = {
   en: { label: "English", bcp47: "en-IN", macOSVoice: "Aman" },
   hi: { label: "Hindi", bcp47: "hi-IN", macOSVoice: "Lekha" },
   ta: { label: "Tamil", bcp47: "ta-IN", macOSVoice: "Vani" },
@@ -20,18 +30,21 @@ export const LOCALE_METADATA: Record<VoiceLocale, { label: string; bcp47: string
   te: { label: "Telugu", bcp47: "te-IN", macOSVoice: "Geeta" },
 };
 
-export const ROLE_METADATA: Record<VoiceRole, {
-  label: string;
-  personaId: string;
-  description: string;
-  providerVoice: string;
-  fallbackRate: number;
-}> = {
+export const ROLE_METADATA: Record<
+  VoiceRole,
+  {
+    label: string;
+    personaId: string;
+    description: string;
+    providerVoice: string;
+    fallbackRate: number;
+  }
+> = {
   narrator: {
     label: "Narrator",
-    personaId: "dwarka.narrator.v1",
+    personaId: "dwarka.narrator.v2",
     description: "Restrained adult narrator",
-    providerVoice: "manan",
+    providerVoice: "aditya",
     fallbackRate: 158,
   },
   vrishaketu: {
@@ -43,17 +56,17 @@ export const ROLE_METADATA: Record<VoiceRole, {
   },
   kunti: {
     label: "Kunti",
-    personaId: "dwarka.kunti.v1",
+    personaId: "dwarka.kunti.v2",
     description: "Adult female Kunti",
-    providerVoice: "pooja",
+    providerVoice: "ishita",
     fallbackRate: 146,
   },
   chitra: {
     label: "Chitra",
-    personaId: "dwarka.chitra.v1",
-    description: "Soft female Chitra voice",
-    providerVoice: "kavitha",
-    fallbackRate: 164,
+    personaId: "dwarka.chitra.v2",
+    description: "Young, clear Chitra delivery",
+    providerVoice: "ishita",
+    fallbackRate: 178,
   },
   "raider-one": {
     label: "Raider one",
@@ -164,6 +177,19 @@ export const FIXED_VOICE_LINES: VoiceLine[] = [
     },
   },
   {
+    id: "ch1-opening-mission",
+    scope: "chapter-0",
+    sequence: 8,
+    role: "vrishaketu",
+    text: {
+      en: "The army rode out with the royal horse. No guard is left in this quarter tonight. Raiders are in the lanes, taking children. These people sheltered Karna's son when no one else would. So tonight I stand for them. Up the lane to the courtyard, before the raiders reach it.",
+      hi: "सेना राजसी अश्व के साथ निकल चुकी है। आज रात इस बस्ती में कोई पहरा नहीं। लुटेरे गलियों में हैं, बच्चों को उठा रहे हैं। इन्हीं लोगों ने कर्ण के पुत्र को शरण दी थी, जब और कोई न था। इसलिए आज रात मैं इनके लिए खड़ा हूँ। गली से ऊपर, आँगन तक — उनके पहुँचने से पहले।",
+      ta: "படையினர் அரச குதிரையுடன் புறப்பட்டுவிட்டனர். இன்றிரவு இந்தக் குடியிருப்பில் காவல் இல்லை. கொள்ளையர்கள் தெருக்களில் இருக்கிறார்கள், குழந்தைகளை இழுத்துச் செல்கிறார்கள். வேறு யாரும் இல்லாதபோது கர்ணனின் மகனுக்கு இவர்கள்தான் இடம் தந்தார்கள். எனவே இன்றிரவு நான் இவர்களுக்காக நிற்கிறேன். தெருவழியே மேலே, முற்றத்திற்கு — அவர்கள் அங்கு போவதற்கு முன்.",
+      kn: "ಸೈನ್ಯ ರಾಜಾಶ್ವದೊಂದಿಗೆ ಹೊರಟುಹೋಗಿದೆ. ಇಂದು ರಾತ್ರಿ ಈ ಬಡಾವಣೆಗೆ ಕಾವಲಿಲ್ಲ. ದರೋಡೆಕೋರರು ಬೀದಿಗಳಲ್ಲಿದ್ದಾರೆ, ಮಕ್ಕಳನ್ನು ಎಳೆದೊಯ್ಯುತ್ತಿದ್ದಾರೆ. ಬೇರೆ ಯಾರೂ ಇಲ್ಲದಾಗ ಕರ್ಣನ ಮಗನಿಗೆ ಆಶ್ರಯ ಕೊಟ್ಟವರು ಇವರೇ. ಆದ್ದರಿಂದ ಇಂದು ರಾತ್ರಿ ನಾನು ಇವರಿಗಾಗಿ ನಿಲ್ಲುತ್ತೇನೆ. ಬೀದಿಯ ಮೇಲಕ್ಕೆ, ಅಂಗಳದವರೆಗೆ — ಅವರು ತಲುಪುವ ಮೊದಲು.",
+      te: "సైన్యం రాజాశ్వంతో బయలుదేరిపోయింది. ఈ రాత్రి ఈ వీధికి కాపలా లేదు. దోపిడీదారులు సందుల్లో ఉన్నారు, పిల్లలను ఎత్తుకుపోతున్నారు. మరెవరూ లేనప్పుడు కర్ణుడి కొడుకుకు ఆశ్రయమిచ్చినవాళ్ళు వీళ్ళే. అందుకే ఈ రాత్రి నేను వీళ్ళ కోసం నిలబడతాను. సందు పైకి, ఆవరణ దాకా — వాళ్ళు చేరుకోకముందే.",
+    },
+  },
+  {
     id: "ch1-raider-call-one",
     scope: "chapter-1",
     sequence: 3,
@@ -230,4 +256,5 @@ export const FIXED_VOICE_LINES: VoiceLine[] = [
   },
 ];
 
-export const EXPECTED_VOICE_ASSET_COUNT = FIXED_VOICE_LINES.length * VOICE_LOCALES.length;
+export const EXPECTED_VOICE_ASSET_COUNT =
+  FIXED_VOICE_LINES.length * VOICE_LOCALES.length;
