@@ -25,6 +25,19 @@ import worldLayout from "../../client-scripts/world-layout.json" with { type: "j
 
 const playerId = "12345678-1234-4234-9234-123456789abc";
 
+function yawToTarget(
+  from: { x: number; z: number },
+  target: { x: number; z: number },
+): number {
+  return Math.atan2(target.x - from.x, -(target.z - from.z));
+}
+
+function angleError(target: number, current: number): number {
+  return Math.abs(
+    Math.atan2(Math.sin(target - current), Math.cos(target - current)),
+  );
+}
+
 test("the canonical world layout has valid placements and uniquely named colliders", () => {
   assert.equal(
     new Set(worldLayout.colliders.map(({ id }) => id)).size,
@@ -801,6 +814,7 @@ test("an enemy warning deals damage exactly once when its wind-up finishes", () 
   const enemy = simulation.enemies[0];
   enemy.x = 0;
   enemy.z = -1;
+  enemy.yaw = Math.PI;
   enemy.attackCooldown = 0;
 
   simulation.tick();
@@ -1002,7 +1016,7 @@ test("damaging the family threat pulls it back to the player", () => {
   assert.ok(threat.z > zAfterHit, "damaged threat kept walking toward the family");
 });
 
-test("an enemy already in clear attack range starts its warning immediately when ready", () => {
+test("an enemy already facing the player in clear range starts its warning immediately when ready", () => {
   const simulation = new ChapterSimulation(playerId, "courtyard");
   const archer = simulation.enemies.find((enemy) => enemy.kind === "archer");
   assert.ok(archer);
@@ -1011,12 +1025,94 @@ test("an enemy already in clear attack range starts its warning immediately when
   simulation.player.z = 12;
   archer.x = 22;
   archer.z = 4;
+  archer.yaw = yawToTarget(archer, simulation.player);
   archer.attackCooldown = 0;
   simulation.combatGraceRemaining = 0;
 
   simulation.tick();
 
   assert.ok(archer.warning > 0, "ready archer idled inside clear attack range");
+});
+
+test("an enemy outside the attack arc turns before winding up and whiffs if the player leaves its impact arc", () => {
+  const simulation = new ChapterSimulation(playerId, "courtyard");
+  simulation.combatGraceRemaining = 0;
+  simulation.player.x = 0;
+  simulation.player.z = 0;
+  simulation.enemies = [simulation.enemies[0]];
+  const enemy = simulation.enemies[0];
+  enemy.x = 0;
+  enemy.z = -1;
+  enemy.yaw = 0;
+  enemy.attackCooldown = 0;
+
+  simulation.tick();
+  assert.equal(enemy.warning, 0, "back-facing enemy began a wind-up");
+  assert.equal(simulation.player.health, 100);
+
+  for (let index = 0; index < 20 && enemy.warning === 0; index += 1)
+    simulation.tick();
+  assert.ok(enemy.warning > 0, "enemy never turned into its start arc");
+
+  enemy.warning = 0.05;
+  simulation.player.x = enemy.x - 1;
+  simulation.player.z = enemy.z;
+  const healthBeforeWhiff = simulation.player.health;
+  simulation.tick();
+  assert.equal(enemy.warning, 0);
+  assert.equal(
+    simulation.player.health,
+    healthBeforeWhiff,
+    "enemy dealt damage outside its impact arc",
+  );
+});
+
+test("enemy yaw converges without reversing while a skirmisher circles", () => {
+  const simulation = new ChapterSimulation(playerId, "courtyard");
+  simulation.combatGraceRemaining = 0;
+  simulation.player.x = 0;
+  simulation.player.z = 0;
+  simulation.enemies = [simulation.enemies[0]];
+  const enemy = simulation.enemies[0];
+  enemy.x = 0;
+  enemy.z = -2.8;
+  enemy.yaw = 0;
+  enemy.attackCooldown = 999;
+
+  const errors: number[] = [];
+  const steps: number[] = [];
+  for (let index = 0; index < 40; index += 1) {
+    const previousYaw = enemy.yaw;
+    simulation.tick();
+    errors.push(angleError(yawToTarget(enemy, simulation.player), enemy.yaw));
+    steps.push(
+      Math.atan2(
+        Math.sin(enemy.yaw - previousYaw),
+        Math.cos(enemy.yaw - previousYaw),
+      ),
+    );
+  }
+
+  const nonZeroDirections = steps
+    .filter((step) => Math.abs(step) > 0.0001)
+    .map(Math.sign);
+  assert.ok(nonZeroDirections.length > 0, "enemy never turned");
+  assert.equal(
+    new Set(nonZeroDirections).size,
+    1,
+    "enemy yaw reversed direction while converging",
+  );
+  assert.ok(errors.at(-1)! < 0.02, `enemy retained ${errors.at(-1)} rad error`);
+});
+
+test("enemy yaw is authoritative snapshot state", () => {
+  const simulation = new ChapterSimulation(playerId, "courtyard");
+  const enemy = simulation.enemies[0];
+  enemy.yaw = 1.234;
+  const snapshotEnemy = simulation
+    .snapshot()
+    .enemies.find(({ id }) => id === enemy.id);
+  assert.equal(snapshotEnemy?.yaw, 1.234);
 });
 
 test("skirmisher circles only after reaching three metres and for at most half a second", () => {
@@ -1248,6 +1344,7 @@ test("a landed hit owns the player state and movement for the configured reactio
   const enemy = simulation.enemies[0];
   enemy.x = 0;
   enemy.z = -1;
+  enemy.yaw = Math.PI;
   enemy.attackCooldown = 0;
 
   for (let index = 0; index < 14; index += 1) simulation.tick();
@@ -1666,6 +1763,7 @@ test("a received hit owns the player state and movement for the configured react
   const enemy = simulation.enemies[0];
   enemy.x = 0;
   enemy.z = -1;
+  enemy.yaw = Math.PI;
   enemy.warning = 0.05;
   enemy.attackCooldown = 1;
   simulation.tick();

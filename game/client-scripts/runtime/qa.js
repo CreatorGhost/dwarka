@@ -471,10 +471,35 @@ export function installQa(rt) {
           x: 0,
           z: 0,
         };
+        const enemy = state.snapshot?.enemies?.find(
+          (candidate) => candidate.id === id,
+        );
+        const player = state.snapshot?.player;
+        const targetYaw = player
+          ? Math.atan2(player.x - position.x, -(player.z - position.z))
+          : 0;
+        const forward = root.forward;
+        const renderedYaw = Math.atan2(forward.x, -forward.z);
+        const facingError = (yaw) =>
+          Number.isFinite(yaw)
+            ? Math.abs(
+                Math.atan2(
+                  Math.sin(targetYaw - yaw),
+                  Math.cos(targetYaw - yaw),
+                ),
+              )
+            : null;
         return {
           id,
+          kind: enemy?.kind || null,
           x: position.x,
           z: position.z,
+          warning: enemy?.warning ?? 0,
+          serverYaw: enemy?.yaw ?? null,
+          interpolatedYaw: root.dwarkaInterpolatedYaw ?? null,
+          renderedYaw,
+          serverFacingError: facingError(enemy?.yaw),
+          renderedFacingError: facingError(renderedYaw),
           speed: Math.hypot(velocity.x, velocity.z),
           animation: root.dwarkaAnimState || null,
           animationSpeed: root.dwarkaVisual?.anim?.speed ?? null,

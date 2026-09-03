@@ -63,6 +63,16 @@ export function visibleEnemyStates(snapshot) {
     : snapshot?.enemies || [];
 }
 
+export function interpolateEnemyYaw(start, end, amount) {
+  const from = Number.isFinite(start) ? start : 0;
+  const to = Number.isFinite(end) ? end : from;
+  const difference = Math.atan2(Math.sin(to - from), Math.cos(to - from));
+  return Math.atan2(
+    Math.sin(from + difference * amount),
+    Math.cos(from + difference * amount),
+  );
+}
+
 export function installEffects(rt) {
   const { state, ui, pc, canvas, mats } = rt;
   const WORLD_BOUNDS = rt.WORLD_BOUNDS;
@@ -575,15 +585,21 @@ export function installEffects(rt) {
     state.enemyHealth.set(enemy.id, enemy.health);
   }
 
-  function smoothEnemyFacing(entity, targetX, targetZ, dt) {
-    const position = entity.getPosition();
-    if (Math.hypot(targetX - position.x, targetZ - position.z) < 0.001) return;
-    const current = entity.getEulerAngles().y;
-    entity.lookAt(targetX, position.y, targetZ);
-    const desired = entity.getEulerAngles().y;
-    const delta = ((desired - current + 540) % 360) - 180;
-    const blend = 1 - Math.exp(-Math.min(0.05, dt) / 0.15);
-    entity.setEulerAngles(0, current + delta * blend, 0);
+  function smoothEnemyYaw(entity, serverYaw, dt) {
+    if (!Number.isFinite(serverYaw)) return;
+    const current = Number.isFinite(entity.dwarkaServerYaw)
+      ? entity.dwarkaServerYaw
+      : serverYaw;
+    const difference = Math.atan2(
+      Math.sin(serverYaw - current),
+      Math.cos(serverYaw - current),
+    );
+    const blend = 1 - Math.exp(-Math.min(0.05, Math.max(0, dt)) / 0.12);
+    entity.dwarkaServerYaw = Math.atan2(
+      Math.sin(current + difference * blend),
+      Math.cos(current + difference * blend),
+    );
+    entity.setEulerAngles(0, (-entity.dwarkaServerYaw * 180) / Math.PI, 0);
   }
 
   function bufferedEnemies(snapshot) {
@@ -623,6 +639,7 @@ export function installEffects(rt) {
         ...enemy,
         x: pc.math.lerp(start.x, enemy.x, amount),
         z: pc.math.lerp(start.z, enemy.z, amount),
+        yaw: interpolateEnemyYaw(start.yaw, enemy.yaw, amount),
       };
     });
     state.enemySnapshotVelocities = velocities;
@@ -650,6 +667,8 @@ export function installEffects(rt) {
           entity.dwarkaFloorY + CHARACTER_GROUND_LIFT * entity.dwarkaScale,
           enemy.z,
         );
+        entity.dwarkaServerYaw = Number.isFinite(enemy.yaw) ? enemy.yaw : 0;
+        entity.setEulerAngles(0, (-entity.dwarkaServerYaw * 180) / Math.PI, 0);
         state.enemyEntities.set(enemy.id, entity);
       }
       const visualNow = performance.now();
@@ -681,6 +700,7 @@ export function installEffects(rt) {
         entity.setLocalScale(pulse, pulse, pulse);
       } else entity.setLocalScale(1, 1, 1);
       const warningActive = enemy.warning > 0;
+      entity.dwarkaInterpolatedYaw = enemy.yaw;
       if (entity.dwarkaWarningActive && !warningActive && !enemy.dead)
         entity.dwarkaImpactUntil =
           performance.now() + (enemy.kind === "brute" ? 760 : 520);
@@ -705,16 +725,7 @@ export function installEffects(rt) {
       rt.syncEquipmentSockets(entity);
       rt.updateWeaponEffects(entity);
       syncEnemyWarning(enemy, entity);
-      const player = state.snapshot?.player;
-      if (warningActive || impactActive || visualSpeed <= 0.18) {
-        if (player) smoothEnemyFacing(entity, player.x, player.z, dt);
-      } else
-        smoothEnemyFacing(
-          entity,
-          entity.getPosition().x + velocity.x,
-          entity.getPosition().z + velocity.z,
-          dt,
-        );
+      smoothEnemyYaw(entity, enemy.yaw, dt);
     }
     for (const [id, entity] of state.enemyEntities)
       if (!active.has(id)) {
@@ -742,7 +753,7 @@ export function installEffects(rt) {
   rt.releaseImpact = (impact) => impactPool.release(impact);
   rt.impactPoolStats = impactPool.stats;
   rt.syncEnemyHealth = syncEnemyHealth;
-  rt.smoothEnemyFacing = smoothEnemyFacing;
+  rt.smoothEnemyYaw = smoothEnemyYaw;
   rt.bufferedEnemies = bufferedEnemies;
   rt.syncEnemies = syncEnemies;
 }

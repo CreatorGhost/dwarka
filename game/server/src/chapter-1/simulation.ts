@@ -49,6 +49,7 @@ export type EnemyState = {
   x: number;
   y: number;
   z: number;
+  yaw: number;
   health: number;
   maxHealth: number;
   warning: number;
@@ -79,6 +80,8 @@ type EnemyBrain = {
   archerMode: "hold" | "advance" | "retreat";
   playerAggro: boolean;
   blockedFor: number;
+  slideRemaining: number;
+  slideSign: -1 | 1;
 };
 
 type LoadPhaseOptions = {
@@ -95,6 +98,13 @@ const SKIRMISHER_CIRCLE_SECONDS = 0.5;
 const ARCHER_RETREAT_START = 4;
 const ARCHER_RETREAT_STOP = 5.5;
 const ARCHER_ADVANCE_STOP = 7.75;
+const ENEMY_TURN_RATE_DEGREES = {
+  skirmisher: 200,
+  archer: 160,
+  brute: 120,
+} satisfies Record<EnemyKind, number>;
+const ATTACK_START_ARC = (60 * Math.PI) / 180;
+const ATTACK_IMPACT_ARC = (75 * Math.PI) / 180;
 const PHASE_ORDER: PhaseId[] = [
   "arrival",
   "courtyard",
@@ -109,6 +119,16 @@ const allowedPressed = new Set(["fire", "melee", "dodge", "interact"]);
 
 function finite(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function angleDifference(target: number, current: number): number {
+  return Math.atan2(Math.sin(target - current), Math.cos(target - current));
+}
+
+function yawToward(from: Point, target: Point, fallback: number): number {
+  const dx = target.x - from.x;
+  const dz = target.z - from.z;
+  return Math.hypot(dx, dz) > 0.0001 ? Math.atan2(dx, -dz) : fallback;
 }
 
 export function sanitizeInput(
@@ -301,6 +321,7 @@ export class ChapterSimulation {
         x: SPAWNS[phase][index].x,
         y: SPAWNS[phase][index].y,
         z: SPAWNS[phase][index].z,
+        yaw: 0,
         health: ENEMY_STATS[kind].health,
         maxHealth: ENEMY_STATS[kind].health,
         warning: 0,
@@ -318,6 +339,8 @@ export class ChapterSimulation {
           archerMode: "hold",
           playerAggro: false,
           blockedFor: 0,
+          slideRemaining: 0,
+          slideSign: index % 2 === 0 ? 1 : -1,
         });
       });
     }
@@ -701,6 +724,9 @@ export class ChapterSimulation {
       archerMode: "hold",
       playerAggro: false,
       blockedFor: 0,
+      slideRemaining: 0,
+      slideSign:
+        Number.isFinite(numericSuffix) && numericSuffix % 2 === 1 ? -1 : 1,
     };
     this.enemyBrains.set(enemy.id, brain);
     return brain;
@@ -739,6 +765,26 @@ export class ChapterSimulation {
     return { x, z };
   }
 
+  private turnEnemyToward(
+    enemy: EnemyState,
+    target: Point,
+    dt: number,
+  ): number {
+    const desiredYaw = yawToward(enemy, target, enemy.yaw);
+    const difference = angleDifference(desiredYaw, enemy.yaw);
+    const maxTurn =
+      (ENEMY_TURN_RATE_DEGREES[enemy.kind] * Math.PI * dt) / 180;
+    const applied = Math.max(-maxTurn, Math.min(maxTurn, difference));
+    enemy.yaw = angleDifference(enemy.yaw + applied, 0);
+    return Math.abs(angleDifference(desiredYaw, enemy.yaw));
+  }
+
+  private enemyPlayerFacingError(enemy: EnemyState): number {
+    return Math.abs(
+      angleDifference(yawToward(enemy, this.player, enemy.yaw), enemy.yaw),
+    );
+  }
+
   private moveEnemy(
     enemy: EnemyState,
     desired: Point,
@@ -746,10 +792,27 @@ export class ChapterSimulation {
     speed: number,
   ): void {
     const desiredMagnitude = Math.hypot(desired.x, desired.z);
-    const base =
+    const brain = this.brainFor(enemy);
+    let base =
       desiredMagnitude > 0.0001
         ? { x: desired.x / desiredMagnitude, z: desired.z / desiredMagnitude }
         : { x: 0, z: 0 };
+    if (brain.slideRemaining > 0 && desiredMagnitude > 0.0001) {
+      brain.slideRemaining = Math.max(0, brain.slideRemaining - dt);
+      const tangent = {
+        x: -base.z * brain.slideSign,
+        z: base.x * brain.slideSign,
+      };
+      const slide = {
+        x: base.x * 0.2 + tangent.x,
+        z: base.z * 0.2 + tangent.z,
+      };
+      const slideMagnitude = Math.max(0.0001, Math.hypot(slide.x, slide.z));
+      base = {
+        x: slide.x / slideMagnitude,
+        z: slide.z / slideMagnitude,
+      };
+    }
     const separation = this.separationSteering(enemy);
     let steer = {
       x: base.x + separation.x * 1.15,
@@ -767,11 +830,12 @@ export class ChapterSimulation {
     );
     const progress = Math.hypot(moved.x - enemy.x, moved.z - enemy.z);
     if (desiredMagnitude > 0.0001 && progress < step * 0.2) {
-      const brain = this.brainFor(enemy);
       brain.blockedFor += dt;
       if (brain.blockedFor >= 0.5) {
         const target = { x: enemy.x + desired.x, z: enemy.z + desired.z };
-        const detours = [1, -1].map((sign) => {
+        const detours = ([brain.slideSign, -brain.slideSign] as Array<
+          -1 | 1
+        >).map((sign) => {
           const tangent = { x: -base.z * sign, z: base.x * sign };
           const direction = {
             x: base.x * 0.2 + tangent.x,
@@ -788,6 +852,7 @@ export class ChapterSimulation {
             this.openDoorIds,
           );
           return {
+            sign,
             candidate,
             progress: Math.hypot(candidate.x - enemy.x, candidate.z - enemy.z),
             remaining: Math.hypot(
@@ -799,9 +864,14 @@ export class ChapterSimulation {
         detours.sort(
           (a, b) => b.progress - a.progress || a.remaining - b.remaining,
         );
-        if (detours[0].progress > progress) moved = detours[0].candidate;
+        if (detours[0].progress > progress) {
+          brain.slideSign = detours[0].sign;
+          brain.slideRemaining = 0.75;
+          brain.blockedFor = 0;
+          moved = detours[0].candidate;
+        }
       }
-    } else this.brainFor(enemy).blockedFor = 0;
+    } else brain.blockedFor = 0;
     for (const other of this.enemies) {
       if (other === enemy || other.dead) continue;
       if (enemy.kind === "brute" && other.kind === "skirmisher") continue;
@@ -993,6 +1063,11 @@ export class ChapterSimulation {
       const target = playerTargeted
         ? this.player
         : this.familyApproachTarget(enemy, familyPosition);
+      this.turnEnemyToward(
+        enemy,
+        warningBeforeTick > 0 ? this.player : target,
+        dt,
+      );
       const attackRange =
         enemy.kind === "archer" ? Math.min(stats.range, 8.5) : stats.range;
       const blocked = segmentBlocked(enemy, this.player, this.openDoorIds);
@@ -1029,6 +1104,7 @@ export class ChapterSimulation {
         if (
           distanceAfterMove <= attackRange &&
           !blockedAfterMove &&
+          this.enemyPlayerFacingError(enemy) <= ATTACK_START_ARC &&
           enemy.attackCooldown <= 0 &&
           this.combatGraceRemaining <= 0
         ) {
@@ -1050,6 +1126,7 @@ export class ChapterSimulation {
         warningFinished &&
         impactDistance <= attackRange + 0.4 &&
         !segmentBlocked(enemy, this.player, this.openDoorIds) &&
+        this.enemyPlayerFacingError(enemy) <= ATTACK_IMPACT_ARC &&
         this.player.invulnerable <= 0
       ) {
         this.player.health = Math.max(0, this.player.health - stats.damage);
