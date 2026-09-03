@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { installHud } from "../../game/client-scripts/ui/hud.js";
+import { shouldPauseForPointerUnlock } from "../../game/client-scripts/runtime/input.js";
 import { installModals } from "../../game/client-scripts/ui/modals.js";
 
 function element(overrides = {}) {
@@ -199,4 +200,31 @@ test("pause remains available during offline fallback in active combat", () => {
   assert.equal(state.modalMode, "pause");
   assert.equal(ui.modal.hidden, false);
   assert.equal(locallyPaused, true);
+});
+
+test("pointer unlock pauses real play but not QA or a still-focused canvas", () => {
+  const canvas = {};
+  assert.equal(
+    shouldPauseForPointerUnlock({
+      pointerLockElement: null,
+      canvas,
+      activeElement: null,
+      playing: true,
+      qaSession: false,
+    }),
+    true,
+  );
+  for (const exempt of [
+    { activeElement: canvas, qaSession: false },
+    { activeElement: null, qaSession: true },
+  ])
+    assert.equal(
+      shouldPauseForPointerUnlock({
+        pointerLockElement: null,
+        canvas,
+        playing: true,
+        ...exempt,
+      }),
+      false,
+    );
 });
