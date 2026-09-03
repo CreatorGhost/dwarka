@@ -25,6 +25,7 @@ import {
   safeCameraDistance,
 } from "../../game/client-scripts/runtime/loop.js";
 import { installModals } from "../../game/client-scripts/ui/modals.js";
+import { doorVisualPose } from "../../game/client-scripts/scene/doors.js";
 
 function element(overrides = {}) {
   return {
@@ -41,6 +42,28 @@ function element(overrides = {}) {
 const worldLayout = JSON.parse(
   readFileSync(new URL("../../game/client-scripts/world-layout.json", import.meta.url), "utf8"),
 );
+
+test("rescue door presentation swings around its authored hinge", () => {
+  const door = worldLayout.doors.find(({ id }) => id === "courtyard-rescue-door");
+  const closed = doorVisualPose(door, 0, worldLayout.doorAssets);
+  const open = doorVisualPose(door, 1, worldLayout.doorAssets);
+  const width = worldLayout.doorAssets.Door_4_Flat.width;
+  const closedRadians = (closed.yaw * Math.PI) / 180;
+  const openRadians = (open.yaw * Math.PI) / 180;
+  const closedHinge = {
+    x: closed.x - Math.cos(closedRadians) * width * 0.5,
+    z: closed.z + Math.sin(closedRadians) * width * 0.5,
+  };
+  const openHinge = {
+    x: open.x - Math.cos(openRadians) * width * 0.5,
+    z: open.z + Math.sin(openRadians) * width * 0.5,
+  };
+  assert.ok(Math.hypot(closed.x - 9.88, closed.z + 1) < 0.0001);
+  assert.equal(closed.y, 0);
+  assert.equal(closed.yaw, -90);
+  assert.ok(Math.abs(open.yaw - 2) < 0.0001);
+  assert.ok(Math.hypot(openHinge.x - closedHinge.x, openHinge.z - closedHinge.z) < 0.0001);
+});
 
 test("voice requested before the manifest finishes is played after the manifest loads", async (t) => {
   const createdAudio = [];

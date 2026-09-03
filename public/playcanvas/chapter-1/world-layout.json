@@ -866,6 +866,96 @@
       "visual": "Wall_Plaster_Straight"
     }
   ],
+  "doorAssets": {
+    "Door_4_Flat": {
+      "width": 1.1179,
+      "depth": 0.2093,
+      "source": "scout-batch-report dimensionsMetres"
+    }
+  },
+  "doors": [
+    {
+      "id": "street-door-west-23",
+      "label": "Street door west 23",
+      "entity": "Door_4_Flat",
+      "position": [-9.88, 0, 23],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "id": "street-door-east-15",
+      "label": "Street door east 15",
+      "entity": "Door_4_Flat",
+      "position": [9.88, 0, 15],
+      "yaw": -90,
+      "scale": 1
+    },
+    {
+      "id": "street-door-west-7",
+      "label": "Street door west 7",
+      "entity": "Door_4_Flat",
+      "position": [-9.88, 0, 7],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "id": "courtyard-rescue-door",
+      "label": "Courtyard rescue door",
+      "entity": "Door_4_Flat",
+      "position": [9.88, 0, -1],
+      "yaw": -90,
+      "scale": 1,
+      "openFromPhase": "courtyard",
+      "swingSeconds": 0.45,
+      "visualSwingSeconds": 0.32
+    },
+    {
+      "id": "street-door-west-minus-9",
+      "label": "Street door west minus 9",
+      "entity": "Door_4_Flat",
+      "position": [-9.88, 0, -9],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "id": "street-door-east-minus-17",
+      "label": "Street door east minus 17",
+      "entity": "Door_4_Flat",
+      "position": [9.88, 0, -17],
+      "yaw": -90,
+      "scale": 1
+    },
+    {
+      "id": "street-door-west-minus-25",
+      "label": "Street door west minus 25",
+      "entity": "Door_4_Flat",
+      "position": [-9.88, 0, -25],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "id": "street-door-east-minus-33",
+      "label": "Street door east minus 33",
+      "entity": "Door_4_Flat",
+      "position": [9.88, 0, -33],
+      "yaw": -90,
+      "scale": 1
+    },
+    {
+      "id": "doorway-rescue-door",
+      "label": "Doorway rescue door",
+      "entity": "Distant palace door",
+      "position": [12, 8.5, -56.7],
+      "yaw": 0,
+      "scale": 1,
+      "width": 3.3,
+      "depth": 0.3,
+      "floorY": 6,
+      "openFromPhase": "doorway",
+      "swingSeconds": 0.45,
+      "visualSwingSeconds": 0.32
+    }
+  ],
   "placements": {
     "Wall_Plaster_Straight": [
       [-9, 0, -3.82, 0, 1],
