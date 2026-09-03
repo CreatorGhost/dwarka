@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "dwarka",
   "chapter": "chapter-1",
-  "generatedAt": "2026-09-03T19:19:29.949Z",
+  "generatedAt": "2026-09-03T19:45:28.724Z",
   "provider": {
     "id": "sarvam",
     "ttsModel": "bulbul:v3",
@@ -40,10 +40,10 @@
   "personas": [
     {
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
+      "personaId": "dwarka.narrator.v2",
       "label": "Narrator",
       "description": "Restrained adult narrator",
-      "providerVoice": "manan"
+      "providerVoice": "aditya"
     },
     {
       "role": "vrishaketu",
@@ -54,17 +54,17 @@
     },
     {
       "role": "kunti",
-      "personaId": "dwarka.kunti.v1",
+      "personaId": "dwarka.kunti.v2",
       "label": "Kunti",
       "description": "Adult female Kunti",
-      "providerVoice": "pooja"
+      "providerVoice": "ishita"
     },
     {
       "role": "chitra",
-      "personaId": "dwarka.chitra.v1",
+      "personaId": "dwarka.chitra.v2",
       "label": "Chitra",
-      "description": "Soft female Chitra voice",
-      "providerVoice": "kavitha"
+      "description": "Young, clear Chitra delivery",
+      "providerVoice": "ishita"
     },
     {
       "role": "raider-one",
@@ -92,11 +92,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "Karna stood for his last day beneath a sun dimmed by dust. Around him, the field had forgotten the difference between victory and grief.",
-      "cacheKey": "d0a5674aaedbd2fb",
-      "generatedAt": "2026-09-01T21:01:28.830Z",
+      "cacheKey": "680f4597af1f8334",
+      "generatedAt": "2026-09-03T19:43:43.146Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -104,36 +104,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9545,
-        "transcriptSha256": "f826c23d41d8693e3e1bbe21116bc4ffd0595d61dddc803562f4d4452505071d",
+        "similarity": 1,
+        "transcriptSha256": "5ba95ded983c64f6e5656e82dbaf7942c7df0ad419b77eb6b2f4feb2d0b93b07",
         "detectedLanguage": "en-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-01-battlefield-d0a5674aaedbd2fb.mp3",
-          "sha256": "5ed28e3cf5f2dc7d52da9a43290faf1def27c8b7341220f72dcd9c4c955df1eb",
-          "bytes": 147456,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-01-battlefield-680f4597af1f8334.mp3",
+          "sha256": "8bdd473f54eb46529db88e6b9f870d365b6da3cf50bc94ea97d7eb90d8bad2b7",
+          "bytes": 146304,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9545,
-            "transcriptSha256": "ddfa63e535269dacc7c9edbfeac0de0e50bbf1ee34b9ddbf25b93234403ae6a0",
+            "similarity": 1,
+            "transcriptSha256": "98a6164aeaa1021360d14ae1b6df7feaf2d26d5a56c5d70409480b1f1daece4b",
             "detectedLanguage": "en-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-01-battlefield-d0a5674aaedbd2fb.ogg",
-          "sha256": "33c45b87346c03e9fea6fe9c8830b12f10159866bea181567f3faa3f44517279",
-          "bytes": 61065,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-01-battlefield-680f4597af1f8334.ogg",
+          "sha256": "76f1426e1db07abe88cbe0d116b132d369b318754b55c05672f38bd594047bcd",
+          "bytes": 62424,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9545,
-            "transcriptSha256": "ddfa63e535269dacc7c9edbfeac0de0e50bbf1ee34b9ddbf25b93234403ae6a0",
+            "similarity": 1,
+            "transcriptSha256": "98a6164aeaa1021360d14ae1b6df7feaf2d26d5a56c5d70409480b1f1daece4b",
             "detectedLanguage": "en-IN"
           }
         }
@@ -146,11 +146,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "कर्ण धूल से धुँधले हुए सूर्य के नीचे अपने अंतिम दिन के लिए खड़े थे। उनके चारों ओर रणभूमि विजय और शोक का अंतर भूल चुकी थी।",
-      "cacheKey": "535b55e7b4a4f2bf",
-      "generatedAt": "2026-09-01T21:01:29.351Z",
+      "cacheKey": "75cee5c22df149ec",
+      "generatedAt": "2026-09-03T19:43:44.080Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -159,15 +159,15 @@
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
         "similarity": 0.9783,
-        "transcriptSha256": "bb960a9bc455543252bf721fb6e93a9df2e52d772e38cf7f712f98151f8d8ffb",
+        "transcriptSha256": "baadf896f4ada4def62c58f7c1bee2195b60fc896b985837c1b929d7192b68ab",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-01-battlefield-535b55e7b4a4f2bf.mp3",
-          "sha256": "8e54534b5db098bed456cdfc1ff4755e32574364307f8fec9fa9c5f45a346e3c",
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-01-battlefield-75cee5c22df149ec.mp3",
+          "sha256": "4c592f5463785e290b718f9b4560ac3780119c6305c7a84cf3917b5fdd0b4013",
           "bytes": 185856,
           "validation": {
             "method": "sarvam-stt",
@@ -180,14 +180,14 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-01-battlefield-535b55e7b4a4f2bf.ogg",
-          "sha256": "a95e99826fd5e7e8152f0ba658cec75762b8254496bbdc9d3a6b6901e19a9dd2",
-          "bytes": 72896,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-01-battlefield-75cee5c22df149ec.ogg",
+          "sha256": "da311203edf49c4bb062adeba63fb1e621029a6e5a087cdc0cd1baad69b9e2c6",
+          "bytes": 74935,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 0.9783,
-            "transcriptSha256": "5ac13624eb3e8ae5c8712f7d2578cb9ae4ba100e935f2dd8454c01d89a1a836e",
+            "transcriptSha256": "18fbb47b1daf026c6355eb8960e680b65f2daf1bb85ba2cc124488728daa9d06",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -200,11 +200,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "தூசியால் மங்கிய சூரியனின் கீழ் கர்ணன் தனது இறுதி நாளை எதிர்கொண்டு நின்றான். அவனைச் சுற்றிய போர்க்களம் வெற்றிக்கும் துயரத்துக்கும் உள்ள வேறுபாட்டை மறந்திருந்தது.",
-      "cacheKey": "1061fb3f343cf6b4",
-      "generatedAt": "2026-09-01T21:01:29.878Z",
+      "cacheKey": "c2569a8615b307c7",
+      "generatedAt": "2026-09-03T19:43:45.136Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -212,36 +212,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9819,
-        "transcriptSha256": "4f13bb6ec7e983127dbfed57f9c08a5404360ca7bb295df961d028fac43594e0",
+        "similarity": 1,
+        "transcriptSha256": "56a62c6286ada81979fe58eb342d45381d3215dbcc52d7af8e528bd0bcb9d5b6",
         "detectedLanguage": "ta-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-01-battlefield-1061fb3f343cf6b4.mp3",
-          "sha256": "52ea8d215d999e5a3a6b304f16458a281b40a34ade5e626633331e0e5b9e9f9a",
-          "bytes": 191616,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-01-battlefield-c2569a8615b307c7.mp3",
+          "sha256": "70f4c7f56b9ed776737ae4e8bd8610251a947c199142198f576723a03c90dc4d",
+          "bytes": 180096,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9819,
-            "transcriptSha256": "d9983d56ccac9cfe7d960f8164f40b6d9a32d7216d5d019c543450d7d1f10ed5",
+            "similarity": 1,
+            "transcriptSha256": "e1d181cd44e5e0e6c548fd97baff04cf65af0c4342bccfa424806ebbd65143d1",
             "detectedLanguage": "ta-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-01-battlefield-1061fb3f343cf6b4.ogg",
-          "sha256": "c494d4d252debd4a50cb79415c585c9c25efb430919e4ca4783a84302e2520d3",
-          "bytes": 77218,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-01-battlefield-c2569a8615b307c7.ogg",
+          "sha256": "accb1038028e9f9e54ecee90bcb67abb5dde53a5b124eb5339fb40d3cf1b492d",
+          "bytes": 75763,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9819,
-            "transcriptSha256": "d9983d56ccac9cfe7d960f8164f40b6d9a32d7216d5d019c543450d7d1f10ed5",
+            "similarity": 1,
+            "transcriptSha256": "e1d181cd44e5e0e6c548fd97baff04cf65af0c4342bccfa424806ebbd65143d1",
             "detectedLanguage": "ta-IN"
           }
         }
@@ -254,11 +254,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ಧೂಳಿನಿಂದ ಮಂಕಾದ ಸೂರ್ಯನ ಕೆಳಗೆ ಕರ್ಣನು ತನ್ನ ಕೊನೆಯ ದಿನವನ್ನು ಎದುರಿಸಿ ನಿಂತನು. ಅವನ ಸುತ್ತಲಿನ ರಣಭೂಮಿ ಜಯ ಮತ್ತು ದುಃಖದ ನಡುವಿನ ವ್ಯತ್ಯಾಸವನ್ನೇ ಮರೆತಿತ್ತು.",
-      "cacheKey": "b90bc39611bd8d92",
-      "generatedAt": "2026-09-01T21:01:30.399Z",
+      "cacheKey": "15bb4547719466ee",
+      "generatedAt": "2026-09-03T19:43:46.296Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -274,9 +274,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-01-battlefield-b90bc39611bd8d92.mp3",
-          "sha256": "0bfa69536d034f2d4525051bb97290f65cbc77a4e78d407c8bec82d8f7aee5fe",
-          "bytes": 221568,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-01-battlefield-15bb4547719466ee.mp3",
+          "sha256": "43215782ec580a175187b881d663c39fe7f2474b1a9368043ff8d10cabd4b890",
+          "bytes": 221952,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -288,9 +288,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-01-battlefield-b90bc39611bd8d92.ogg",
-          "sha256": "c3754f34ee0ebb3dc17f996e790d2af4bfb6ddee312a9cce6f6c082d00cf5684",
-          "bytes": 84530,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-01-battlefield-15bb4547719466ee.ogg",
+          "sha256": "bc01bb83c8f269248ce227c903b244b3089242d88dcc258fa0a526beb7baf3fe",
+          "bytes": 92986,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -308,11 +308,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "దుమ్ముతో మసకబారిన సూర్యుని కింద కర్ణుడు తన చివరి రోజును ఎదుర్కొంటూ నిలిచాడు. అతని చుట్టూ ఉన్న యుద్ధభూమి విజయానికీ దుఃఖానికీ మధ్య తేడాను మరచిపోయింది.",
-      "cacheKey": "27e64e4fd6d5f440",
-      "generatedAt": "2026-09-01T21:01:30.922Z",
+      "cacheKey": "bffe8d9f06116ead",
+      "generatedAt": "2026-09-03T19:43:47.338Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -320,36 +320,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9528,
-        "transcriptSha256": "fbf3727cb025d3e8519176be7727def04a49a162ba1304d6fc0f51b2fe79c5dd",
+        "similarity": 0.9524,
+        "transcriptSha256": "4d8f33a647b1089ce431c49102a5b16048c2785c0f71656c2054dd793d2446f1",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-01-battlefield-27e64e4fd6d5f440.mp3",
-          "sha256": "9072d1ccda8095d61ad4b61109dc2af0e7dedbccb0d35044f6c4dfb20e8a0f82",
-          "bytes": 178944,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-01-battlefield-bffe8d9f06116ead.mp3",
+          "sha256": "1f73f1a1a651e155f24d097bc4ed590d0fe362a9636335ff29c677572e951f3a",
+          "bytes": 207360,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9528,
-            "transcriptSha256": "ceeea311d3a4860398bd90c8f578f761b862ec4fd12756da85b072b487ec460f",
+            "similarity": 0.9524,
+            "transcriptSha256": "3591c6513ca0a4caf5ebd34b826426cc9fc228d2d4ce45225c7926b194731b87",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-01-battlefield-27e64e4fd6d5f440.ogg",
-          "sha256": "89577556b55954572874497f0469fb5e9a2b1a5ae9b2ebfee99d7032095f0880",
-          "bytes": 75383,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-01-battlefield-bffe8d9f06116ead.ogg",
+          "sha256": "0c4bf8c1484beb64a4cfb452126f3b57da458590694c0f7c3e38aad26ccf6f6a",
+          "bytes": 86877,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9528,
-            "transcriptSha256": "ceeea311d3a4860398bd90c8f578f761b862ec4fd12756da85b072b487ec460f",
+            "similarity": 0.9524,
+            "transcriptSha256": "3591c6513ca0a4caf5ebd34b826426cc9fc228d2d4ce45225c7926b194731b87",
             "detectedLanguage": "te-IN"
           }
         }
@@ -362,11 +362,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "His arrows crossed the field like light through a storm. Skill could still shape the moment, though it could no longer change its end.",
-      "cacheKey": "0010607a9d8f7933",
-      "generatedAt": "2026-09-01T21:01:31.295Z",
+      "cacheKey": "3904f5081feb5c17",
+      "generatedAt": "2026-09-03T19:43:48.016Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -382,9 +382,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-02-last-stand-0010607a9d8f7933.mp3",
-          "sha256": "fdeedb7c0d35190325e5754cde43f6ff1aa7888ccb4691edd0ba275ec5874013",
-          "bytes": 155904,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-02-last-stand-3904f5081feb5c17.mp3",
+          "sha256": "bfadc392400dc9ab6da095d2f4fc0b3c75b1989130f4103ba9f84443c53be5cf",
+          "bytes": 157824,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -396,9 +396,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-02-last-stand-0010607a9d8f7933.ogg",
-          "sha256": "ba09d8357f330f368b3741146b1a80d7c35a13b6d3699bde18499dbcb3bef45a",
-          "bytes": 62338,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-02-last-stand-3904f5081feb5c17.ogg",
+          "sha256": "912fa2b7b9f70a82e8b7999c3e298dad5da61057ecf84feb38528b1aaf93a335",
+          "bytes": 64855,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -416,11 +416,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "उनके बाण तूफ़ान में चमकती रोशनी की तरह रणभूमि पार कर रहे थे। कौशल अब भी उस क्षण को आकार दे सकता था, पर उसके अंत को नहीं बदल सकता था।",
-      "cacheKey": "d8ed0e3d36947b1f",
-      "generatedAt": "2026-09-01T21:01:31.715Z",
+      "cacheKey": "ec7dcb56037b2fe7",
+      "generatedAt": "2026-09-03T19:43:49.010Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -428,17 +428,17 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9641,
-        "transcriptSha256": "ecb164eeebd9867a65308cb337259035b3ab4383af8fd68215df8be8de31e20a",
+        "similarity": 0.9846,
+        "transcriptSha256": "228dc2f315a65770490f5c01d1f9f9669a608ca26530b79a087fa7d86b36b28b",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-02-last-stand-d8ed0e3d36947b1f.mp3",
-          "sha256": "f9b4e7ddb936d02fd3eb9fa4c1f3e8b16813247d1c4d80d94c1e78fe787d9fac",
-          "bytes": 187392,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-02-last-stand-ec7dcb56037b2fe7.mp3",
+          "sha256": "7cdae234a67d516d1b0615a055876c89f2db86de6ac64b00ad2aabde2cb4814d",
+          "bytes": 218880,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -450,14 +450,14 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-02-last-stand-d8ed0e3d36947b1f.ogg",
-          "sha256": "8e20899f261f0738fc99a886c1abb0f6f1863e3950df11e2dfb95d42669050ea",
-          "bytes": 75428,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-02-last-stand-ec7dcb56037b2fe7.ogg",
+          "sha256": "b2fe8dfa338356fa9ce85f376f269bb30239b3b7f363f92c3395ce817aad90d8",
+          "bytes": 87093,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9641,
-            "transcriptSha256": "9e4d6bbc7affef77586d6b720d23d1b550fe6ac53e8ad75ac27f2406d69893c5",
+            "similarity": 0.9846,
+            "transcriptSha256": "9f1cb7be215b02ac14629a6ebc4807789b9a3dfa5999d64bea13a9947d264d5e",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -470,11 +470,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "புயலைக் கிழிக்கும் ஒளிபோல் அவனது அம்புகள் களத்தைக் கடந்தன. திறமை அந்தக் கணத்தை இன்னும் வடிவமைக்க முடிந்தது; ஆனால் அதன் முடிவை மாற்ற முடியவில்லை.",
-      "cacheKey": "219e2d6c166a9e4a",
-      "generatedAt": "2026-09-01T21:01:32.168Z",
+      "cacheKey": "308d4ad7009d8601",
+      "generatedAt": "2026-09-03T19:43:49.961Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -482,36 +482,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9837,
-        "transcriptSha256": "61029994e434ba6a226b8afc44fbf8c0206959364991f484907cfe83811f83f2",
+        "similarity": 0.9675,
+        "transcriptSha256": "25f2daa7c51a32ace1e43d969ddd311475938acfe1e172eb2e4da2569fee56b0",
         "detectedLanguage": "ta-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-02-last-stand-219e2d6c166a9e4a.mp3",
-          "sha256": "a975730d6175d99cf74ad94e9cca21ab55aab5f2a7a481079ddd47ff0fad9316",
-          "bytes": 175872,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-02-last-stand-308d4ad7009d8601.mp3",
+          "sha256": "dadd8f3faee4e2d86de7914dba5424061c20d92783fac225dc63e5f3e60df674",
+          "bytes": 183168,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9837,
-            "transcriptSha256": "1ec1a6c001f616a9df30fefe1bb37b5ea5ff2bd01d236aea6dee54b08581511f",
+            "similarity": 0.9675,
+            "transcriptSha256": "a550bdf10d7b8ea032c8a6ff39fc732b4047f361e2d8936763eb82664e2725c6",
             "detectedLanguage": "ta-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-02-last-stand-219e2d6c166a9e4a.ogg",
-          "sha256": "8b00a8293fd4d480f3e08d255849aa5d3f91bd6bb10f521da36e7633882097ff",
-          "bytes": 69626,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-02-last-stand-308d4ad7009d8601.ogg",
+          "sha256": "346481c11332ad57c74c025b02b50c1a6e2617285507a77cce79fc9524045e78",
+          "bytes": 76449,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9837,
-            "transcriptSha256": "1ec1a6c001f616a9df30fefe1bb37b5ea5ff2bd01d236aea6dee54b08581511f",
+            "similarity": 0.9675,
+            "transcriptSha256": "a550bdf10d7b8ea032c8a6ff39fc732b4047f361e2d8936763eb82664e2725c6",
             "detectedLanguage": "ta-IN"
           }
         }
@@ -524,11 +524,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ಬಿರುಗಾಳಿಯನ್ನು ಚೀರುವ ಬೆಳಕಿನಂತೆ ಅವನ ಬಾಣಗಳು ರಣಭೂಮಿಯನ್ನು ದಾಟಿದವು. ಕೌಶಲ್ಯ ಆ ಕ್ಷಣವನ್ನು ಇನ್ನೂ ರೂಪಿಸಬಹುದಾಗಿತ್ತು, ಆದರೆ ಅದರ ಅಂತ್ಯವನ್ನು ಬದಲಾಯಿಸಲಾರದು.",
-      "cacheKey": "cca3aa4137a3c25a",
-      "generatedAt": "2026-09-01T21:01:32.640Z",
+      "cacheKey": "b91c77a638c6a17e",
+      "generatedAt": "2026-09-03T19:43:51.014Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -544,9 +544,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-02-last-stand-cca3aa4137a3c25a.mp3",
-          "sha256": "20d3a33f5f418512c9056982b3938fb81e972abbf092e2d8f73b8b9e021e909d",
-          "bytes": 167424,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-02-last-stand-b91c77a638c6a17e.mp3",
+          "sha256": "a4c31dbe1b42be98e19aa38b087de2347ceba68013a80daf2da9b914a2e81d27",
+          "bytes": 208896,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -558,9 +558,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-02-last-stand-cca3aa4137a3c25a.ogg",
-          "sha256": "304bb6cb60b4c22ca0d20a89f774bbfb3393dd0eab0c35e3e0c8c64ccd6094f8",
-          "bytes": 67454,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-02-last-stand-b91c77a638c6a17e.ogg",
+          "sha256": "8cc3d8e7444fb83a27adb11b6ba0ab466ef65c66356181a21f7b7cd52cad8dac",
+          "bytes": 90163,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -578,11 +578,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "తుఫానును చీల్చే వెలుగులా అతని బాణాలు యుద్ధభూమిని దాటాయి. నైపుణ్యం ఆ క్షణాన్ని ఇంకా మలచగలిగింది, కానీ దాని ముగింపును మార్చలేకపోయింది.",
-      "cacheKey": "f44bd2a8dc7dcee0",
-      "generatedAt": "2026-09-01T21:01:33.150Z",
+      "cacheKey": "cd4d05400d1ca039",
+      "generatedAt": "2026-09-03T19:43:51.869Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -590,36 +590,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9823,
-        "transcriptSha256": "d7a483a22aae2d2fcea8e8b4fba2392efcca63b416587debd6d4d15aff5bcc3c",
+        "similarity": 0.9911,
+        "transcriptSha256": "d429640684b1b40be5702fa3bec696b755ab86c0158ad4ccda73eed36cc04efd",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-02-last-stand-f44bd2a8dc7dcee0.mp3",
-          "sha256": "997cca18110945b3d4b60922dda24ec1c92d52b3fd7f7909e1e5ed8fa6dca795",
-          "bytes": 170112,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-02-last-stand-cd4d05400d1ca039.mp3",
+          "sha256": "3b2bd837f40df5e00f1d4f6ea671f432105e74d23b53a9771d30fefabb7a753a",
+          "bytes": 200064,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9823,
-            "transcriptSha256": "f90f087f237828102936b251608561443edda64da81178669713037c82f79adc",
+            "similarity": 0.9911,
+            "transcriptSha256": "422d83a7d6e6ba7cbb7dd6417c9774ad1981128fc25f6ed63745b84cbace0f84",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-02-last-stand-f44bd2a8dc7dcee0.ogg",
-          "sha256": "417e98ebe6bc4cce18752331a260105d20007398807db22b389ab40ca5ef7c1e",
-          "bytes": 70296,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-02-last-stand-cd4d05400d1ca039.ogg",
+          "sha256": "28fb292ebb739d5650a9677d645e237c489f8a52ccb10efa87010c5a4b758169",
+          "bytes": 85470,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9823,
-            "transcriptSha256": "f90f087f237828102936b251608561443edda64da81178669713037c82f79adc",
+            "similarity": 0.9911,
+            "transcriptSha256": "422d83a7d6e6ba7cbb7dd6417c9774ad1981128fc25f6ed63745b84cbace0f84",
             "detectedLanguage": "te-IN"
           }
         }
@@ -632,11 +632,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "Then the chariot wheel sank into the earth. Old curses, old choices, and the weight of fate closed around him.",
-      "cacheKey": "e2fecd9f7a1178f4",
-      "generatedAt": "2026-09-01T21:01:33.544Z",
+      "cacheKey": "b37543fe7dbabe6b",
+      "generatedAt": "2026-09-03T19:43:52.494Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -644,36 +644,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 1,
-        "transcriptSha256": "d73f79ea0c68bb33f63615d6d0c61448d76b53f02d5bb38a2b8de4dcb0df2844",
+        "similarity": 0.9942,
+        "transcriptSha256": "b05ac16cdb5d3996bf5e9d12bdadea544f4188a82fa927af17b26b83c62e35b5",
         "detectedLanguage": "en-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-03-wheel-e2fecd9f7a1178f4.mp3",
-          "sha256": "60d1ad3ca7e9a4343124ed7ffacf777d0b0354556435936f123ee30ebce9dcbc",
-          "bytes": 125952,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-03-wheel-b37543fe7dbabe6b.mp3",
+          "sha256": "9f60a4795221f9e073635a033d6d58ff0d67805c0a1171ac91c064982ba6cf64",
+          "bytes": 145920,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "f7123c1e5d6621b2a4caf8db9459b23c195404fd5aa9eb50c4e1a603d2271ad5",
+            "similarity": 0.9942,
+            "transcriptSha256": "5adf743d7916b0ba3892c26b855026ae5f7c9062cf3348f5457da5d261dc0d6d",
             "detectedLanguage": "en-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-03-wheel-e2fecd9f7a1178f4.ogg",
-          "sha256": "193df7586009009cb4eae5f5cfa650223bb2cdc53174950e8b670b9d90671f10",
-          "bytes": 50221,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-03-wheel-b37543fe7dbabe6b.ogg",
+          "sha256": "14f3ff5619b2fd74d2c0f209e9a9ebb0f05a418853207b8512290c577be327e2",
+          "bytes": 59331,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "f7123c1e5d6621b2a4caf8db9459b23c195404fd5aa9eb50c4e1a603d2271ad5",
+            "similarity": 0.9942,
+            "transcriptSha256": "5adf743d7916b0ba3892c26b855026ae5f7c9062cf3348f5457da5d261dc0d6d",
             "detectedLanguage": "en-IN"
           }
         }
@@ -686,11 +686,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "फिर रथ का पहिया धरती में धँस गया। पुराने शाप, पुराने निर्णय और भाग्य का भार उनके चारों ओर घिर आए।",
-      "cacheKey": "fba6b98db6444496",
-      "generatedAt": "2026-09-01T21:01:33.926Z",
+      "cacheKey": "01c200c7354de240",
+      "generatedAt": "2026-09-03T19:43:53.436Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -698,36 +698,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9726,
-        "transcriptSha256": "ed5702979753583d939b3f9363f8ff82f5a7e58f09b7685c68d06e5c0f557ef6",
+        "similarity": 0.9178,
+        "transcriptSha256": "e087a364451f8549cbc49314b206edfb1b7c2302b13c9774adbcbd6982b94b11",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-03-wheel-fba6b98db6444496.mp3",
-          "sha256": "017ee085c607573eaff5b653420b6da9f3ef8eaae48b947195ad918cbc27e56c",
-          "bytes": 131712,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-03-wheel-01c200c7354de240.mp3",
+          "sha256": "3ff5739942619f470d94fa85e13d9d11dfed47de20ac52f7185b16a5618ff13a",
+          "bytes": 143232,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9726,
-            "transcriptSha256": "ceb8514f37f02eb382711c38a4cdf7e6be078f39c5d8f5e05724550063443136",
+            "similarity": 0.9178,
+            "transcriptSha256": "b4031cb962d7919e63bfb9d45725cbc36a34c81dc1413451a409a4c19652c8cf",
             "detectedLanguage": "hi-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-03-wheel-fba6b98db6444496.ogg",
-          "sha256": "9f95f1a7955d39d1268afd092a014a4762630c02fac6a13b6e8679174d4d7803",
-          "bytes": 54732,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-03-wheel-01c200c7354de240.ogg",
+          "sha256": "04a96e8ca1caa1f7c2a4db41554cac30e900233bdd77714ffd5d24bab2553a2e",
+          "bytes": 60173,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9726,
-            "transcriptSha256": "044a9ea5ebaf0bf9e960f306a69a3fa72b4cd19ceb1d9f152927655263b46cab",
+            "similarity": 0.9178,
+            "transcriptSha256": "b4031cb962d7919e63bfb9d45725cbc36a34c81dc1413451a409a4c19652c8cf",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -740,11 +740,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "பின்னர் தேர்ச் சக்கரம் மண்ணுக்குள் புதைந்தது. பழைய சாபங்களும் பழைய முடிவுகளும் விதியின் பாரமும் அவனைச் சூழ்ந்தன.",
-      "cacheKey": "f35e9d98cda426bd",
-      "generatedAt": "2026-09-01T21:01:34.273Z",
+      "cacheKey": "6a49da4b0e00ef09",
+      "generatedAt": "2026-09-03T19:43:54.214Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -752,36 +752,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9896,
-        "transcriptSha256": "0d00c48efecea0dfde1f574b990758c0a3c8730c14f035e96db880cfe76d8388",
+        "similarity": 0.9691,
+        "transcriptSha256": "27824aba6aaa529f834c71ee2582da3fcf157c4d1a20f762f90531b1eb0acfd7",
         "detectedLanguage": "ta-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-03-wheel-f35e9d98cda426bd.mp3",
-          "sha256": "5136531a15ec37f894fba46f312878335a8f201968261aa69c5d194003b4a9b3",
-          "bytes": 135936,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-03-wheel-6a49da4b0e00ef09.mp3",
+          "sha256": "11529c217c332c6a0e65e97c5f168d4ffd0ce0516a4da6812cc6d305f826ed58",
+          "bytes": 163200,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9896,
-            "transcriptSha256": "43387d4955731c59da991e87652f28746a71c71a45db52dbc281c209b583178c",
+            "similarity": 0.9691,
+            "transcriptSha256": "bae468498792df9e58d375f3d9919967defa4290cad6b6cf9b7a26cf1151d8c5",
             "detectedLanguage": "ta-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-03-wheel-f35e9d98cda426bd.ogg",
-          "sha256": "a4e28c482d3b28f137fe935bee7f489aea5f4b4b57795b2b797c0c75b0c48c10",
-          "bytes": 53266,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-03-wheel-6a49da4b0e00ef09.ogg",
+          "sha256": "d6bc1fd090a58fe413c6f08d90dc581aeaa1af44761159e41388af7bc1879fb7",
+          "bytes": 60594,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9896,
-            "transcriptSha256": "fe88fec76c1b5d18c884c08978dfc438ac5ab82035b1c0cbbb201004657f377b",
+            "similarity": 0.9691,
+            "transcriptSha256": "bae468498792df9e58d375f3d9919967defa4290cad6b6cf9b7a26cf1151d8c5",
             "detectedLanguage": "ta-IN"
           }
         }
@@ -794,11 +794,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ನಂತರ ರಥದ ಚಕ್ರ ಭೂಮಿಯಲ್ಲಿ ಹೂತುಹೋಯಿತು. ಹಳೆಯ ಶಾಪಗಳು, ಹಳೆಯ ಆಯ್ಕೆಗಳು ಮತ್ತು ವಿಧಿಯ ಭಾರ ಅವನನ್ನು ಸುತ್ತುವರಿದವು.",
-      "cacheKey": "0ed13b0ff0fe65a1",
-      "generatedAt": "2026-09-01T21:01:34.608Z",
+      "cacheKey": "e3a1e7a936c4bdac",
+      "generatedAt": "2026-09-03T19:43:55.029Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -806,36 +806,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9697,
-        "transcriptSha256": "a160eb0e5befc04b431d0f9bae5cfb8039289cfdafde9575774fd7e4efd856d9",
+        "similarity": 1,
+        "transcriptSha256": "6bba056b296806e1d5095f658d3d2b7291d0831529d3635797e8e2dbef7efee6",
         "detectedLanguage": "kn-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-03-wheel-0ed13b0ff0fe65a1.mp3",
-          "sha256": "73de864dd9985ab18686212c82033108b360e0bd17f94f90115af8062eee923b",
-          "bytes": 137472,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-03-wheel-e3a1e7a936c4bdac.mp3",
+          "sha256": "6f7bd44eb52e491f7a75705732e1886c116e8217d3644ff99bdaf19d9848d764",
+          "bytes": 151680,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9697,
-            "transcriptSha256": "817c951d566d239aac13e2a2f4b98916cb10c799ca36fe54b853e3c4eb718306",
+            "similarity": 1,
+            "transcriptSha256": "fdff3c197a480f48577f7ff35f6f5eca636511dd306629dddc3075fecc9441be",
             "detectedLanguage": "kn-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-03-wheel-0ed13b0ff0fe65a1.ogg",
-          "sha256": "adb5f0fd6fefb1ae5eaaed1c0be3a9adecfc832f15131bd8ec0db7f07c947b20",
-          "bytes": 54810,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-03-wheel-e3a1e7a936c4bdac.ogg",
+          "sha256": "54b5879a2bff191e1789f3920022bf8869a906d311c66f1854ee344767cf5ead",
+          "bytes": 62032,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "d83bd013689e3fcb2317415fa364ce00f27fd9917c14357a736aeeacc1c1dd78",
+            "transcriptSha256": "fdff3c197a480f48577f7ff35f6f5eca636511dd306629dddc3075fecc9441be",
             "detectedLanguage": "kn-IN"
           }
         }
@@ -848,11 +848,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "తర్వాత రథచక్రం భూమిలో కూరుకుపోయింది. పాత శాపాలు, పాత నిర్ణయాలు, విధి భారం అతన్ని చుట్టుముట్టాయి.",
-      "cacheKey": "8536443259881c8e",
-      "generatedAt": "2026-09-01T21:01:34.911Z",
+      "cacheKey": "bca0ae5501bad980",
+      "generatedAt": "2026-09-03T19:43:55.902Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -861,35 +861,35 @@
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
         "similarity": 1,
-        "transcriptSha256": "e970c558b5d54d75f5cd5d549c8cd9b7098784023fb486c4a56b711e2b48103c",
+        "transcriptSha256": "cde5752108ab4f59165903fac31fccf9ff16db49848f1aed783168058deda005",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-03-wheel-8536443259881c8e.mp3",
-          "sha256": "16d5a824c868002bebdfd6d64ef6be73daaf242816eabbb94092543f70371e3e",
-          "bytes": 160128,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-03-wheel-bca0ae5501bad980.mp3",
+          "sha256": "8282d064492ef950fb3dc4e6a3afefa1ea9522fde0ec83b8e62bc250cdb3ef1d",
+          "bytes": 164736,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "fb2aa3e129e694deb3545c8fed771b4238a46b0ff98d1613b36aec8ab975d95e",
+            "transcriptSha256": "8f3c96233fc197a35b9fb88457995b0e5618a9dc0e08cfd31e938c37b1eeac68",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-03-wheel-8536443259881c8e.ogg",
-          "sha256": "edec26c1db3e3c4e8091045a0cd3d37f02bb7d1ea125954773a39cf4543f438e",
-          "bytes": 59987,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-03-wheel-bca0ae5501bad980.ogg",
+          "sha256": "0c9f966dc3229156b441f3fce877c0a8fef2e74abf7f867c038b8c9d2c7f7f70",
+          "bytes": 63464,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "fb2aa3e129e694deb3545c8fed771b4238a46b0ff98d1613b36aec8ab975d95e",
+            "transcriptSha256": "8f3c96233fc197a35b9fb88457995b0e5618a9dc0e08cfd31e938c37b1eeac68",
             "detectedLanguage": "te-IN"
           }
         }
@@ -902,11 +902,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "Karna set down his bow and lifted the wheel. He asked for the pause owed to an unarmed warrior.",
-      "cacheKey": "c49cc3d16806bcbf",
-      "generatedAt": "2026-09-01T21:01:35.200Z",
+      "cacheKey": "c536171e4bb28e1b",
+      "generatedAt": "2026-09-03T19:43:58.682Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -914,36 +914,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9252,
-        "transcriptSha256": "360d265200d32486bb75a3db5364067686bfd6a2534d6e57e0895104177b87bd",
+        "similarity": 0.8767,
+        "transcriptSha256": "80fd837f2be57f2a4024c0838c104890bebc791df8281d26864115366e02117b",
         "detectedLanguage": "en-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-04-pause-owed-c49cc3d16806bcbf.mp3",
-          "sha256": "a3d532a65264cd9988d4c29dd837b4283412bf5d5889e97beb9543d8e4ada81b",
-          "bytes": 109056,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-04-pause-owed-c536171e4bb28e1b.mp3",
+          "sha256": "51fee05fa1aeba00fee83ed2cebdd16d44ad8f3bfd73a76dcee4207134944b96",
+          "bytes": 111744,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9252,
-            "transcriptSha256": "89a7ede46df5fac782acf89c251a58c36d91756a51e3f0c563b32026eed63120",
+            "similarity": 0.8767,
+            "transcriptSha256": "0aee054bdafa5489472f8328701722c89d5b411252874910a8e0aac4614fd5d6",
             "detectedLanguage": "en-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-04-pause-owed-c49cc3d16806bcbf.ogg",
-          "sha256": "e367d7e40f52271ca0255cd36b35e2aaa524dbd473c866b86da1f9a198a22931",
-          "bytes": 43518,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-04-pause-owed-c536171e4bb28e1b.ogg",
+          "sha256": "2aaadea94bb4e9fa4f8988c1d18803b3f9a5a6532e99f5beaa5c7773f8ae2057",
+          "bytes": 47638,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9252,
-            "transcriptSha256": "89a7ede46df5fac782acf89c251a58c36d91756a51e3f0c563b32026eed63120",
+            "similarity": 0.8767,
+            "transcriptSha256": "0aee054bdafa5489472f8328701722c89d5b411252874910a8e0aac4614fd5d6",
             "detectedLanguage": "en-IN"
           }
         }
@@ -956,11 +956,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "कर्ण ने धनुष नीचे रखा और पहिया उठाने लगे। उन्होंने निहत्थे योद्धा को मिलने वाले विराम की माँग की।",
-      "cacheKey": "936275c218c93e52",
-      "generatedAt": "2026-09-01T21:01:35.642Z",
+      "cacheKey": "67e484f4ec98b985",
+      "generatedAt": "2026-09-03T19:44:02.019Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -976,9 +976,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-04-pause-owed-936275c218c93e52.mp3",
-          "sha256": "e8acb9c7c89b42bbba8ba0a2a49bc40d494621880d5aae567d3116e910039009",
-          "bytes": 109056,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-04-pause-owed-67e484f4ec98b985.mp3",
+          "sha256": "8799c1810984124a2c4b681dfb1df9bf69fd6a5d325a55329b714d85dfd7b823",
+          "bytes": 142080,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -990,9 +990,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-04-pause-owed-936275c218c93e52.ogg",
-          "sha256": "83aeb81d576d18c938052e8906edd5d367d39507fa124b9d54ffd988c475d4d2",
-          "bytes": 46035,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-04-pause-owed-67e484f4ec98b985.ogg",
+          "sha256": "9614f075638b1a670c57558d69818c28804ff97d4a335b4bfdf1fc4f35126b8f",
+          "bytes": 57946,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1010,11 +1010,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "கர்ணன் தனது வில்லை கீழே வைத்து சக்கரத்தைத் தூக்க முயன்றான். ஆயுதமற்ற வீரனுக்குரிய இடைவெளியை அவன் கேட்டான்.",
-      "cacheKey": "1ddd5ba418263175",
-      "generatedAt": "2026-09-01T21:01:35.999Z",
+      "cacheKey": "b0d82609ca7cd18c",
+      "generatedAt": "2026-09-03T19:44:05.171Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1030,9 +1030,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-04-pause-owed-1ddd5ba418263175.mp3",
-          "sha256": "6e03baa1b011fa59418a67b2a9a3ed9f5b5b2b15b8a3423bd4c2a4a03cd869e3",
-          "bytes": 115968,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-04-pause-owed-b0d82609ca7cd18c.mp3",
+          "sha256": "f94eb27464065a542e551383abb4d685da067deb7ccfc9e7d338e6462b494bc9",
+          "bytes": 143232,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1044,9 +1044,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-04-pause-owed-1ddd5ba418263175.ogg",
-          "sha256": "1f0718796b4c4df8a822f82f6e97e0ab91ab8c0551e988a3cca2914c45790234",
-          "bytes": 48225,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-04-pause-owed-b0d82609ca7cd18c.ogg",
+          "sha256": "0a371b493bed7bc4278ab814b63d9d68c4c07a88749943ba19498d3c478875c8",
+          "bytes": 61425,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1064,11 +1064,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ಕರ್ಣನು ತನ್ನ ಬಿಲ್ಲನ್ನು ಕೆಳಗಿಟ್ಟು ಚಕ್ರವನ್ನು ಎತ್ತಲು ಮುಂದಾದನು. ನಿರಾಯುಧ ಯೋಧನಿಗೆ ಸಲ್ಲಬೇಕಾದ ವಿರಾಮವನ್ನು ಅವನು ಕೇಳಿದನು.",
-      "cacheKey": "89b9ab9fe63377c7",
-      "generatedAt": "2026-09-01T21:01:36.416Z",
+      "cacheKey": "dfa4de49757531b6",
+      "generatedAt": "2026-09-03T19:44:09.235Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1076,36 +1076,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 1,
-        "transcriptSha256": "350508fbabf0f76b4e50e1a76b7d868cd18fd1c66f0ef104b2af4085a971f56e",
+        "similarity": 0.9892,
+        "transcriptSha256": "5a674db1cc3cd7169df316a67957733115cc455863bf1daecb53964be5676786",
         "detectedLanguage": "kn-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-04-pause-owed-89b9ab9fe63377c7.mp3",
-          "sha256": "8de0808a02a07e305cb0f859fc4f85b4782b29ecb53757b7ef493663f12ce1fd",
-          "bytes": 177408,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-04-pause-owed-dfa4de49757531b6.mp3",
+          "sha256": "583269b1d12653138d7585b606f827109654045cf5ec75c5c23ae607698f5b2e",
+          "bytes": 201600,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "635da1de98a1d734eb889344a3cccff05c474bd9bee6489c8a82ccee361058af",
+            "similarity": 0.9892,
+            "transcriptSha256": "e8f7cf9b07a754c7c1410bf566b024468b524fc14aca9dc9336bff77f3900f7e",
             "detectedLanguage": "kn-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-04-pause-owed-89b9ab9fe63377c7.ogg",
-          "sha256": "8a5be97570631f6d58b5020244e56c252e9c411f2ec4ba5c4fc2afee5317dd88",
-          "bytes": 65860,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-04-pause-owed-dfa4de49757531b6.ogg",
+          "sha256": "94ee118960db553597b505bd8a52d1c27d3d2bcbfc971ac502e8eb9795e51014",
+          "bytes": 83150,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "635da1de98a1d734eb889344a3cccff05c474bd9bee6489c8a82ccee361058af",
+            "similarity": 0.9892,
+            "transcriptSha256": "e8f7cf9b07a754c7c1410bf566b024468b524fc14aca9dc9336bff77f3900f7e",
             "detectedLanguage": "kn-IN"
           }
         }
@@ -1118,11 +1118,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "కర్ణుడు తన విల్లును కిందపెట్టి చక్రాన్ని ఎత్తడానికి ప్రయత్నించాడు. నిరాయుధ యోధుడికి ఇవ్వాల్సిన విరామాన్ని కోరాడు.",
-      "cacheKey": "ebf80e783a404074",
-      "generatedAt": "2026-09-01T21:01:36.752Z",
+      "cacheKey": "266afb8627267517",
+      "generatedAt": "2026-09-03T19:44:13.079Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1131,35 +1131,35 @@
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
         "similarity": 1,
-        "transcriptSha256": "e2a7c3de059adae35ca6fb162c4258fb766c260c987cb68204cc7147f612b5b7",
+        "transcriptSha256": "f8ba28e2cd09af8ad14fb148ae44bf7ac295b9ed58c516d7a6fe04212e05dcac",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-04-pause-owed-ebf80e783a404074.mp3",
-          "sha256": "bd8ccd6352af1d1edd0e4065b1515eaaf217df3429be505702352d6988299891",
-          "bytes": 135936,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-04-pause-owed-266afb8627267517.mp3",
+          "sha256": "990978af98231250f85588a7918a2ebc43c29b3895495858d73c4b57163bc775",
+          "bytes": 170112,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "fa377f34abe5cd7e88fc5dbd07d79ecfdd47313d17792b85838485a3944b2551",
+            "transcriptSha256": "b446c37942d59f14de61314044fa1a13536c0dd590846e184839ea9d555d830d",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-04-pause-owed-ebf80e783a404074.ogg",
-          "sha256": "65efeabb9b4476c0bdeec6c6dac0e869cc9491c57d072dd7af55048a69ebe614",
-          "bytes": 55561,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-04-pause-owed-266afb8627267517.ogg",
+          "sha256": "32122bb685326b7834494f920c984e3dd4e559ebdc83fccd4e0c30ad700a9104",
+          "bytes": 65119,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "b446c37942d59f14de61314044fa1a13536c0dd590846e184839ea9d555d830d",
+            "transcriptSha256": "fa377f34abe5cd7e88fc5dbd07d79ecfdd47313d17792b85838485a3944b2551",
             "detectedLanguage": "te-IN"
           }
         }
@@ -1172,11 +1172,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "The story cuts to ash. His surviving son inherited a name, a wound, and a war he did not choose.",
-      "cacheKey": "0181af2a6158e74a",
-      "generatedAt": "2026-09-01T21:01:37.000Z",
+      "cacheKey": "d1c8a8f8ec76a023",
+      "generatedAt": "2026-09-03T19:44:15.891Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1192,9 +1192,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-05-what-remained-0181af2a6158e74a.mp3",
-          "sha256": "df8e6e1667abf9ee538c3147f0e5cae2deee0130f6d7e9c19b76cdc9833bc01a",
-          "bytes": 124800,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-05-what-remained-d1c8a8f8ec76a023.mp3",
+          "sha256": "f70c5cb8daf643ff25510ac26d7e36db748faee338ca2f5c66592f8d63311f06",
+          "bytes": 127488,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1206,9 +1206,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-05-what-remained-0181af2a6158e74a.ogg",
-          "sha256": "f5cc243ac4d0e4fef8530f0159ef7daaaf6302ecddf70be508aab67cfae764b8",
-          "bytes": 48399,
+          "runtimePath": "/audio/chapter-1/voices/en/ch0-panel-05-what-remained-d1c8a8f8ec76a023.ogg",
+          "sha256": "ab7f3d1a43f39296349e1f30d9612db0a27c973960838f7740387c290aa2e41d",
+          "bytes": 54002,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1226,11 +1226,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "कथा राख पर आकर रुकती है। उनके जीवित पुत्र को एक नाम, एक घाव और ऐसा युद्ध विरासत में मिला जिसे उसने नहीं चुना था।",
-      "cacheKey": "7389d2c7e1669bb2",
-      "generatedAt": "2026-09-01T21:01:37.363Z",
+      "cacheKey": "ac9619e70a5ce98a",
+      "generatedAt": "2026-09-03T19:44:19.673Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1238,36 +1238,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9581,
-        "transcriptSha256": "f684a0ff6a9aaf794bee773f41056886969cf44f71a87d31e479358af82915d0",
+        "similarity": 0.9762,
+        "transcriptSha256": "2228bcaec9dbd56666781b39d58e8e2bcdf2fcfcdd8f63ee67d6babd59afb6fe",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-05-what-remained-7389d2c7e1669bb2.mp3",
-          "sha256": "1d8d76d450c1635d56a59cac4114359fb292596ff5f1b2b4362fe51c091a7673",
-          "bytes": 161664,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-05-what-remained-ac9619e70a5ce98a.mp3",
+          "sha256": "588b9de4abeb3bd4df403f656f4bdbe16022dfcc4fed1968150ba9c1b547b9f5",
+          "bytes": 171648,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9581,
-            "transcriptSha256": "7defcaa5a7418a6be7afe1a121848d9bf5faf3978b6f99e0838a0cf8ebf1b565",
+            "similarity": 0.9762,
+            "transcriptSha256": "cb4207620fda489034252637102f7a8b5f928a1d24a19b2f432bb1d25f8a6c51",
             "detectedLanguage": "hi-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-05-what-remained-7389d2c7e1669bb2.ogg",
-          "sha256": "83149dda1dfc546f6edd7d6253d2b7ece078491179d309f65c1fac67918a0211",
-          "bytes": 64909,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch0-panel-05-what-remained-ac9619e70a5ce98a.ogg",
+          "sha256": "7b488096b76bb088364b8a55d7d9d16919a05968a8a2e8bfacfc1a5565723fd6",
+          "bytes": 70896,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9581,
-            "transcriptSha256": "3c724a5678854a750cbf95caa1f19fd8f825a308d5c48f7ca27b7d36e04b9703",
+            "similarity": 0.9762,
+            "transcriptSha256": "b8e6a11b4783124a33e93365f6d0ddea2ceff243add47e169e58e1b747049cf6",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -1280,11 +1280,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "கதை சாம்பலிடம் வந்து நிற்கிறது. உயிருடன் மீந்த அவன் மகனுக்கு ஒரு பெயரும் ஒரு காயமும் அவன் தேர்ந்தெடுக்காத ஒரு போரும் மரபாகக் கிடைத்தன.",
-      "cacheKey": "cfe578e5a778e932",
-      "generatedAt": "2026-09-01T21:01:37.752Z",
+      "cacheKey": "090768e4e6036ba2",
+      "generatedAt": "2026-09-03T19:44:24.180Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1300,9 +1300,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-05-what-remained-cfe578e5a778e932.mp3",
-          "sha256": "d3f991a1d5d7719c9cdce6e6b95a747a4d7d7ae673ad5ac65dc4c1ee11f1b1c7",
-          "bytes": 158976,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-05-what-remained-090768e4e6036ba2.mp3",
+          "sha256": "cce3dc5265a87429c2e01f834fd54616146873c51b47d0d893ed4194292f3a8a",
+          "bytes": 167424,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1314,9 +1314,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-05-what-remained-cfe578e5a778e932.ogg",
-          "sha256": "23f6749de54b5c424f0a00f0978b25897be9127d63b14e22bf18b3992bc84ed9",
-          "bytes": 66132,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch0-panel-05-what-remained-090768e4e6036ba2.ogg",
+          "sha256": "ee1c8ac2b0cb454b6bd6ee447833b92678d17a7ea9da82724a8450ad9309ef4f",
+          "bytes": 76030,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1334,11 +1334,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ಕಥೆ ಬೂದಿಯ ಬಳಿ ಬಂದು ನಿಲ್ಲುತ್ತದೆ. ಬದುಕುಳಿದ ಅವನ ಮಗನಿಗೆ ಒಂದು ಹೆಸರು, ಒಂದು ಗಾಯ ಮತ್ತು ಅವನು ಆರಿಸದ ಯುದ್ಧವು ಪರಂಪರೆಯಾಗಿ ಸಿಕ್ಕವು.",
-      "cacheKey": "5cdf51a2997311d9",
-      "generatedAt": "2026-09-01T21:01:38.147Z",
+      "cacheKey": "e5e81f39102f20d2",
+      "generatedAt": "2026-09-03T19:44:28.997Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1354,9 +1354,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-05-what-remained-5cdf51a2997311d9.mp3",
-          "sha256": "644307974a63dca34d2041ebf0df5a8c8024a20342f2115d3786dd246fd8dd0c",
-          "bytes": 205824,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-05-what-remained-e5e81f39102f20d2.mp3",
+          "sha256": "a2ec3aab6f32052e8e8a4a3749fe3cdc485def9fa0a1f3a8b4f64f3a151fe0ce",
+          "bytes": 194688,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1368,9 +1368,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-05-what-remained-5cdf51a2997311d9.ogg",
-          "sha256": "4e57d0c89cc5788ac7467700156263f7eb7277ee396847a39ffcb12034abbf85",
-          "bytes": 75956,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch0-panel-05-what-remained-e5e81f39102f20d2.ogg",
+          "sha256": "335dd4e535bb20263f39aa43e662ca33a2cf651e99b7d68003cd94392abdb841",
+          "bytes": 83251,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1388,11 +1388,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "కథ బూడిద దగ్గర ఆగుతుంది. బ్రతికి మిగిలిన అతని కుమారుడికి ఒక పేరు, ఒక గాయం, తాను ఎంచుకోని ఒక యుద్ధం వారసత్వంగా వచ్చాయి.",
-      "cacheKey": "94e28a6e7f81099f",
-      "generatedAt": "2026-09-01T21:01:38.617Z",
+      "cacheKey": "c10a6316264a5e52",
+      "generatedAt": "2026-09-03T19:44:32.952Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1400,36 +1400,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9583,
-        "transcriptSha256": "7b16a8e9a351936458f3526ee89c0697001e199cb2a531514fca955513ecda71",
+        "similarity": 0.9792,
+        "transcriptSha256": "6c0eaca4731213aa3fc11e73a5ac7d8736f0f57b4e8c7bab403864d682a0fa03",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-05-what-remained-94e28a6e7f81099f.mp3",
-          "sha256": "6e0f8e47de64025684a1a6f92a67b1a633a7b4679c39b78e805070f046396515",
-          "bytes": 148992,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-05-what-remained-c10a6316264a5e52.mp3",
+          "sha256": "7635a7eb82e09fe60c7366d795e84564972c5c94e0adeccea6d75d57f02f8caf",
+          "bytes": 171648,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9583,
-            "transcriptSha256": "90029038152969d1163befbba9bc16e94a1e159ca3099fe22eff5e68070fc405",
+            "similarity": 0.9792,
+            "transcriptSha256": "e224ea83e794355f491eddaa997f5ef69b0d9021f958781549c03d5f8b79c37c",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-05-what-remained-94e28a6e7f81099f.ogg",
-          "sha256": "dbd8c7d735c92b4eb39b4d8197f5fad7c99875fdcc6bd24d766526d6f6e8b0fa",
-          "bytes": 61236,
+          "runtimePath": "/audio/chapter-1/voices/te/ch0-panel-05-what-remained-c10a6316264a5e52.ogg",
+          "sha256": "f382879dcfe5a50e6f312a698c6c485cf41a418dde3f4db5e4429a60fb768867",
+          "bytes": 72644,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9583,
-            "transcriptSha256": "90029038152969d1163befbba9bc16e94a1e159ca3099fe22eff5e68070fc405",
+            "similarity": 0.9792,
+            "transcriptSha256": "e224ea83e794355f491eddaa997f5ef69b0d9021f958781549c03d5f8b79c37c",
             "detectedLanguage": "te-IN"
           }
         }
@@ -1712,11 +1712,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "kunti",
-      "personaId": "dwarka.kunti.v1",
-      "providerVoice": "pooja",
+      "personaId": "dwarka.kunti.v2",
+      "providerVoice": "ishita",
       "text": "After the war, the secret was spoken. Karna had been my first son. Vrishaketu entered the house of the men who killed his father.",
-      "cacheKey": "c627c33d8f3039aa",
-      "generatedAt": "2026-09-01T21:01:38.950Z",
+      "cacheKey": "acaeeed9fb9c8786",
+      "generatedAt": "2026-09-03T19:44:36.621Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1724,36 +1724,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9851,
-        "transcriptSha256": "4779f6a10f6cd6526c688546ac0ac789199bffdcea24c3ef3d5fb9240084d3e0",
+        "similarity": 1,
+        "transcriptSha256": "55bda2a11808902dc890ceda7edcfc441307802152779a6040ac720da735d3aa",
         "detectedLanguage": "en-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-kunti-revelation-c627c33d8f3039aa.mp3",
-          "sha256": "aa1ac9f41cb4c69d148697103745e368601740a7b5625f4d02cd7afa1f05847c",
-          "bytes": 157824,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-kunti-revelation-acaeeed9fb9c8786.mp3",
+          "sha256": "971eb7c4fd4a582b4eed11a4f9ee8b673e612be3089bcaacabc838ea48f46465",
+          "bytes": 145536,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9851,
-            "transcriptSha256": "48e6e4619d2cfd8838c7655a9c4b9b4dd4b279cc23c3c284b9158a6d52d38182",
+            "similarity": 1,
+            "transcriptSha256": "e85bf2030545f2d132757082f853a2ae9efc457ec5649e4a487a44264c32233a",
             "detectedLanguage": "en-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-kunti-revelation-c627c33d8f3039aa.ogg",
-          "sha256": "38500b82aff2c4b3a67ec6f847ed97479107698006593bc5fd0cafc89ce1c4f9",
-          "bytes": 64573,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-kunti-revelation-acaeeed9fb9c8786.ogg",
+          "sha256": "ee8601bcb032599cbf45173c96246d93be3e25ab5f7c86e29770c7173671acc5",
+          "bytes": 57340,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9851,
-            "transcriptSha256": "48e6e4619d2cfd8838c7655a9c4b9b4dd4b279cc23c3c284b9158a6d52d38182",
+            "similarity": 1,
+            "transcriptSha256": "e85bf2030545f2d132757082f853a2ae9efc457ec5649e4a487a44264c32233a",
             "detectedLanguage": "en-IN"
           }
         }
@@ -1766,11 +1766,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "kunti",
-      "personaId": "dwarka.kunti.v1",
-      "providerVoice": "pooja",
+      "personaId": "dwarka.kunti.v2",
+      "providerVoice": "ishita",
       "text": "युद्ध के बाद रहस्य कह दिया गया। कर्ण मेरा पहला पुत्र था। वृषकेतु उन लोगों के घर में आया जिन्होंने उसके पिता को मारा था।",
-      "cacheKey": "b609a55a77159374",
-      "generatedAt": "2026-09-01T21:01:39.352Z",
+      "cacheKey": "6059ba81977e57c9",
+      "generatedAt": "2026-09-03T19:44:40.099Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1779,35 +1779,35 @@
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
         "similarity": 0.9836,
-        "transcriptSha256": "d7588c7ff52fbcd22a867bda8e3b16b61c082196406b9f1f572b2552d8dfea9a",
+        "transcriptSha256": "8a3fc8d405971b8bc5b42b3a0ec1b5f91755d4c7af191b77f8d531e987202e1d",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-kunti-revelation-b609a55a77159374.mp3",
-          "sha256": "db46000e4dcf72ff986633e54f8cd21d6dc6aa37824d6c3ec719488b6e7f7605",
-          "bytes": 152064,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-kunti-revelation-6059ba81977e57c9.mp3",
+          "sha256": "6abf549510b937f4829f51c4f8cc27c5dc9f30494cd33b4be59e643a6236fc89",
+          "bytes": 144000,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 0.9836,
-            "transcriptSha256": "5e9d016aa5384622d09a84ae85ddd400827f8d2871bda787a5c33ac73a341f28",
+            "transcriptSha256": "5fb37c327fb1a1ee8f5d32d98258170b397eb0c5d45246da22e810651b88203a",
             "detectedLanguage": "hi-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-kunti-revelation-b609a55a77159374.ogg",
-          "sha256": "376fd5268381c435a379befffdf413057c40eddfe4b02dd1a441953c91951f1b",
-          "bytes": 63884,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-kunti-revelation-6059ba81977e57c9.ogg",
+          "sha256": "dca8d028e65a725f39e6dd5da5db340dc0f6cecacd73d7b923d0b908b87a5d88",
+          "bytes": 57659,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 0.9836,
-            "transcriptSha256": "5e9d016aa5384622d09a84ae85ddd400827f8d2871bda787a5c33ac73a341f28",
+            "transcriptSha256": "5fb37c327fb1a1ee8f5d32d98258170b397eb0c5d45246da22e810651b88203a",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -1820,11 +1820,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "kunti",
-      "personaId": "dwarka.kunti.v1",
-      "providerVoice": "pooja",
+      "personaId": "dwarka.kunti.v2",
+      "providerVoice": "ishita",
       "text": "போருக்குப் பிறகு அந்த ரகசியம் சொல்லப்பட்டது. கர்ணன் என் முதல் மகன். தனது தந்தையைக் கொன்றவர்களின் இல்லத்திற்குள் விருஷகேது வந்தான்.",
-      "cacheKey": "ef223572ffcb9c58",
-      "generatedAt": "2026-09-01T21:01:39.735Z",
+      "cacheKey": "31c3991f22b66868",
+      "generatedAt": "2026-09-03T19:44:43.842Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1840,9 +1840,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-kunti-revelation-ef223572ffcb9c58.mp3",
-          "sha256": "6e89073868cf7c6381abc47cccb098e1e09133643b4425054541e49a5d2da1d1",
-          "bytes": 173568,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-kunti-revelation-31c3991f22b66868.mp3",
+          "sha256": "7043dfa5d1b52bc31a60654cfe9242021e3dde28b180212751107b1692658028",
+          "bytes": 167040,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1854,9 +1854,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-kunti-revelation-ef223572ffcb9c58.ogg",
-          "sha256": "7be89ebc32931d37378c59d1b9ef15cf388a55dde4c43533e89b562abc8ac88d",
-          "bytes": 68924,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-kunti-revelation-31c3991f22b66868.ogg",
+          "sha256": "d869cbabbe223b02952ed1aeeed76f7893d3b83f44e89c69476f5be391885423",
+          "bytes": 59918,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1874,11 +1874,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "kunti",
-      "personaId": "dwarka.kunti.v1",
-      "providerVoice": "pooja",
+      "personaId": "dwarka.kunti.v2",
+      "providerVoice": "ishita",
       "text": "ಯುದ್ಧದ ನಂತರ ಆ ರಹಸ್ಯವನ್ನು ಹೇಳಲಾಯಿತು. ಕರ್ಣನು ನನ್ನ ಮೊದಲ ಮಗ. ತನ್ನ ತಂದೆಯನ್ನು ಕೊಂದವರ ಮನೆಯೊಳಗೆ ವೃಷಕೇತು ಬಂದನು.",
-      "cacheKey": "b525b140eb44ee4a",
-      "generatedAt": "2026-09-01T21:01:40.199Z",
+      "cacheKey": "f74a3638044f6777",
+      "generatedAt": "2026-09-03T19:44:46.997Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1887,35 +1887,35 @@
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
         "similarity": 1,
-        "transcriptSha256": "70e81a08eacf452f15b72326e3beabddf96b98b97f8b3ae14ce1bb8371263688",
+        "transcriptSha256": "7d49be0bbf37f9cc8f5958a4e47d083685bd6973e3893a19c18e2d077544176c",
         "detectedLanguage": "kn-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-kunti-revelation-b525b140eb44ee4a.mp3",
-          "sha256": "dd0b3dbdf05e5fa79a3f694426c9d7e2262c8a2c2a61663ca00d1941cf9f06bc",
-          "bytes": 179712,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-kunti-revelation-f74a3638044f6777.mp3",
+          "sha256": "1ac341c2996b3cdb0327a4df030519ef9afdbb589ac33c45b15dc1f44d7738e9",
+          "bytes": 153216,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "1c9a69ee417050c3b28f82930560ebee0f5868da23d57a89dff8258141623674",
+            "transcriptSha256": "a1934ec078050cd113491f9e67cf3efc4aac2a5c6b468890e18884abd51a3ffa",
             "detectedLanguage": "kn-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-kunti-revelation-b525b140eb44ee4a.ogg",
-          "sha256": "5ddf3a0196edb18b53df0364dd9246d463099a5b01e471294b8d780a102d7104",
-          "bytes": 70401,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-kunti-revelation-f74a3638044f6777.ogg",
+          "sha256": "9e2e6b52c6afdd3eb17d776b3591785dd61a5521a6f9e196b8743dfd21e679bf",
+          "bytes": 57219,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "1c9a69ee417050c3b28f82930560ebee0f5868da23d57a89dff8258141623674",
+            "transcriptSha256": "a1934ec078050cd113491f9e67cf3efc4aac2a5c6b468890e18884abd51a3ffa",
             "detectedLanguage": "kn-IN"
           }
         }
@@ -1928,11 +1928,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "kunti",
-      "personaId": "dwarka.kunti.v1",
-      "providerVoice": "pooja",
+      "personaId": "dwarka.kunti.v2",
+      "providerVoice": "ishita",
       "text": "యుద్ధం తర్వాత ఆ రహస్యం బయటపడింది. కర్ణుడు నా మొదటి కుమారుడు. తన తండ్రిని చంపిన వారి ఇంటిలోకి వృషకేతు అడుగుపెట్టాడు.",
-      "cacheKey": "ae0ceb5ef193491b",
-      "generatedAt": "2026-09-01T21:01:40.590Z",
+      "cacheKey": "80b9912aea281a8a",
+      "generatedAt": "2026-09-03T19:44:50.778Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -1948,9 +1948,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-kunti-revelation-ae0ceb5ef193491b.mp3",
-          "sha256": "cef0a82694cf5a85f8da7233b031a8980a39ff6d8f8bbd341a863efff40d641a",
-          "bytes": 167040,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-kunti-revelation-80b9912aea281a8a.mp3",
+          "sha256": "2c9c05e8856334a9955cc11f1ba57010617f0235278aff9b22fdaa3efea7e2fe",
+          "bytes": 184320,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1962,9 +1962,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-kunti-revelation-ae0ceb5ef193491b.ogg",
-          "sha256": "a0c7a4d38e5e4b2a02354bfce06fca835599d822382a25c090e8a47b433997b1",
-          "bytes": 65177,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-kunti-revelation-80b9912aea281a8a.ogg",
+          "sha256": "59b4d2309d9e491a511a0b3a32aa4e6b3d5b3679ae3743a148d4a1496a14331f",
+          "bytes": 66631,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -1982,11 +1982,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "The army had gone with the royal sacrifice. Raiders entered the unguarded charioteers' quarter.",
-      "cacheKey": "0f082b4de4adb571",
-      "generatedAt": "2026-09-01T21:01:40.885Z",
+      "cacheKey": "b7db2c321dd7ff4a",
+      "generatedAt": "2026-09-03T19:44:53.277Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2002,9 +2002,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-raid-begins-0f082b4de4adb571.mp3",
-          "sha256": "7d425ec71d758ebede12966122acf7217f4f778af373deba5238b75dc4359687",
-          "bytes": 113280,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-raid-begins-b7db2c321dd7ff4a.mp3",
+          "sha256": "5e0bb68deb42395c1d275ef638289b5db6c426db153ac45ccec2b02c8da7b18c",
+          "bytes": 109056,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2016,9 +2016,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-raid-begins-0f082b4de4adb571.ogg",
-          "sha256": "8b54cfc29f2549be5af1f06bfed3023b5df6aed003da9fba07db93aabce88429",
-          "bytes": 47148,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-raid-begins-b7db2c321dd7ff4a.ogg",
+          "sha256": "66bfd6709baf229b8907290a61cae2b240c39a6eafade386274ef7051c36eeae",
+          "bytes": 47449,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2036,11 +2036,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "सेना राजकीय यज्ञ के साथ जा चुकी थी। हमलावर असुरक्षित सारथियों की बस्ती में घुस आए।",
-      "cacheKey": "53465823873cfac3",
-      "generatedAt": "2026-09-01T21:01:41.179Z",
+      "cacheKey": "c794371bc986f631",
+      "generatedAt": "2026-09-03T19:44:56.017Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2048,36 +2048,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 1,
-        "transcriptSha256": "4355ff61ddbffc1cecc84a83e046dc79399c67106c3337f7c1a21877330416c6",
+        "similarity": 0.9531,
+        "transcriptSha256": "bec4d2dd19c9cf145a2745ae768e943313f1c5f9e6241179339f0e009a7bcff5",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-raid-begins-53465823873cfac3.mp3",
-          "sha256": "8db0efd4379c1c48da6d5d320de58144143ae15c219356e5122bf681ea598ac1",
-          "bytes": 104448,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-raid-begins-c794371bc986f631.mp3",
+          "sha256": "f99f30d5f33a2cd04cafc87cc4bc2bfe8e50c61719a8ed0bf57d63403f2a8619",
+          "bytes": 100608,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "04703e6d360f76a77a9e558aecf3c6001e6bd8ef8043dc4217091a0b7a9ee895",
+            "similarity": 0.9531,
+            "transcriptSha256": "09092b07e710e62ab6139160a461ecca7b03a648964fdc0b0b62a145eb4c0796",
             "detectedLanguage": "hi-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-raid-begins-53465823873cfac3.ogg",
-          "sha256": "af8b17c87004ce11f5eed38c2cbc8d1369bb19633d5f46df1b752c282aa73c75",
-          "bytes": 46046,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-raid-begins-c794371bc986f631.ogg",
+          "sha256": "53d527533620ef2e2288d81819b2a717a32ede614b3fc09348af867f92c5965a",
+          "bytes": 45537,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "04703e6d360f76a77a9e558aecf3c6001e6bd8ef8043dc4217091a0b7a9ee895",
+            "similarity": 0.9688,
+            "transcriptSha256": "9cfc24c4f2fd7da16e090055dcd7e32f21b03dc0e9d79680fc25d8fd727bb32c",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -2090,11 +2090,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "அரச யாகத்துடன் படை சென்றிருந்தது. காவலற்ற தேரோட்டிகளின் குடியிருப்புக்குள் கொள்ளையர்கள் நுழைந்தனர்.",
-      "cacheKey": "245a338b0966ffab",
-      "generatedAt": "2026-09-01T21:01:41.533Z",
+      "cacheKey": "d44419ce0622818b",
+      "generatedAt": "2026-09-03T19:44:58.788Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2110,9 +2110,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-raid-begins-245a338b0966ffab.mp3",
-          "sha256": "7394796eb04c9f8f3ed4ac928978ddf6adadec3b3471c2e20f83c0dc966b897f",
-          "bytes": 115968,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-raid-begins-d44419ce0622818b.mp3",
+          "sha256": "5cb75e0219480993f12af434ad6c8d297843721df64faea503e2ddba427f1a45",
+          "bytes": 114816,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2124,9 +2124,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-raid-begins-245a338b0966ffab.ogg",
-          "sha256": "4b572e2f4611f10215804c01d3d4156b28878f968a44d69c13f2fa7fddfe94fd",
-          "bytes": 46262,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-raid-begins-d44419ce0622818b.ogg",
+          "sha256": "2c0d573ae3d3afbe0d700615b37bc093f067781e1acd9768d14bb02f24d6010b",
+          "bytes": 48843,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2144,11 +2144,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ರಾಜಯಜ್ಞದೊಂದಿಗೆ ಸೇನೆ ಹೊರಟಿತ್ತು. ಕಾವಲಿಲ್ಲದ ಸಾರಥಿಗಳ ಬಡಾವಣೆಗೆ ದಾಳಿಕೋರರು ನುಗ್ಗಿದರು.",
-      "cacheKey": "fe361bb4ac6f6b60",
-      "generatedAt": "2026-09-01T21:01:41.810Z",
+      "cacheKey": "848d324074ac9df3",
+      "generatedAt": "2026-09-03T19:45:01.790Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2156,36 +2156,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 1,
-        "transcriptSha256": "886b874101538cdff74abda7e8bb517618e2bfdf6f6b74a2046c0470b159c4b5",
+        "similarity": 0.9926,
+        "transcriptSha256": "e3b24938d6d013986c2527709ba2b1cb16c3210b9bf849ecdd01a77b172b38f2",
         "detectedLanguage": "kn-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-raid-begins-fe361bb4ac6f6b60.mp3",
-          "sha256": "9b90429edfb8c21af62c65d626bfbf5d627033d128af24108173a5a54b771d18",
-          "bytes": 113280,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-raid-begins-848d324074ac9df3.mp3",
+          "sha256": "3117e09b8a1a4ae729946c7d413a0ff25af98f6047d064f41ed9a9dd11802780",
+          "bytes": 117504,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "1533b30f2e3ea6668e9a01571df13b66dde2ba456ac250ead98b579f3614d9f9",
+            "transcriptSha256": "dc902c41c85003b29cc5922adebf0c627bbb3a0b3e262ca5edc9aba818e87136",
             "detectedLanguage": "kn-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-raid-begins-fe361bb4ac6f6b60.ogg",
-          "sha256": "1df7e4e6cdc2d2c7b749c08ae810329bfd4cc2dddd5436ef7ca85fc591895fbc",
-          "bytes": 47776,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-raid-begins-848d324074ac9df3.ogg",
+          "sha256": "c9560a0e5548ca100db154a8e246f9005b17acc82de4b31cfdee5d2442b20682",
+          "bytes": 55411,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "1533b30f2e3ea6668e9a01571df13b66dde2ba456ac250ead98b579f3614d9f9",
+            "similarity": 0.9926,
+            "transcriptSha256": "243b08a282e3bd38796b668c9a636e2e9e50832e22c3d6c762499328f2077745",
             "detectedLanguage": "kn-IN"
           }
         }
@@ -2198,11 +2198,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "రాజయజ్ఞంతో పాటు సైన్యం వెళ్లిపోయింది. కాపలా లేని సారథుల వాడలోకి దుండగులు చొరబడ్డారు.",
-      "cacheKey": "6f76850811cbb1cc",
-      "generatedAt": "2026-09-01T21:01:42.110Z",
+      "cacheKey": "8030d931eb78d21b",
+      "generatedAt": "2026-09-03T19:45:05.144Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2210,36 +2210,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 0.9231,
-        "transcriptSha256": "5aa46f38089621f0f392033c262b50c88ef22e8ea4b3c7de6768f2f8d79fbf61",
+        "similarity": 0.9444,
+        "transcriptSha256": "99a5b856f92c46dfaa7971a98e7f63f209eed9a6f09a358c70c6db851191df62",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-raid-begins-6f76850811cbb1cc.mp3",
-          "sha256": "fe8ba529e5839022ba6e14d7831e37d9cd5a57ab41fe6c17f5b989af5c5c7d38",
-          "bytes": 120192,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-raid-begins-8030d931eb78d21b.mp3",
+          "sha256": "ba1e5eae5a5bccb16f6e5b995750943f12059ae60a6bf1aea25f02835fe4c814",
+          "bytes": 132096,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9231,
-            "transcriptSha256": "5797d3d10696bc43a801e35f372b43a61eeda4b43026d6b2526e2dcaf3cd372e",
+            "similarity": 0.9444,
+            "transcriptSha256": "f143f3d05870c0115974c08e94579117e71e40da7a16bcb828eb5fea2fbec124",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-raid-begins-6f76850811cbb1cc.ogg",
-          "sha256": "c59045748c5b3eb7a6abc7c77a2831a6019af09e865b718bdd66454f69562109",
-          "bytes": 47049,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-raid-begins-8030d931eb78d21b.ogg",
+          "sha256": "cb1154513c78ae44386dba931b8f381ef758d98c0bf2fa713a85d00aaa7e20aa",
+          "bytes": 58661,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 0.9231,
-            "transcriptSha256": "5797d3d10696bc43a801e35f372b43a61eeda4b43026d6b2526e2dcaf3cd372e",
+            "similarity": 0.9444,
+            "transcriptSha256": "2ad71ab6edd02f73742cd597d8bd7edb916e9e041744d0d775483299be57febc",
             "detectedLanguage": "te-IN"
           }
         }
@@ -2792,11 +2792,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "chitra",
-      "personaId": "dwarka.chitra.v1",
-      "providerVoice": "kavitha",
+      "personaId": "dwarka.chitra.v2",
+      "providerVoice": "ishita",
       "text": "They asked for you by name.",
-      "cacheKey": "10735729c2a64674",
-      "generatedAt": "2026-09-01T21:01:44.711Z",
+      "cacheKey": "860dc7587120d312",
+      "generatedAt": "2026-09-03T19:45:06.596Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2812,9 +2812,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-chitra-final-10735729c2a64674.mp3",
-          "sha256": "43e68ea84d717e86642fdfcd3267e83a92f85a9de202945ecb2d54872a661b13",
-          "bytes": 32256,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-chitra-final-860dc7587120d312.mp3",
+          "sha256": "f2e72a98e9b1f461efb73816eaaab6c4256279b3f8db1b65006a7cd0eb7ad5c9",
+          "bytes": 20736,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2826,9 +2826,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-chitra-final-10735729c2a64674.ogg",
-          "sha256": "4421304ec90e0e7d575a24a763ffffc177a7dbb5aa5c1261ec4629061c4618ad",
-          "bytes": 15127,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-chitra-final-860dc7587120d312.ogg",
+          "sha256": "9e8c340d287a91d04d6bf2417cf6a0ea57c239b84a783054e0960bc7686c3af5",
+          "bytes": 11391,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2846,11 +2846,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "chitra",
-      "personaId": "dwarka.chitra.v1",
-      "providerVoice": "kavitha",
+      "personaId": "dwarka.chitra.v2",
+      "providerVoice": "ishita",
       "text": "उन्होंने तुम्हारा नाम लेकर पूछा था।",
-      "cacheKey": "2970ef9f58141dd8",
-      "generatedAt": "2026-09-01T21:01:44.896Z",
+      "cacheKey": "1d8f9ff68241c8fa",
+      "generatedAt": "2026-09-03T19:45:08.648Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2866,9 +2866,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-chitra-final-2970ef9f58141dd8.mp3",
-          "sha256": "1377f2f95158247347385bcad804186b861a0165abfb53b385eedd62bb068f2a",
-          "bytes": 43008,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-chitra-final-1d8f9ff68241c8fa.mp3",
+          "sha256": "ddd6631ede68487bd7cc6d6f34b856a728e2941927b4d6c7f9b9eede89cf5477",
+          "bytes": 32256,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2880,9 +2880,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-chitra-final-2970ef9f58141dd8.ogg",
-          "sha256": "88751da59ee0c93a436cdeddc6a398d11258b77f6a74348ef7bac7e7b626bbff",
-          "bytes": 19578,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-chitra-final-1d8f9ff68241c8fa.ogg",
+          "sha256": "89ac62d6ca622f7eefbcebaa6e0cf2bf7e6844ba204b8082170773af5b96241b",
+          "bytes": 16506,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2900,11 +2900,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "chitra",
-      "personaId": "dwarka.chitra.v1",
-      "providerVoice": "kavitha",
+      "personaId": "dwarka.chitra.v2",
+      "providerVoice": "ishita",
       "text": "அவர்கள் உன்னைப் பெயர் சொல்லிக் கேட்டார்கள்.",
-      "cacheKey": "328054ab0aadf577",
-      "generatedAt": "2026-09-01T21:01:45.098Z",
+      "cacheKey": "ecdd7d1a6b26b8ef",
+      "generatedAt": "2026-09-03T19:45:10.268Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2920,9 +2920,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-chitra-final-328054ab0aadf577.mp3",
-          "sha256": "67b71488f3a75277aa3284dd33083efa8d3fff55dde7089c530c3edec9271556",
-          "bytes": 46080,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-chitra-final-ecdd7d1a6b26b8ef.mp3",
+          "sha256": "014521d8d55fbf7b76c9f6e1b0ec8132bcce29a24212efde8074228998d45ccd",
+          "bytes": 36096,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2934,9 +2934,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-chitra-final-328054ab0aadf577.ogg",
-          "sha256": "d1cd1bf041b69366990055d28f5ce4fccd8206451a79309fc722f51f43341e55",
-          "bytes": 19700,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-chitra-final-ecdd7d1a6b26b8ef.ogg",
+          "sha256": "198ced942bdfbece1214cd958c28e1a904d4f4ee7bff2fd860c34cf2972ecc02",
+          "bytes": 16469,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2954,11 +2954,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "chitra",
-      "personaId": "dwarka.chitra.v1",
-      "providerVoice": "kavitha",
+      "personaId": "dwarka.chitra.v2",
+      "providerVoice": "ishita",
       "text": "ಅವರು ನಿನ್ನ ಹೆಸರನ್ನೇ ಹೇಳಿ ಕೇಳಿದರು.",
-      "cacheKey": "64dbcfe4ce9e7570",
-      "generatedAt": "2026-09-01T21:01:45.288Z",
+      "cacheKey": "0f90ade9049a9b5a",
+      "generatedAt": "2026-09-03T19:45:12.141Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -2974,9 +2974,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-chitra-final-64dbcfe4ce9e7570.mp3",
-          "sha256": "0c8a2c71ed970682cc126a5dca9678eb2081ff1b4e5554161e9f010583631fd0",
-          "bytes": 48384,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-chitra-final-0f90ade9049a9b5a.mp3",
+          "sha256": "6a67b73c95e754521ea7240d52bcdb6b0f7659b121853f6dd33649b924e141f8",
+          "bytes": 52608,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -2988,9 +2988,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-chitra-final-64dbcfe4ce9e7570.ogg",
-          "sha256": "b14dda1919ca891f1cadd736fd1d66c48b6952638f39b052bf82e5c3a2565ae5",
-          "bytes": 21437,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-chitra-final-0f90ade9049a9b5a.ogg",
+          "sha256": "fc765bad576cfb454aa23f3afedb3c8dae8fffa0a7cf035af2cfa2b6f5022db3",
+          "bytes": 19423,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3008,11 +3008,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "chitra",
-      "personaId": "dwarka.chitra.v1",
-      "providerVoice": "kavitha",
+      "personaId": "dwarka.chitra.v2",
+      "providerVoice": "ishita",
       "text": "వారు నీ పేరే చెప్పి అడిగారు.",
-      "cacheKey": "aef173c51d754f17",
-      "generatedAt": "2026-09-01T21:01:45.602Z",
+      "cacheKey": "56efbc4850a64fcb",
+      "generatedAt": "2026-09-03T19:45:13.688Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -3028,9 +3028,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-chitra-final-aef173c51d754f17.mp3",
-          "sha256": "aea0ca0bf338b7dfb2ee1e58b468dca8111ae4b628c23e2e22dafd7f34c3e6df",
-          "bytes": 40320,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-chitra-final-56efbc4850a64fcb.mp3",
+          "sha256": "a6a78d0889c181884843fc6cbbb3612eb549feb3d7f0fe9d986cd8ef9721dd22",
+          "bytes": 37632,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3042,9 +3042,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-chitra-final-aef173c51d754f17.ogg",
-          "sha256": "82a035688e82d3a52a6e91bc8845168ce6eab80fe7a4602e1f3b88cc4f616cb2",
-          "bytes": 17746,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-chitra-final-56efbc4850a64fcb.ogg",
+          "sha256": "195a56af0f5eef071ba8c939b268865dd1ed00249b6affec0d3ee3d919fe07de",
+          "bytes": 15759,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3062,11 +3062,11 @@
       "locale": "en",
       "bcp47": "en-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "At dawn, the royal horse was released. Its road followed the raiders' trail.",
-      "cacheKey": "0380adc68437fb49",
-      "generatedAt": "2026-09-01T21:01:45.850Z",
+      "cacheKey": "572fdf83702fc54f",
+      "generatedAt": "2026-09-03T19:45:16.019Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -3082,9 +3082,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-dawn-road-0380adc68437fb49.mp3",
-          "sha256": "5d925921f0e244de3abbf0d719f96bccbb0731f98e1fdc724c522da2e888e07c",
-          "bytes": 89088,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-dawn-road-572fdf83702fc54f.mp3",
+          "sha256": "1793fb78b3682571d0e5c0ff8833e5770e1030d1383b374059dbc46a05b8eede",
+          "bytes": 93312,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3096,9 +3096,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/en/ch1-dawn-road-0380adc68437fb49.ogg",
-          "sha256": "87f0babd11b80dd2fc86cf85012f0cc0449abf978e01278e9dd4eaf7a185ed3c",
-          "bytes": 35335,
+          "runtimePath": "/audio/chapter-1/voices/en/ch1-dawn-road-572fdf83702fc54f.ogg",
+          "sha256": "6be4ed275ff6563f03e474625dbc17e6c45df6e5b587a93d6ae3acc1768fc7d2",
+          "bytes": 36155,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3116,11 +3116,11 @@
       "locale": "hi",
       "bcp47": "hi-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "भोर में राजकीय अश्व को छोड़ दिया गया। उसका मार्ग हमलावरों के निशानों के पीछे चला।",
-      "cacheKey": "24cdda946d4446d8",
-      "generatedAt": "2026-09-01T21:01:46.155Z",
+      "cacheKey": "af1f7b3019c43dd9",
+      "generatedAt": "2026-09-03T19:45:19.090Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -3128,36 +3128,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 1,
-        "transcriptSha256": "a65b608ae6a849cf04d6def2ae985969a04db01459ffe51afa7e30e42699720d",
+        "similarity": 0.9683,
+        "transcriptSha256": "9ce1cb7c48cf4b72d6d21fc6f4c6399167dc11f026b8d6ff9cbfdca5f26c3d08",
         "detectedLanguage": "hi-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-dawn-road-24cdda946d4446d8.mp3",
-          "sha256": "42bc6193e06f6ca416a6157fbcfe86a31fc7c75845ac6ce9d201a11b3b6b53c7",
-          "bytes": 99072,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-dawn-road-af1f7b3019c43dd9.mp3",
+          "sha256": "6a748d1dbeffd732e033835a725cf36d828da104fc6b4018b45c1777ce0f0018",
+          "bytes": 104832,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "6094400adf3d02105c6208c402539cc954792fd727900efd20994bc81d6c53f2",
+            "similarity": 0.9683,
+            "transcriptSha256": "c8aa8c15e8b1382d97fc5665ef53e1517af63f3895fa63ba9df6dc1ea457ebc2",
             "detectedLanguage": "hi-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/hi/ch1-dawn-road-24cdda946d4446d8.ogg",
-          "sha256": "1dc9d261f669a6bdba6c813d157176ee49378a5ceda8d76d9aabfe9b974e8e2d",
-          "bytes": 43820,
+          "runtimePath": "/audio/chapter-1/voices/hi/ch1-dawn-road-af1f7b3019c43dd9.ogg",
+          "sha256": "d594a9e3df6084397060442d7edda8a5159703abff60c88a37a084b0701b72b7",
+          "bytes": 45871,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "6094400adf3d02105c6208c402539cc954792fd727900efd20994bc81d6c53f2",
+            "similarity": 0.9683,
+            "transcriptSha256": "c8aa8c15e8b1382d97fc5665ef53e1517af63f3895fa63ba9df6dc1ea457ebc2",
             "detectedLanguage": "hi-IN"
           }
         }
@@ -3170,11 +3170,11 @@
       "locale": "ta",
       "bcp47": "ta-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "விடியற்காலையில் அரச குதிரை விடப்பட்டது. அதன் பாதை கொள்ளையர்களின் தடத்தைத் தொடர்ந்தது.",
-      "cacheKey": "c416355358ffedfe",
-      "generatedAt": "2026-09-01T21:01:46.444Z",
+      "cacheKey": "c172324a5808f9ab",
+      "generatedAt": "2026-09-03T19:45:22.042Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -3183,30 +3183,30 @@
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
         "similarity": 1,
-        "transcriptSha256": "34eb90e9d72baaaa85732340b19bc273e18dddd2fd0eeb5d288dd7bb39162b74",
+        "transcriptSha256": "9177ab551aa5d72b4fa040856c941815055ff4de7e342dce8ba3d0af93d8e025",
         "detectedLanguage": "ta-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-dawn-road-c416355358ffedfe.mp3",
-          "sha256": "c65d2cd693eecde6d80b4c05c73dc021368acfd7473fe4bfb32da3e2930752dd",
-          "bytes": 105984,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-dawn-road-c172324a5808f9ab.mp3",
+          "sha256": "14a80d4856fd70a6fe3fffb8a194f51fb664f6293cf79bccea17acd68830944f",
+          "bytes": 110592,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
             "similarity": 1,
-            "transcriptSha256": "a0d6d96fae972993fcabee325b69b9e4fd3954eefea3628985d46ff4085185b9",
+            "transcriptSha256": "310950aa7c3af904924253026851bae8ac2f5e36d4e427f7ba265bb03f4de3c9",
             "detectedLanguage": "ta-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/ta/ch1-dawn-road-c416355358ffedfe.ogg",
-          "sha256": "23da40ec6cf19c91c9f7a48608ca547f7537e7f401964eaf80047d3828e2c53e",
-          "bytes": 42542,
+          "runtimePath": "/audio/chapter-1/voices/ta/ch1-dawn-road-c172324a5808f9ab.ogg",
+          "sha256": "7260ba56521050e549d147bf53a1355afb750ce75c0cfadd8efb9f9ce03eb3f0",
+          "bytes": 49073,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3224,11 +3224,11 @@
       "locale": "kn",
       "bcp47": "kn-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ಬೆಳಗಿನ ಜಾವ ರಾಜಾಶ್ವವನ್ನು ಬಿಡಲಾಯಿತು. ಅದರ ದಾರಿ ದಾಳಿಕೋರರ ಹೆಜ್ಜೆಗುರುತುಗಳನ್ನು ಹಿಂಬಾಲಿಸಿತು.",
-      "cacheKey": "83be743a5669fe42",
-      "generatedAt": "2026-09-01T21:01:46.756Z",
+      "cacheKey": "5956c8c37ed41d2b",
+      "generatedAt": "2026-09-03T19:45:25.615Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -3244,9 +3244,9 @@
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-dawn-road-83be743a5669fe42.mp3",
-          "sha256": "5c41ca9f18ec3661d4aa3fc84255d970a95fdd8d03d478ccfe1adb624d85340b",
-          "bytes": 111744,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-dawn-road-5956c8c37ed41d2b.mp3",
+          "sha256": "089339b8d5750c857325b795eb302fd4bc153d47c97e8e38b7a18102fd7004db",
+          "bytes": 144768,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3258,9 +3258,9 @@
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/kn/ch1-dawn-road-83be743a5669fe42.ogg",
-          "sha256": "025bae16da6f6346e884779ae421e6b0ffaf1bad21177b00d75fd016621d76f8",
-          "bytes": 45458,
+          "runtimePath": "/audio/chapter-1/voices/kn/ch1-dawn-road-5956c8c37ed41d2b.ogg",
+          "sha256": "760e259020bec932a8f9b5a2635415d6748d79f8de65245d800f7b3441eedd9a",
+          "bytes": 62617,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
@@ -3278,11 +3278,11 @@
       "locale": "te",
       "bcp47": "te-IN",
       "role": "narrator",
-      "personaId": "dwarka.narrator.v1",
-      "providerVoice": "manan",
+      "personaId": "dwarka.narrator.v2",
+      "providerVoice": "aditya",
       "text": "ఉషోదయాన రాజాశ్వాన్ని విడిచారు. దాని దారి దుండగుల జాడను అనుసరించింది.",
-      "cacheKey": "8ed57e25edb984f2",
-      "generatedAt": "2026-09-01T21:01:47.029Z",
+      "cacheKey": "308d088cbc86847a",
+      "generatedAt": "2026-09-03T19:45:28.699Z",
       "status": "validated",
       "provider": "sarvam",
       "ttsModel": "bulbul:v3",
@@ -3290,36 +3290,36 @@
       "validation": {
         "method": "sarvam-stt",
         "sttModel": "saaras:v3",
-        "similarity": 1,
-        "transcriptSha256": "ad114910ae1abfe06366231e848acfb24d45f1eaf11cd2931100ec9404c97eb5",
+        "similarity": 0.9322,
+        "transcriptSha256": "38be0ee4243e7bfd4b3cff9454f06e18be7006c4307294bb90ff1cbc31ab87be",
         "detectedLanguage": "te-IN"
       },
       "assets": [
         {
           "codec": "mp3",
           "mimeType": "audio/mpeg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-dawn-road-8ed57e25edb984f2.mp3",
-          "sha256": "b9c8972f51446fe1c977095568d8ceb785ad21f28c0213fa47f309c95ac5afd7",
-          "bytes": 89088,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-dawn-road-308d088cbc86847a.mp3",
+          "sha256": "d56939021b9c7b5c9c57ae1fcbcbc95bba95eca6edf1fc6d061314956ffca644",
+          "bytes": 111744,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "d6f230254b1ee4d51eee8875c7cb4ae9f60855317130b64d499f94ad05831f53",
+            "similarity": 0.9322,
+            "transcriptSha256": "47f3eda10eaa2d806b69cbcae03bbf390a8c440e2a573853bb5a593b03ff386d",
             "detectedLanguage": "te-IN"
           }
         },
         {
           "codec": "ogg",
           "mimeType": "audio/ogg",
-          "runtimePath": "/audio/chapter-1/voices/te/ch1-dawn-road-8ed57e25edb984f2.ogg",
-          "sha256": "f4986b1999c2e915f885f8488aab0108d939c44de519f14fe40ef04ed4f00f3f",
-          "bytes": 36499,
+          "runtimePath": "/audio/chapter-1/voices/te/ch1-dawn-road-308d088cbc86847a.ogg",
+          "sha256": "21fffa1ee17dd583b0faf4bda8933196dea46511d31a54bb2ba14ef4274e1cb7",
+          "bytes": 49117,
           "validation": {
             "method": "sarvam-stt",
             "sttModel": "saaras:v3",
-            "similarity": 1,
-            "transcriptSha256": "d6f230254b1ee4d51eee8875c7cb4ae9f60855317130b64d499f94ad05831f53",
+            "similarity": 0.9322,
+            "transcriptSha256": "4d3fd6d2e9f54a00626c648eee52afb159ab3d62409b5e5a393b50ece2324257",
             "detectedLanguage": "te-IN"
           }
         }
