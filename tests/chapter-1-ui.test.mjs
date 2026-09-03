@@ -193,7 +193,7 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   assert.match(servedBundle, /Offline play/, "the served bundle must be generated from the readable runtime source");
   assert.doesNotMatch(runtime, /primitive\("sphere", "Indigo night sky"/, "an opaque sky mesh must not hide distant scenery");
   assert.match(runtime, /ambientLight = new pc\.Color\(0\.16, 0\.18, 0\.29\)/);
-  assert.match(runtime, /scene\.exposure = 0\.86/);
+  assert.match(runtime, /scene\.exposure = 0\.74/);
   assert.doesNotMatch(runtime, /new pc\.Entity\("Camera soft fill"\)/, "the camera must not carry a flattening headlight");
   assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
   assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
