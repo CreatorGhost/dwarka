@@ -138,11 +138,6 @@ test("Chapter 1 keeps directional signs, input cleanup, collision, and exact end
   );
   assert.match(
     runtime,
-    /arrow\.setEulerAngles\([\s\S]{0,120}\(-state\.yaw \* 180\) \/ Math\.PI,\s*0\s*\)/,
-    "visible arrow must use the same PlayCanvas yaw convention",
-  );
-  assert.match(
-    runtime,
     /visualNow - entity\.dwarkaDeadAt < 800/,
     "dead enemies must remain visible long enough to play their down animation",
   );
@@ -273,10 +268,6 @@ test("every character variant uses one face-safe skeleton and all blades stay ha
   assert.match(runtime, /Archer dashed tracer/);
   assert.match(runtime, /dwarkaWarningActive/);
   assert.match(runtime, /dwarkaImpactUntil/);
-  assert.match(
-    runtime,
-    /enemy\.kind === "archer"[\s\S]{0,100}"fire"[\s\S]{0,100}enemy\.kind === "brute"[\s\S]{0,100}"bruteWarn"[\s\S]{0,100}"melee"/,
-  );
   assert.doesNotMatch(
     runtime,
     /entity\.lookAt\(player\.x, 0, player\.z\)/,
@@ -440,8 +431,8 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   );
   assert.match(
     runtime,
-    /road\.receiveShadows = false/,
-    "the broad sand receiver must not show directional shadow-map striping",
+    /road\.receiveShadows = true/,
+    "the route ground must receive the authored moon contact shadow",
   );
   assert.doesNotMatch(
     runtime,
@@ -554,8 +545,8 @@ test("A1 uses the ledgered HDR, physical materials, native grading, and producti
     "desktop rendering should use the engine-native grading frame",
   );
   assert.match(runtime, /maxPixelRatio = Math\.min\(\s*1,\s*window\.devicePixelRatio,?\s*\)/);
-  assert.match(runtime, /state\.renderScale === 1 && state\.lowFpsSeconds >= 2/);
-  assert.match(runtime, /state\.renderScale === 0\.9 && state\.lowFpsSeconds >= 2/);
+  assert.match(runtime, /function enforceNativeResolution/);
+  assert.doesNotMatch(runtime, /nextScale = 0\.[89]/);
   assert.match(runtime, /value\.useMetalness = true/);
   assert.match(
     runtime,

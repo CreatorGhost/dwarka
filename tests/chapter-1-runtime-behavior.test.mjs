@@ -1,13 +1,25 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
   CHARACTER_ANIMATIONS,
   animationSpeeds,
 } from "../../game/client-scripts/character/animation.js";
+import { enemyActionAnimation } from "../../game/client-scripts/combat/effects.js";
+import {
+  attackWarningGlyph,
+  bowReticlePresentation,
+  targetRimColor,
+  visibleArrowEuler,
+} from "../../game/client-scripts/combat/reticle.js";
 import { installHud } from "../../game/client-scripts/ui/hud.js";
 import { shouldPauseForPointerUnlock } from "../../game/client-scripts/runtime/input.js";
-import { safeCameraDistance } from "../../game/client-scripts/runtime/loop.js";
+import {
+  desktopPixelRatio,
+  playerWeaponVisibility,
+  safeCameraDistance,
+} from "../../game/client-scripts/runtime/loop.js";
 import { installModals } from "../../game/client-scripts/ui/modals.js";
 
 function element(overrides = {}) {
@@ -21,6 +33,10 @@ function element(overrides = {}) {
     ...overrides,
   };
 }
+
+const worldLayout = JSON.parse(
+  readFileSync(new URL("../../game/client-scripts/world-layout.json", import.meta.url), "utf8"),
+);
 
 test("voice requested before the manifest finishes is played after the manifest loads", async (t) => {
   const createdAudio = [];
@@ -92,6 +108,46 @@ test("voice requested before the manifest finishes is played after the manifest 
   rt.playVoice(state.deferredVoiceLine);
   assert.equal(state.deferredVoiceLine, null);
   assert.equal(createdAudio.length, 2);
+});
+
+test("bow reticle distinguishes a lock, recovery, and a blocked shot", () => {
+  assert.deepEqual(
+    bowReticlePresentation({
+      hasTarget: true,
+      locked: true,
+      cooldownActive: false,
+    }),
+    { className: "locked", labelKey: "targetAcquired" },
+  );
+  assert.equal(
+    bowReticlePresentation({
+      hasTarget: true,
+      locked: true,
+      cooldownActive: true,
+    }).labelKey,
+    "targetCooldown",
+  );
+  assert.equal(
+    bowReticlePresentation({
+      hasTarget: false,
+      locked: false,
+      cooldownActive: false,
+    }).labelKey,
+    "targetNoShot",
+  );
+  assert.deepEqual(visibleArrowEuler(0, Math.PI / 2), [90, -90, 0]);
+});
+
+test("targeting cues distinguish all three enemy roles without relying on red", () => {
+  assert.deepEqual(["skirmisher", "archer", "brute"].map(attackWarningGlyph), [
+    "blade-exclamation",
+    "arrow-eye",
+    "mace-diamond",
+  ]);
+  const rimColors = ["skirmisher", "archer", "brute"].map(targetRimColor);
+  assert.equal(new Set(rimColors.map((color) => color.join(","))).size, 3);
+  assert.ok(targetRimColor("archer")[2] > targetRimColor("archer")[0]);
+  assert.ok(targetRimColor("skirmisher")[0] > targetRimColor("skirmisher")[2]);
 });
 
 test("changing locale re-renders the already-open pause modal", () => {
@@ -261,4 +317,45 @@ test("camera collision treats the route edge as a wall-sized occluder", () => {
   });
   assert.ok(open > 2.8);
   assert.ok(acrossFacade < 1.2, `camera travelled ${acrossFacade.toFixed(2)} m through the facade`);
+});
+
+test("desktop rendering remains at the native 1.0 pixel ratio", () => {
+  assert.equal(desktopPixelRatio(1), 1);
+  assert.equal(desktopPixelRatio(2), 1);
+});
+
+test("the authored traversal path covers the full 186 metre route on valid floors", () => {
+  const distance = worldLayout.routeWaypoints.slice(1).reduce((total, point, index) => {
+    const previous = worldLayout.routeWaypoints[index];
+    return total + Math.hypot(point.x - previous.x, point.z - previous.z);
+  }, 0);
+  const floorAt = (point) =>
+    worldLayout.floorRegions.find(
+      (region) =>
+        point.x >= region.minX &&
+        point.x <= region.maxX &&
+        point.z >= region.minZ &&
+        point.z <= region.maxZ,
+    )?.y ?? null;
+
+  assert.equal(distance, 186);
+  assert.ok(worldLayout.routeWaypoints.every((point) => floorAt(point) === point.y));
+});
+
+test("a health drop owns the enemy animation frame and player hit-stun keeps the sword", () => {
+  assert.equal(
+    enemyActionAnimation({
+      kind: "brute",
+      dead: false,
+      hitActive: true,
+      warningActive: true,
+      impactActive: true,
+      visualSpeed: 2,
+    }),
+    "hit",
+  );
+  assert.deepEqual(playerWeaponVisibility(false, "hit"), {
+    bowEquipped: false,
+    swordEquipped: true,
+  });
 });
