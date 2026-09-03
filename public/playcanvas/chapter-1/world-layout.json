@@ -4,6 +4,19 @@
   "worldBounds": { "minX": -28, "maxX": 28, "minZ": -58, "maxZ": 34 },
   "streetSurfaceY": 0.035,
   "characterGroundLift": 0.055,
+  "familyStaging": {
+    "market": {
+      "members": [
+        { "position": [-20.7, 6, -32], "yaw": 160 },
+        { "position": [-19.3, 6, -32], "yaw": -160 }
+      ],
+      "light": {
+        "position": [-19.4, 8, -32],
+        "intensity": 0.55,
+        "range": 5.5
+      }
+    }
+  },
   "floorRegions": [
     { "id": "stair-1", "minX": 2, "maxX": 4, "minZ": -22, "maxZ": -10, "y": 1 },
     { "id": "stair-2", "minX": 0, "maxX": 2, "minZ": -22, "maxZ": -10, "y": 2 },
