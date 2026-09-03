@@ -18,3 +18,23 @@
 .reconnect.failed{border-color:var(--gold)}.reconnect.failed .spinner{display:none}
 .status-card,.modal-backdrop,.tutorial{backdrop-filter:none}
 .status-card{background:linear-gradient(120deg,rgba(9,11,29,.97),rgba(14,18,46,.92))}
+
+@font-face{font-family:"Dwarka Cinzel";src:url("/fonts/Cinzel-700.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Dwarka Cormorant";src:url("/fonts/CormorantGaramond-400.woff2") format("woff2");font-weight:500;font-display:swap}
+.modal.story-beat{display:block;padding:0;background:#000;animation:story-fade-in .7s ease both}
+.story-beat .modal-backdrop{display:none}
+.story-beat .modal-card{position:absolute;inset:0;width:auto;max-height:none;overflow:hidden;border:0;background:#000;box-shadow:none;padding:0}
+.story-beat .sun-mark,.story-beat .modal-kicker,.story-beat #modal-title,.story-beat #modal-copy,.story-beat #controls-grid,.story-beat #settings-panel{display:none!important}
+.story-beat #story-panel{position:absolute;inset:0;display:block;margin:0;border:0;background:#000;overflow:hidden}
+.story-beat #story-panel:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.28) 9%,transparent 26%),linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.74) 14%,rgba(0,0,0,.3) 30%,transparent 46%),radial-gradient(ellipse at center,transparent 46%,rgba(0,0,0,.42))}
+.story-beat #story-panel img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center;animation:story-ken-burns var(--story-duration,9s) linear both}
+.story-beat #story-panel div{position:absolute;left:50%;bottom:clamp(76px,11vh,122px);z-index:2;width:min(1180px,calc(100vw - 260px));transform:translateX(-50%);padding:0;text-align:center;animation:story-caption-in .7s 1.1s ease both;text-shadow:0 2px 10px #000,0 1px 34px rgba(0,0,0,.95)}
+.story-beat #story-panel b{color:#e3b45e;font:700 14px "Dwarka Cinzel",Georgia,serif;letter-spacing:.2em;text-transform:uppercase}
+.story-beat #story-panel p{margin:12px 0 0;color:#f8f1e5;font:500 clamp(24px,1.75vw,33px)/1.4 "Dwarka Cormorant",Georgia,serif}
+.story-beat #story-panel.caption-out div{animation:story-caption-out .3s ease both}
+.story-beat .modal-actions{position:absolute;right:28px;bottom:28px;z-index:3;margin:0}
+.story-beat .pointer-note{position:absolute;left:28px;bottom:30px;z-index:3;max-width:680px;margin:0;color:#ddd7ca;text-shadow:0 2px 8px #000}
+@keyframes story-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes story-caption-in{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes story-caption-out{to{opacity:0;transform:translate(-50%,-8px)}}
+@keyframes story-ken-burns{from{transform:scale(1) translateX(-.7%)}to{transform:scale(1.08) translateX(.7%)}}

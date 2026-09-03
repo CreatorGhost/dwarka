@@ -10,6 +10,7 @@ import {
 } from "../../game/client-scripts/character/animation.js";
 import {
   enemyActionAnimation,
+  interpolateEnemyYaw,
   separateEnemyVisuals,
   visibleEnemyStates,
 } from "../../game/client-scripts/combat/effects.js";
@@ -26,7 +27,11 @@ import {
   playerWeaponVisibility,
   safeCameraDistance,
 } from "../../game/client-scripts/runtime/loop.js";
-import { installModals } from "../../game/client-scripts/ui/modals.js";
+import {
+  installModals,
+  STORY_TAIL_MS,
+  storyFallbackDuration,
+} from "../../game/client-scripts/ui/modals.js";
 import { doorVisualPose } from "../../game/client-scripts/scene/doors.js";
 import { createEmbeddedHandshake } from "../../game/client-scripts/net/handshake.js";
 import { postProfileResume } from "../app/game/chapter-1/profile-bridge.js";
@@ -383,7 +388,13 @@ test("pause remains available during offline fallback in active combat", () => {
   assert.equal(locallyPaused, true);
 });
 
-test("pointer unlock pauses real play but not QA or a still-focused canvas", () => {
+test("narrated story beats outlast their voice and retain a readable muted fallback", () => {
+  assert.equal(STORY_TAIL_MS, 450);
+  assert.equal(storyFallbackDuration("A short line.", 8.5), 9_400);
+  assert.ok(storyFallbackDuration("A long localized line with enough words to read.") >= 5_000);
+});
+
+test("pointer unlock pauses real play after a held lock but not QA or an unlocked focused canvas", () => {
   const canvas = {};
   assert.equal(
     shouldPauseForPointerUnlock({
@@ -392,12 +403,13 @@ test("pointer unlock pauses real play but not QA or a still-focused canvas", () 
       activeElement: null,
       playing: true,
       qaSession: false,
+      hadPointerLock: false,
     }),
     true,
   );
   for (const exempt of [
-    { activeElement: canvas, qaSession: false },
-    { activeElement: null, qaSession: true },
+    { activeElement: canvas, qaSession: false, hadPointerLock: false },
+    { activeElement: null, qaSession: true, hadPointerLock: true },
   ])
     assert.equal(
       shouldPauseForPointerUnlock({
@@ -408,6 +420,17 @@ test("pointer unlock pauses real play but not QA or a still-focused canvas", () 
       }),
       false,
     );
+  assert.equal(
+    shouldPauseForPointerUnlock({
+      pointerLockElement: null,
+      canvas,
+      activeElement: canvas,
+      playing: true,
+      qaSession: false,
+      hadPointerLock: true,
+    }),
+    true,
+  );
 });
 
 test("sprint uses the authored sprint cycle at the calibrated travel rate", () => {
@@ -523,5 +546,15 @@ test("enemy walk playback tracks rendered velocity and inactive waves stay hidde
       enemies: [{ id: "market-active" }],
     }).length,
     1,
+  );
+});
+
+test("enemy snapshot yaw interpolates across the shortest arc", () => {
+  const start = (170 * Math.PI) / 180;
+  const end = (-170 * Math.PI) / 180;
+  const midpoint = interpolateEnemyYaw(start, end, 0.5);
+  assert.ok(
+    Math.abs(Math.abs(midpoint) - Math.PI) < 0.0001,
+    `yaw took the long path through ${midpoint}`,
   );
 });

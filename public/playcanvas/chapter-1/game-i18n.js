@@ -1,6 +1,7 @@
 /* Localized fixed UI for the Chapter 1 static export. Input-key labels remain literal. */
 window.DWARKA_GAME_I18N = Object.freeze({
   en: {
+    chapterKicker: "CHAPTER 1",
     objective: "OBJECTIVE",
     familyDanger: "FAMILY IN DANGER",
     ccOn: "CC On",
@@ -13,6 +14,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     connecting: "Connecting",
     retryNow: "Retry",
     enterStreet: "Enter the street",
+    clickEnterStreet: "Click to enter the street",
     paused: "Paused",
     resume: "Resume",
     returnHome: "Return home",
@@ -95,6 +97,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     oathLine: "Then I will follow the horse—and find who sent them.",
   },
   hi: {
+    chapterKicker: "अध्याय 1",
     objective: "उद्देश्य",
     familyDanger: "परिवार संकट में",
     ccOn: "कैप्शन चालू",
@@ -107,6 +110,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     connecting: "जुड़ रहा है",
     retryNow: "फिर प्रयास करें",
     enterStreet: "गली में प्रवेश करें",
+    clickEnterStreet: "गली में प्रवेश करने के लिए क्लिक करें",
     paused: "विराम",
     resume: "जारी रखें",
     returnHome: "मुखपृष्ठ",
@@ -183,6 +187,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     oathLine: "तब मैं अश्व के पीछे जाऊँगा—और उन्हें भेजने वाले को खोजूँगा।",
   },
   ta: {
+    chapterKicker: "அத்தியாயம் 1",
     objective: "நோக்கம்",
     familyDanger: "குடும்பம் ஆபத்தில்",
     ccOn: "வசனங்கள் இயக்கு",
@@ -195,6 +200,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     connecting: "இணைகிறது",
     retryNow: "மீண்டும் முயல்க",
     enterStreet: "தெருவில் நுழைக",
+    clickEnterStreet: "தெருவில் நுழைய கிளிக் செய்யவும்",
     paused: "இடைநிறுத்தம்",
     resume: "தொடர்க",
     returnHome: "முகப்புக்கு",
@@ -275,6 +281,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
       "அப்படியெனில் நான் குதிரையைத் தொடர்வேன்—அவர்களை அனுப்பியவனை கண்டுபிடிப்பேன்.",
   },
   kn: {
+    chapterKicker: "ಅಧ್ಯಾಯ 1",
     objective: "ಉದ್ದೇಶ",
     familyDanger: "ಕುಟುಂಬ ಅಪಾಯದಲ್ಲಿ",
     ccOn: "ಶೀರ್ಷಿಕೆಗಳು ಚಾಲು",
@@ -287,6 +294,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     connecting: "ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ",
     retryNow: "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
     enterStreet: "ಬೀದಿಗೆ ಪ್ರವೇಶಿಸಿ",
+    clickEnterStreet: "ಬೀದಿಗೆ ಪ್ರವೇಶಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ",
     paused: "ವಿರಾಮ",
     resume: "ಮುಂದುವರಿಸಿ",
     returnHome: "ಮುಖಪುಟಕ್ಕೆ",
@@ -362,6 +370,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
       "ಹಾಗಾದರೆ ನಾನು ಕುದುರೆಯನ್ನು ಹಿಂಬಾಲಿಸುತ್ತೇನೆ—ಅವರನ್ನು ಕಳುಹಿಸಿದವನನ್ನು ಹುಡುಕುತ್ತೇನೆ.",
   },
   te: {
+    chapterKicker: "అధ్యాయం 1",
     objective: "లక్ష్యం",
     familyDanger: "కుటుంబం ప్రమాదంలో",
     ccOn: "క్యాప్షన్‌లు ఆన్",
@@ -374,6 +383,7 @@ window.DWARKA_GAME_I18N = Object.freeze({
     connecting: "అనుసంధానిస్తోంది",
     retryNow: "మళ్లీ ప్రయత్నించండి",
     enterStreet: "వీధిలోకి ప్రవేశించండి",
+    clickEnterStreet: "వీధిలోకి ప్రవేశించడానికి క్లిక్ చేయండి",
     paused: "విరామం",
     resume: "కొనసాగించండి",
     returnHome: "ముఖపుటకు",

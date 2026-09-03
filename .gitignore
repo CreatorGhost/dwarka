@@ -39,3 +39,6 @@ yarn-error.log*
 /outputs/
 /work/
 *.tsbuildinfo
+
+# Abandoned Unity WebGL build (archived under ../unity)
+public/unity/
