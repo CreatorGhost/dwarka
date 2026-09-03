@@ -5,11 +5,13 @@ import test from "node:test";
 import {
   CHARACTER_ANIMATIONS,
   animationSpeeds,
+  enemyWalkPlaybackSpeed,
   keepCharacterRenderDetail,
 } from "../../game/client-scripts/character/animation.js";
 import {
   enemyActionAnimation,
   separateEnemyVisuals,
+  visibleEnemyStates,
 } from "../../game/client-scripts/combat/effects.js";
 import {
   attackWarningGlyph,
@@ -500,5 +502,26 @@ test("snapshot interpolation cannot visually collapse two attackers", () => {
       { id: "courtyard-1-0", health: 60 },
       { id: "courtyard-1-1", health: 60 },
     ],
+  );
+});
+
+test("enemy walk playback tracks rendered velocity and inactive waves stay hidden", () => {
+  assert.ok(enemyWalkPlaybackSpeed(2.15) > enemyWalkPlaybackSpeed(1.35));
+  assert.ok(enemyWalkPlaybackSpeed(1.35) > enemyWalkPlaybackSpeed(0.5));
+  assert.equal(
+    visibleEnemyStates({
+      phase: "market",
+      family: { active: false },
+      enemies: [{ id: "market-hidden" }],
+    }).length,
+    0,
+  );
+  assert.equal(
+    visibleEnemyStates({
+      phase: "market",
+      family: { active: true },
+      enemies: [{ id: "market-active" }],
+    }).length,
+    1,
   );
 });
