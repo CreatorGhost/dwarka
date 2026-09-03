@@ -31,6 +31,27 @@ const stories = [
   { id: "D", href: "/abhimanyu" },
 ];
 
+const titleCopy: Record<Locale, {
+  subtitle: string;
+  begin: string;
+  continue: string;
+  replay: string;
+  language: string;
+  settings: string;
+  credits: string;
+  creditsTitle: string;
+  creditsBody: string;
+  close: string;
+  archive: string;
+  source: string;
+}> = {
+  en: { subtitle: "The Boy with the Paper Sun", begin: "Begin", continue: "Continue", replay: "Replay", language: "Language", settings: "Settings", credits: "Credits", creditsTitle: "Credits", creditsBody: "Created for a college game jam. Story, art direction, and game development by the DWARKA team.", close: "Close", archive: "Story archive", source: "Adapted from the Jaiminiya Ashvamedha Parva" },
+  hi: { subtitle: "कागज़ी सूरज वाला बालक", begin: "आरंभ करें", continue: "जारी रखें", replay: "फिर खेलें", language: "भाषा", settings: "सेटिंग्स", credits: "श्रेय", creditsTitle: "श्रेय", creditsBody: "एक कॉलेज गेम जैम के लिए निर्मित। कथा, कला निर्देशन और खेल विकास: DWARKA टीम।", close: "बंद करें", archive: "कथा संग्रह", source: "जैमिनीय अश्वमेध पर्व से रूपांतरित" },
+  ta: { subtitle: "காகிதச் சூரியன் கொண்ட சிறுவன்", begin: "தொடங்கு", continue: "தொடர்க", replay: "மீண்டும் ஆடு", language: "மொழி", settings: "அமைப்புகள்", credits: "நன்றிகள்", creditsTitle: "நன்றிகள்", creditsBody: "கல்லூரி விளையாட்டு விழாவிற்காக உருவாக்கப்பட்டது. கதை, கலை இயக்கம் மற்றும் விளையாட்டு உருவாக்கம்: DWARKA குழு.", close: "மூடு", archive: "கதைத் தொகுப்பு", source: "ஜைமினிய அசுவமேத பர்வத்திலிருந்து தழுவப்பட்டது" },
+  kn: { subtitle: "ಕಾಗದದ ಸೂರ್ಯನ ಬಾಲಕ", begin: "ಪ್ರಾರಂಭಿಸಿ", continue: "ಮುಂದುವರಿಸಿ", replay: "ಮತ್ತೆ ಆಡಿ", language: "ಭಾಷೆ", settings: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು", credits: "ಶ್ರೇಯಗಳು", creditsTitle: "ಶ್ರೇಯಗಳು", creditsBody: "ಕಾಲೇಜು ಗೇಮ್ ಜಾಮ್‌ಗಾಗಿ ರಚಿಸಲಾಗಿದೆ. ಕಥೆ, ಕಲಾ ನಿರ್ದೇಶನ ಮತ್ತು ಆಟದ ಅಭಿವೃದ್ಧಿ: DWARKA ತಂಡ.", close: "ಮುಚ್ಚಿ", archive: "ಕಥಾ ಸಂಗ್ರಹ", source: "ಜೈಮಿನೀಯ ಅಶ್ವಮೇಧ ಪರ್ವದಿಂದ ರೂಪಾಂತರಿಸಲಾಗಿದೆ" },
+  te: { subtitle: "కాగితపు సూర్యుడున్న బాలుడు", begin: "ప్రారంభించండి", continue: "కొనసాగించండి", replay: "మళ్లీ ఆడండి", language: "భాష", settings: "సెట్టింగ్స్", credits: "రూపకర్తలు", creditsTitle: "రూపకర్తలు", creditsBody: "కాలేజీ గేమ్ జామ్ కోసం రూపొందించబడింది. కథ, కళా దర్శకత్వం మరియు గేమ్ అభివృద్ధి: DWARKA బృందం.", close: "మూసివేయండి", archive: "కథల భాండాగారం", source: "జైమినీయ అశ్వమేధ పర్వం నుండి స్వీకరించబడింది" },
+};
+
 function LanguageSelect({ value, onChange, label }: { value: Locale; onChange: (locale: Locale) => void; label: string }) {
   return <label>{label}<select value={value} onChange={(event) => onChange(event.target.value as Locale)}>{locales.map((locale) => <option value={locale} key={locale}>{languageNames[locale]}</option>)}</select></label>;
 }
@@ -51,13 +72,18 @@ export default function Home() {
   const [panel, setPanel] = useState(0);
   const [skipConfirm, setSkipConfirm] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [voiceNotice, setVoiceNotice] = useState(false);
   const storyVoiceRef = useRef<HTMLAudioElement | null>(null);
   const languageDialogRef = useRef<HTMLDivElement | null>(null);
   const settingsDialogRef = useRef<HTMLDivElement | null>(null);
+  const creditsDialogRef = useRef<HTMLDivElement | null>(null);
   const storyDialogRef = useRef<HTMLDivElement | null>(null);
   const settingsInvokerRef = useRef<HTMLElement | null>(null);
+  const languageInvokerRef = useRef<HTMLElement | null>(null);
+  const creditsInvokerRef = useRef<HTMLElement | null>(null);
   const voiceLocale = profile?.settings.voiceLocale;
   const masterVolume = profile?.settings.master;
   const dialogueVolume = profile?.settings.dialogue;
@@ -116,7 +142,7 @@ export default function Home() {
   }, [masterVolume, dialogueVolume, muteAll]);
 
   useEffect(() => {
-    const dialog = !profile?.settings.languageChosen
+    const dialog = !profile?.settings.languageChosen || languageOpen
       ? languageDialogRef.current
       : resetConfirm
         ? document.querySelector<HTMLElement>(".settings-dialog .confirm-dialog")
@@ -124,6 +150,8 @@ export default function Home() {
           ? document.querySelector<HTMLElement>(".story-reader .confirm-dialog")
           : settingsOpen
             ? settingsDialogRef.current
+            : creditsOpen
+              ? creditsDialogRef.current
             : storyOpen
               ? storyDialogRef.current
               : null;
@@ -135,6 +163,12 @@ export default function Home() {
       if (event.key === "Escape" && settingsOpen && !resetConfirm) {
         event.preventDefault(); setSettingsOpen(false); settingsInvokerRef.current?.focus(); return;
       }
+      if (event.key === "Escape" && languageOpen && profile?.settings.languageChosen) {
+        event.preventDefault(); setLanguageOpen(false); languageInvokerRef.current?.focus(); return;
+      }
+      if (event.key === "Escape" && creditsOpen) {
+        event.preventDefault(); setCreditsOpen(false); creditsInvokerRef.current?.focus(); return;
+      }
       if (event.key === "Escape" && resetConfirm) { event.preventDefault(); setResetConfirm(false); return; }
       if (event.key === "Escape" && skipConfirm) { event.preventDefault(); setSkipConfirm(false); return; }
       if (event.key !== "Tab") return;
@@ -145,16 +179,24 @@ export default function Home() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [profile?.settings.languageChosen, settingsOpen, resetConfirm, storyOpen, skipConfirm]);
+  }, [profile?.settings.languageChosen, languageOpen, creditsOpen, settingsOpen, resetConfirm, storyOpen, skipConfirm]);
 
   const locale = profile?.settings.locale ?? "en";
   const copy = dictionaries[locale];
+  const menuCopy = titleCopy[locale];
   const action = useMemo(() => {
-    if (profile?.progressSummary?.chapterComplete) return { label: copy.home.replayChapter1, detail: copy.phases.complete, kind: "game" as const, href: "/game/chapter-1?replay=1" };
-    if (profile?.progressToken && profile.progressSummary) return { label: copy.home.continueChapter1, detail: copy.phases[profile.progressSummary.nextPhase], kind: "game" as const, href: "/game/chapter-1" };
-    if (profile?.storyIntroComplete) return { label: copy.home.beginChapter1, detail: copy.home.chapter1Detail, kind: "game" as const, href: "/game/chapter-1" };
-    return { label: copy.home.beginChapter0, detail: copy.home.chapter0Detail, kind: "story" as const, href: "#chapter-0" };
-  }, [copy, profile]);
+    if (profile?.progressSummary?.chapterComplete) return { kind: "game" as const, href: "/game/chapter-1?replay=1" };
+    if (profile?.progressToken && profile.progressSummary) return { kind: "game" as const, href: "/game/chapter-1" };
+    if (profile?.storyIntroComplete) return { kind: "game" as const, href: "/game/chapter-1" };
+    return { kind: "story" as const, href: "#chapter-0" };
+  }, [profile]);
+  const titleStatus = profile?.progressSummary?.chapterComplete
+    ? copy.home.complete
+    : profile?.progressToken && profile.progressSummary
+      ? copy.phases[profile.progressSummary.nextPhase]
+      : profile?.storyIntroComplete
+        ? copy.home.heroCaptionLabel
+        : copy.chapter0.label;
 
   function persist(next: ChapterProfile) { setProfile(saveProfile(next)); }
   function completeStory(startGame = false) {
@@ -165,6 +207,8 @@ export default function Home() {
   }
   function startPrimary() { if (action.kind === "story") { setPanel(0); setStoryOpen(true); } else window.location.assign(action.href); }
   function openSettings() { settingsInvokerRef.current = document.activeElement as HTMLElement | null; window.scrollTo(0, 0); setSettingsOpen(true); }
+  function openLanguage() { languageInvokerRef.current = document.activeElement as HTMLElement | null; setLanguageOpen(true); }
+  function openCredits() { creditsInvokerRef.current = document.activeElement as HTMLElement | null; setCreditsOpen(true); }
   function saveSetting<K extends keyof ChapterSettings>(key: K, value: ChapterSettings[K]) {
     const current = profile ?? readProfile();
     setProfile(updateSettings(current, { [key]: value }));
@@ -172,6 +216,10 @@ export default function Home() {
   function chooseLanguage(nextLocale: Locale) {
     const current = profile ?? readProfile();
     setProfile(updateSettings(current, { locale: nextLocale, voiceLocale: nextLocale, voiceLinked: true, languageChosen: true }));
+    if (languageOpen) {
+      setLanguageOpen(false);
+      requestAnimationFrame(() => languageInvokerRef.current?.focus());
+    }
   }
   function chooseTextLanguage(nextLocale: Locale) {
     const current = profile ?? readProfile();
@@ -199,36 +247,37 @@ export default function Home() {
   const storyMuted = (profile?.settings.muteAll ?? false) || (profile?.settings.dialogue ?? 1) === 0;
 
   return (
-    <main lang={locale}>
-      <section className="hero game-hero" aria-labelledby="page-title">
-        <div className="hero-copy">
-          <p className="eyebrow">{copy.home.eyebrow}</p>
-          <h1 id="page-title">{copy.home.title}</h1>
-          <p className="hero-deck">{copy.home.deck}</p>
-          <div className="chapter-status" aria-live="polite"><span>{action.detail}</span>{profile?.progressSummary?.chapterComplete ? <b>{copy.home.complete}</b> : null}</div>
-          <div className="hero-actions">
-            <button className="button primary" type="button" onClick={startPrimary}>{action.label}</button>
-            {profile?.storyIntroComplete ? <button className="button quiet" type="button" onClick={() => { setPanel(0); setStoryOpen(true); }}>{copy.home.replayStory}</button> : null}
-            <button className="button quiet settings-entry" type="button" onClick={openSettings}>{copy.home.settings}</button>
-            <a className="button quiet" href="#compare">{copy.home.readAllStories}</a>
-          </div>
+    <main className="title-page" lang={locale}>
+      <section className="title-screen" aria-labelledby="page-title">
+        <div className="title-art" aria-hidden="true">
+          <Image src="/brand/title-key-art.jpeg" alt="" fill sizes="100vw" priority />
         </div>
-        <figure className="hero-art">
-          <Image src="/story-a/10-oath.webp" alt={copy.home.heroAlt} width={1536} height={1024} priority />
-          <figcaption><b>{copy.home.heroCaptionLabel}</b>{copy.home.heroCaption}</figcaption>
-        </figure>
-      </section>
+        <div className="title-vignette" aria-hidden="true" />
+        <div className="title-grain" aria-hidden="true" />
 
-      <section className="premise" aria-labelledby="plain-language">
-        <p className="section-number">00</p><div><p className="eyebrow" id="plain-language">{copy.home.confirmedDirection}</p><h2>{copy.home.premiseTitle}</h2></div>
-        <p>{copy.home.premise}</p>
-      </section>
+        <div className="title-lockup">
+          <h1 className="sr-only" id="page-title">DWARKA: The Lost City</h1>
+          <p className="title-chapter">Chapter I <span aria-hidden="true">/</span> {menuCopy.subtitle}</p>
+          <p className="title-status" aria-live="polite">{titleStatus}</p>
+          <button className="title-primary" type="button" onClick={startPrimary}>
+            <span>{profile?.progressSummary?.chapterComplete ? menuCopy.replay : profile?.progressToken || profile?.storyIntroComplete ? menuCopy.continue : menuCopy.begin}</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <nav className="title-menu" aria-label="Game menu">
+            <button type="button" onClick={openLanguage}>{menuCopy.language}</button>
+            <button className="settings-entry" type="button" onClick={openSettings}>{menuCopy.settings}</button>
+            <button type="button" onClick={openCredits}>{menuCopy.credits}</button>
+          </nav>
+        </div>
 
-      <section className="story-grid" id="compare" aria-label={copy.home.archiveLabel}>
-        {stories.map((story, index) => { const storyCopy = copy.home.stories[index]; return <article className={`story-card story-${story.id.toLowerCase()}`} key={story.id}><div className="story-card-top"><span className="story-letter">{story.id}</span><span className="verdict">{storyCopy.verdict}</span></div><h2>{storyCopy.title}</h2><p className="story-subtitle">{storyCopy.subtitle}</p><dl><div><dt>{copy.home.whoYouPlay}</dt><dd>{storyCopy.who}</dd></div><div><dt>{copy.home.whatStarts}</dt><dd>{storyCopy.spark}</dd></div><div><dt>{copy.home.whatYouDo}</dt><dd>{storyCopy.goal}</dd></div></dl><Link href={story.href}>{storyCopy.read}</Link></article>; })}
+        <footer className="title-footer">
+          <p>{menuCopy.source}</p>
+          <details className="title-archive">
+            <summary>{menuCopy.archive}</summary>
+            <nav aria-label={copy.home.archiveLabel}>{stories.map((story, index) => <Link key={story.id} href={story.href}>{copy.home.stories[index].title}</Link>)}</nav>
+          </details>
+        </footer>
       </section>
-
-      <section className="decision"><p className="eyebrow">{copy.home.decisionChapter}</p><h2>{copy.home.decisionTitle}</h2><p>{copy.home.decisionBody}</p><button className="button primary" type="button" onClick={startPrimary}>{action.label}</button></section>
 
       {storyOpen ? <div ref={storyDialogRef} className="story-reader" role="dialog" aria-modal="true" aria-labelledby="story-title">
         <div className="story-reader-top"><div><p className="eyebrow">{copy.chapter0.label}</p><p className="attribution">{copy.chapter0.attribution}</p></div><button type="button" onClick={() => setStoryOpen(false)} aria-label={copy.chapter0.close}>{copy.chapter0.close}</button></div>
@@ -261,7 +310,9 @@ export default function Home() {
         <div className="settings-actions"><button type="button" onClick={() => { setSettingsOpen(false); requestAnimationFrame(() => settingsInvokerRef.current?.focus()); }}>{copy.settings.done}</button></div>
       </div>{resetConfirm ? <div className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="reset-title"><div><p className="eyebrow">{copy.settings.resetLabel}</p><h2 id="reset-title">{copy.settings.resetTitle}</h2><p>{copy.settings.resetBody}</p><div><button type="button" onClick={() => setResetConfirm(false)}>{copy.settings.cancel}</button><button className="danger-button" type="button" onClick={confirmReset}>{copy.settings.resetConfirm}</button></div></div></div> : null}</div> : null}
 
-      {profile && !profile.settings.languageChosen ? <div ref={languageDialogRef} className="language-chooser" role="dialog" aria-modal="true" aria-labelledby="language-title"><div><p className="eyebrow">DWARKA</p><h2 id="language-title">{dictionaries.en.languageChooser.title}</h2><p>{dictionaries.en.languageChooser.description}</p><div className="language-options">{locales.map((option) => <button type="button" lang={option} key={option} onClick={() => chooseLanguage(option)}>{languageNames[option]}</button>)}</div></div></div> : null}
+      {creditsOpen ? <div ref={creditsDialogRef} className="credits-dialog" role="dialog" aria-modal="true" aria-labelledby="credits-title"><div><p className="eyebrow">DWARKA</p><h2 id="credits-title">{menuCopy.creditsTitle}</h2><p>{menuCopy.creditsBody}</p><button type="button" onClick={() => { setCreditsOpen(false); requestAnimationFrame(() => creditsInvokerRef.current?.focus()); }}>{menuCopy.close}</button></div></div> : null}
+
+      {profile && (!profile.settings.languageChosen || languageOpen) ? <div ref={languageDialogRef} className="language-chooser" role="dialog" aria-modal="true" aria-labelledby="language-title"><div><p className="eyebrow">DWARKA</p><h2 id="language-title">{dictionaries[locale].languageChooser.title}</h2><p>{dictionaries[locale].languageChooser.description}</p><div className="language-options">{locales.map((option) => <button type="button" lang={option} key={option} onClick={() => chooseLanguage(option)}>{languageNames[option]}</button>)}</div>{profile.settings.languageChosen ? <button className="language-close" type="button" onClick={() => { setLanguageOpen(false); requestAnimationFrame(() => languageInvokerRef.current?.focus()); }}>{menuCopy.close}</button> : null}</div></div> : null}
     </main>
   );
 }

@@ -9,14 +9,16 @@ async function render(path = "/") {
   return worker.fetch(new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("renders the Chapter 0 homepage and confirmed Chapter 1 entry", async () => {
+test("renders the DWARKA title screen and Chapter 1 identity", async () => {
   const response = await render("/");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Begin Chapter 0/);
+  assert.match(html, /DWARKA: The Lost City/);
   assert.match(html, /The Boy with the Paper Sun/);
-  assert.match(html, /The confirmed direction/);
-  assert.doesNotMatch(html, /player survives for three minutes/i);
+  assert.match(html, /title-key-art\.jpeg/);
+  assert.match(html, /Adapted from the Jaiminiya Ashvamedha Parva/);
+  assert.doesNotMatch(html, /The confirmed direction/);
+  assert.doesNotMatch(html, /Who you play/);
 });
 
 test("preserves all four story routes and adds the game route", async () => {

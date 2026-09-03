@@ -17,15 +17,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
   const host = requestHeaders.get("host") ?? "localhost:3000";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const image = `${protocol}://${host}/og.png`;
-  const title = "DWARKA | Mahabharata game story review";
-  const description = "Compare four story directions for a Mahabharata-era action game and read each complete visual chapter.";
+  const image = `${protocol}://${host}/brand/title-key-art.jpeg`;
+  const title = "DWARKA: The Lost City";
+  const description = "Enter a Mahabharata-era action game about Vrishaketu, the surviving son of Karna.";
 
   return {
     title,
     description,
-    icons: { icon: "/favicon.png", shortcut: "/favicon.png" },
-    openGraph: { title, description, images: [{ url: image, width: 1731, height: 909, alt: "DWARKA, Four Ways into the Mahabharata" }] },
+    icons: { icon: "/brand/dwarka-mark.png", shortcut: "/brand/dwarka-mark.png", apple: "/brand/dwarka-mark.png" },
+    openGraph: { title, description, images: [{ url: image, width: 1264, height: 841, alt: "DWARKA: The Lost City title artwork" }] },
     twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
