@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import {
+  CHARACTER_ANIMATIONS,
+  animationSpeeds,
+} from "../../game/client-scripts/character/animation.js";
 import { installHud } from "../../game/client-scripts/ui/hud.js";
 import { shouldPauseForPointerUnlock } from "../../game/client-scripts/runtime/input.js";
+import { safeCameraDistance } from "../../game/client-scripts/runtime/loop.js";
 import { installModals } from "../../game/client-scripts/ui/modals.js";
 
 function element(overrides = {}) {
@@ -227,4 +232,33 @@ test("pointer unlock pauses real play but not QA or a still-focused canvas", () 
       }),
       false,
     );
+});
+
+test("sprint uses the authored sprint cycle at the calibrated travel rate", () => {
+  assert.equal(CHARACTER_ANIMATIONS.sprint, "Sprint_Loop");
+  assert.equal(
+    animationSpeeds({ feel: { dodgeClipSeconds: 1.47, dodgeActionSeconds: 0.65 } }).sprint,
+    1.12,
+  );
+});
+
+test("camera collision treats the route edge as a wall-sized occluder", () => {
+  const floorAt = (x, z) => (x >= -6 && x <= 6 && z >= -18 && z <= 4 ? 0 : null);
+  const target = { x: 4.9, y: 1.6, z: -8 };
+  const open = safeCameraDistance({
+    target,
+    desired: { x: 2, y: 2.8, z: -8 },
+    bounds: { minX: -28, maxX: 28, minZ: -58, maxZ: 34 },
+    colliders: [],
+    floorAt,
+  });
+  const acrossFacade = safeCameraDistance({
+    target,
+    desired: { x: 9, y: 2.8, z: -8 },
+    bounds: { minX: -28, maxX: 28, minZ: -58, maxZ: 34 },
+    colliders: [],
+    floorAt,
+  });
+  assert.ok(open > 2.8);
+  assert.ok(acrossFacade < 1.2, `camera travelled ${acrossFacade.toFixed(2)} m through the facade`);
 });

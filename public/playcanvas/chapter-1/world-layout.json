@@ -210,8 +210,8 @@
     { "phase": "arrival", "x": 4.8, "y": 1.9, "z": 20, "intensity": 0.75 },
     { "phase": "courtyard", "x": 18, "y": 1.9, "z": 10, "intensity": 0.75 },
     { "phase": "courtyard", "x": 25, "y": 1.9, "z": 7, "intensity": 0.75 },
-    { "phase": "market", "x": -23, "y": 7.9, "z": -24, "intensity": 0.3 },
-    { "phase": "market", "x": -17, "y": 7.9, "z": -29, "intensity": 0.3 },
+    { "phase": "market", "x": -23, "y": 7.9, "z": -24, "intensity": 0.24 },
+    { "phase": "market", "x": -17, "y": 7.9, "z": -29, "intensity": 0.24 },
     { "phase": "doorway", "x": 8, "y": 7.9, "z": -46, "intensity": 0.28 },
     { "phase": "doorway", "x": 4, "y": 7.9, "z": -51, "intensity": 0.28 }
   ],
