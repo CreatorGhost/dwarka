@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dwarka.local/schemas/chapter-1-voice-manifest.schema.json",
+  "title": "DWARKA Chapter 1 fixed voice manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "chapter", "generatedAt", "provider", "locales", "personas", "lineCount", "entryCount", "assetCount", "entries"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "project": { "const": "dwarka" },
+    "chapter": { "const": "chapter-1" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ttsModel", "sttModel", "syntheticVoice", "developmentFallback"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "ttsModel": { "type": "string", "minLength": 1 },
+        "sttModel": { "type": ["string", "null"] },
+        "syntheticVoice": { "const": true },
+        "developmentFallback": { "type": "boolean" }
+      }
+    },
+    "locales": { "type": "array", "minItems": 5, "maxItems": 5 },
+    "personas": { "type": "array", "minItems": 6 },
+    "lineCount": { "type": "integer", "minimum": 1 },
+    "entryCount": { "type": "integer", "minimum": 1 },
+    "assetCount": { "type": "integer", "minimum": 2 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sourceLineId", "scope", "sequence", "locale", "bcp47", "role", "personaId", "providerVoice", "text", "cacheKey", "generatedAt", "status", "provider", "ttsModel", "syntheticVoice", "validation", "assets"],
+        "properties": {
+          "sourceLineId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "scope": { "enum": ["chapter-0", "chapter-1"] },
+          "sequence": { "type": "integer", "minimum": 1 },
+          "locale": { "enum": ["en", "hi", "ta", "kn", "te"] },
+          "bcp47": { "enum": ["en-IN", "hi-IN", "ta-IN", "kn-IN", "te-IN"] },
+          "role": { "enum": ["narrator", "vrishaketu", "kunti", "chitra", "raider-one", "raider-two"] },
+          "personaId": { "type": "string", "pattern": "^dwarka\\.[a-z-]+\\.v1$" },
+          "providerVoice": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{16}$" },
+          "generatedAt": { "type": "string", "format": "date-time" },
+          "status": { "enum": ["validated", "development-fallback"] },
+          "provider": { "type": "string", "minLength": 1 },
+          "ttsModel": { "type": "string", "minLength": 1 },
+          "syntheticVoice": { "const": true },
+          "validation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["method", "sttModel", "similarity", "transcriptSha256", "detectedLanguage"],
+            "properties": {
+              "method": { "enum": ["sarvam-stt", "not-validated"] },
+              "sttModel": { "type": ["string", "null"] },
+              "similarity": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+              "transcriptSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+              "detectedLanguage": { "type": ["string", "null"] }
+            }
+          },
+          "assets": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["codec", "mimeType", "runtimePath", "sha256", "bytes", "validation"],
+              "properties": {
+                "codec": { "enum": ["mp3", "ogg"] },
+                "mimeType": { "enum": ["audio/mpeg", "audio/ogg"] },
+                "runtimePath": { "type": "string", "pattern": "^/audio/chapter-1/voices/(en|hi|ta|kn|te)/[a-z0-9-]+\\.(mp3|ogg)$" },
+                "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                "bytes": { "type": "integer", "minimum": 257 },
+                "validation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["method", "sttModel", "similarity", "transcriptSha256", "detectedLanguage"],
+                  "properties": {
+                    "method": { "enum": ["sarvam-stt", "not-validated"] },
+                    "sttModel": { "type": ["string", "null"] },
+                    "similarity": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+                    "transcriptSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+                    "detectedLanguage": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

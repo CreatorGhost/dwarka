@@ -1,0 +1,29 @@
+node_modules/
+.DS_Store
+*.log
+
+# Unity: abandoned track, never pushed
+unity/
+
+# Raw asset archives (large, re-downloadable; game/asset-ledger.md records every source)
+game/assets/raw/
+game/assets/work/
+game/tools/__pycache__/
+
+# Secrets
+game/server/.env.local
+
+# site/ is its own git repository, pushed separately to the same GitHub repo
+site/
+
+# Archival prototypes and source art (kept locally; the shipped art lives in site/public)
+docs/source-png/
+docs/old-sketch-style/
+game/client-scripts-v1-scratch/
+docs/manga/
+.next/
+.vite/
+.vinext/
+.impeccable/
+.dockerignore
+next-env.d.ts

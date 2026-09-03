@@ -1,0 +1,269 @@
+export function installDressing(rt) {
+  const { state, ui, pc, canvas, mats } = rt;
+  const WORLD_BOUNDS = rt.WORLD_BOUNDS;
+  const WORLD_COLLIDERS = rt.WORLD_COLLIDERS;
+  const FLOOR_REGIONS = rt.FLOOR_REGIONS;
+  const ROUTE_SEGMENTS = rt.ROUTE_SEGMENTS;
+  const ENVIRONMENT_PLACEMENTS = rt.ENVIRONMENT_PLACEMENTS;
+  const STREET_HOUSE_BAYS = rt.STREET_HOUSE_BAYS;
+  const TALL_HOUSE_BAYS = rt.TALL_HOUSE_BAYS;
+  const SETBACK_HOUSE_BAYS = rt.SETBACK_HOUSE_BAYS;
+  const LANDMARKS = rt.LANDMARKS;
+  const STREET_HOUSE_MODEL_KEYS = rt.STREET_HOUSE_MODEL_KEYS;
+  const UPPER_HOUSE_MODEL_KEYS = rt.UPPER_HOUSE_MODEL_KEYS;
+  const UPPER_HOUSE_FRONTS = rt.UPPER_HOUSE_FRONTS;
+  const GROUND_ALIGNED_MODELS = rt.GROUND_ALIGNED_MODELS;
+  const STREET_SURFACE_Y = rt.STREET_SURFACE_Y;
+  const CHARACTER_GROUND_LIFT = rt.CHARACTER_GROUND_LIFT;
+  const floorHeightAt = rt.floorHeightAt;
+  const STORY = rt.STORY;
+  const STORY_VOICE_LINES = rt.STORY_VOICE_LINES;
+  const EFFECT_URLS = rt.EFFECT_URLS;
+  const TUTORIAL_STEPS = rt.TUTORIAL_STEPS;
+  const PLAYABLE_PHASES = rt.PLAYABLE_PHASES;
+  const MODEL_URLS = rt.MODEL_URLS;
+  const CHAPTER_CONFIG = rt.CHAPTER_CONFIG;
+  const ChapterSimulation = rt.ChapterSimulation;
+  const CHARACTER_ANIMATIONS = rt.CHARACTER_ANIMATIONS;
+  const PHASE_DETAILS = rt.PHASE_DETAILS;
+  const UI_MESSAGES = rt.UI_MESSAGES;
+  const assetUrl = rt.assetUrl;
+  const chapterAssetRevision = rt.chapterAssetRevision;
+  const angleDifference = rt.angleDifference;
+  const targetLineBlocked = rt.targetLineBlocked;
+  const safeWebSocketEndpoint = rt.safeWebSocketEndpoint;
+  const CHARACTER_ANIMATION_SPEEDS = rt.CHARACTER_ANIMATION_SPEEDS;
+  const characterStateGraph = rt.characterStateGraph;
+  const animationSpeeds = rt.animationSpeeds;
+  const t = rt.t;
+  const sendParent = rt.sendParent;
+  const strings = rt.strings;
+  const localizedMessage = rt.localizedMessage;
+  const clearInput = rt.clearInput;
+  const queuePressed = rt.queuePressed;
+
+  function createSunEmblem(x, y, z, facing = 0) {
+    const emblem = rt.primitive(
+      "cylinder",
+      "Gold sun emblem",
+      [x, y, z],
+      [0.34, 0.055, 0.34],
+      mats.gold,
+    );
+    emblem.setEulerAngles(90, facing, 0);
+    for (let ray = 0; ray < 8; ray += 1) {
+      const angle = (ray * Math.PI) / 4;
+      const spoke = rt.primitive(
+        "box",
+        "Sun ray",
+        [x + Math.cos(angle) * 0.48, y + Math.sin(angle) * 0.48, z],
+        [0.26, 0.035, 0.035],
+        mats.gold,
+      );
+      spoke.setEulerAngles(0, facing, ray * 45);
+    }
+  }
+
+  function createBunting(z, height, paletteOffset = 0) {
+    if (!state.pennantMesh)
+      state.pennantMesh = pc.createMesh(
+        state.app.graphicsDevice,
+        [-0.5, 0.42, 0, 0.5, 0.42, 0, 0, -0.58, 0],
+        {
+          normals: [0, 0, 1, 0, 0, 1, 0, 0, 1],
+          uvs: [0, 0, 1, 0, 0.5, 1],
+          indices: [0, 1, 2],
+        },
+      );
+    const points = [];
+    for (let index = 0; index < 13; index += 1) {
+      const progress = index / 12;
+      points.push(
+        new pc.Vec3(
+          -9.5 + progress * 19,
+          height - Math.sin(progress * Math.PI) * 0.64,
+          z,
+        ),
+      );
+    }
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const cord = rt.primitive(
+        "box",
+        "Sagging festival cord",
+        [0, 0, 0],
+        [0.015, 0.015, 1],
+        mats.wood,
+      );
+      cord.castShadows = false;
+      rt.boxBetweenLocal(
+        cord,
+        state.app.root,
+        points[index],
+        points[index + 1],
+        0.015,
+      );
+    }
+    for (let index = 0; index < 11; index += 1) {
+      const anchor = points[index + 1];
+      const pennant = new pc.Entity("Triangular festival pennant");
+      const instance = new pc.MeshInstance(
+        state.pennantMesh,
+        mats.buntingPalette[
+          (index + paletteOffset) % mats.buntingPalette.length
+        ],
+      );
+      pennant.addComponent("render", { meshInstances: [instance] });
+      state.app.root.addChild(pennant);
+      pennant.setPosition(anchor.x, anchor.y - 0.48, anchor.z);
+      pennant.setLocalScale(0.74, 0.88, 1);
+      pennant.setEulerAngles(0, 0, (index + paletteOffset) % 2 ? 6 : -6);
+      pennant.render.castShadows = false;
+      pennant.render.receiveShadows = true;
+    }
+  }
+
+  function createRegionalSkyline() {
+    for (const [x, z, scale, color] of [
+      [-15.8, 18, 1.0, mats.stoneLight],
+      [15.2, 5, 0.82, mats.sand],
+      [-16.4, -12, 0.9, mats.sand],
+      [15.8, -28, 1.08, mats.stoneLight],
+      [-12.8, -45, 1.22, mats.sandLight],
+      [13.4, -47, 0.95, mats.sand],
+    ]) {
+      rt.primitive(
+        "cylinder",
+        "Rooftop shrine drum",
+        [x, 5.4 * scale, z],
+        [1.45 * scale, 0.75 * scale, 1.45 * scale],
+        color,
+      );
+      const dome = rt.primitive(
+        "sphere",
+        "Rooftop shrine dome",
+        [x, 6.0 * scale, z],
+        [1.62 * scale, 0.72 * scale, 1.62 * scale],
+        color,
+      );
+      dome.castShadows = false;
+      rt.primitive(
+        "cylinder",
+        "Rooftop gold finial",
+        [x, 6.86 * scale, z],
+        [0.09 * scale, 0.7 * scale, 0.09 * scale],
+        mats.gold,
+      );
+      rt.primitive(
+        "sphere",
+        "Rooftop finial crown",
+        [x, 7.25 * scale, z],
+        [0.18 * scale, 0.18 * scale, 0.18 * scale],
+        mats.gold,
+      );
+    }
+    const nicheBack = rt.primitive(
+      "box",
+      "Household shrine niche",
+      [-9.76, 1.55, 2.1],
+      [0.08, 1.28, 1.16],
+      mats.indigo,
+    );
+    nicheBack.castShadows = false;
+    for (const [y, z, height, depth] of [
+      [2.22, 2.1, 0.15, 1.42],
+      [0.9, 2.1, 0.15, 1.42],
+      [1.55, 1.45, 1.45, 0.14],
+      [1.55, 2.75, 1.45, 0.14],
+    ]) {
+      const frame = rt.primitive(
+        "box",
+        "Shrine niche sandstone frame",
+        [-9.62, y, z],
+        [0.22, height, depth],
+        mats.stoneLight,
+      );
+      frame.castShadows = false;
+    }
+    createSunEmblem(-9.48, 1.55, 2.1, 90);
+    const shrineGlow = new pc.Entity("Shrine diya glow");
+    shrineGlow.addComponent("light", {
+      type: "omni",
+      color: new pc.Color(1, 0.38, 0.1),
+      intensity: 0.4,
+      range: 4.2,
+      castShadows: false,
+    });
+    shrineGlow.setPosition(-9.1, 1.25, 2.1);
+    rt.registerFireLight(shrineGlow, 0.4, 2.7);
+    state.app.root.addChild(shrineGlow);
+    const wellBeam = rt.primitive(
+      "box",
+      "Well timber crossbeam",
+      [5, 2.16, 17],
+      [2.35, 0.16, 0.18],
+      mats.wood,
+    );
+    wellBeam.castShadows = true;
+    createBunting(11.5, 5.15, 0);
+    createBunting(-8.5, 4.92, 1);
+    createBunting(-26.5, 5.12, 2);
+  }
+
+  function decorateTurnWalls() {
+    for (const [z, columns, motifX, textileColor] of [
+      [-3.67, [-9.1, -6.5, -3.9, -1.3, 1.2], -5.2, mats.turquoise],
+      [-17.87, [-1.15, 1.7, 4.55, 7.4, 9.95], 4.45, mats.magenta],
+    ]) {
+      for (const x of [columns[1], columns[3]]) {
+        const cloth = rt.primitive(
+          "box",
+          "Dyed turn-wall textile",
+          [x, 0.86, z - 0.03],
+          [1.08, 1.08, 0.035],
+          textileColor,
+        );
+        cloth.castShadows = false;
+      }
+      createSunEmblem(motifX, 1.02, z - 0.08);
+    }
+  }
+
+  function createDoorwayLandmark() {
+    const landmark = LANDMARKS.doorway;
+    if (!landmark) return;
+    for (const spec of landmark.primitives || []) {
+      const entity = rt.primitive(
+        spec.type,
+        spec.name,
+        spec.position,
+        spec.scale,
+        mats[spec.material] || mats.stone,
+      );
+      entity.castShadows = !/runner|dome|crown/i.test(spec.name);
+      entity.receiveShadows = true;
+      rt.registerDoorEntity(entity, spec.name, spec.position);
+    }
+    if (landmark.sunEmblem) createSunEmblem(...landmark.sunEmblem);
+    for (const [x, y, z, facing] of landmark.torches || [])
+      rt.createWallTorch(x, y, z, facing);
+    const fillSpec = landmark.fireFill;
+    if (!fillSpec) return;
+    const fill = new pc.Entity("Doorway fire fill");
+    fill.addComponent("light", {
+      type: "omni",
+      color: new pc.Color(1, 0.48, 0.24),
+      intensity: fillSpec.intensity,
+      range: fillSpec.range,
+      castShadows: false,
+    });
+    fill.setPosition(...fillSpec.position);
+    rt.registerFireLight(fill, fillSpec.intensity, 4.2);
+    state.app.root.addChild(fill);
+  }
+
+  rt.createSunEmblem = createSunEmblem;
+  rt.createBunting = createBunting;
+  rt.createRegionalSkyline = createRegionalSkyline;
+  rt.decorateTurnWalls = decorateTurnWalls;
+  rt.createDoorwayLandmark = createDoorwayLandmark;
+}

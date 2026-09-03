@@ -1,0 +1,36 @@
+{
+  "network": {
+    "enemyInterpolationMs": 100
+  },
+  "feel": {
+    "cameraSpringFrequency": 12,
+    "dodgeActionSeconds": 0.65,
+    "dodgeClipSeconds": 1.47,
+    "dodgeInvulnerabilityStartSeconds": 0.2,
+    "dodgeInvulnerabilityEndSeconds": 0.5,
+    "familyDangerRadius": 2.6
+  },
+  "checkpoints": {
+    "arrival": { "x": 0, "y": 0, "z": 28, "yaw": 0 },
+    "courtyard": { "x": 22, "y": 0, "z": 12, "yaw": 0 },
+    "market": { "x": -20, "y": 6, "z": -26, "yaw": 0 },
+    "doorway": { "x": 12, "y": 6, "z": -44, "yaw": -1.57 },
+    "ending": { "x": 0, "y": 6, "z": -50, "yaw": 0 },
+    "complete": { "x": 0, "y": 6, "z": -50, "yaw": 0 }
+  },
+  "familyPositions": {
+    "courtyard": { "x": 22, "y": 0, "z": -2 },
+    "market": { "x": -20, "y": 6, "z": -32 },
+    "doorway": { "x": 0, "y": 6, "z": -50 }
+  },
+  "enemyStats": {
+    "skirmisher": { "health": 60, "damage": 15, "speed": 2.15, "range": 1.65, "windup": 0.65 },
+    "archer": { "health": 45, "damage": 12, "speed": 1.35, "range": 9.5, "windup": 0.8 },
+    "brute": { "health": 110, "damage": 22, "speed": 1.25, "range": 2.05, "windup": 1.1 }
+  },
+  "spawns": {
+    "courtyard": [{ "x": 18, "y": 0, "z": 8 }, { "x": 25, "y": 0, "z": 6 }, { "x": 22, "y": 0, "z": 1 }],
+    "market": [{ "x": -23, "y": 6, "z": -24 }, { "x": -17, "y": 6, "z": -24 }, { "x": -24, "y": 6, "z": -33 }, { "x": -16, "y": 6, "z": -33 }],
+    "doorway": [{ "x": 9, "y": 6, "z": -47 }, { "x": 4, "y": 6, "z": -49 }, { "x": 1, "y": 6, "z": -53 }, { "x": 10, "y": 6, "z": -52 }]
+  }
+}

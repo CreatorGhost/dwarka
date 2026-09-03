@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "canonicalRig": "Quaternius Universal Animation Library 1 Standard",
+  "canonicalRigFile": "site/public/playcanvas/chapter-1/assets/animations/UAL1_Standard.glb",
+  "outputFile": "site/public/playcanvas/chapter-1/assets/animations/Dwarka_Combat.glb",
+  "clips": [
+    {
+      "name": "Bow_Aim_Loop",
+      "sourceFile": "game/assets/raw/mixamo/Standing Aim Idle 01.fbx",
+      "sourceMotionId": "123cd592-6ad3-4ecc-9199-d4179124fa01",
+      "sourceClip": "Standing Aim Idle 01",
+      "role": "player and archer bow hold",
+      "loop": true,
+      "download": {
+        "format": "FBX Binary",
+        "skin": "Without Skin",
+        "fps": 30,
+        "keyframeReduction": "none",
+        "overdrive": 50,
+        "characterArmSpace": 50
+      },
+      "sha256": "1166c4b3a39028bbe3814ed5a35db92399ec0ea7d5bd55729f9b609724d21732"
+    },
+    {
+      "name": "Bow_Release",
+      "sourceFile": "game/assets/raw/mixamo/Standing Aim Recoil.fbx",
+      "sourceMotionId": "c9cebedc-b96c-11e4-a802-0aaa78deedf9",
+      "sourceClip": "Standing Aim Recoil",
+      "role": "player and archer bow release",
+      "loop": false,
+      "download": {
+        "format": "FBX Binary",
+        "skin": "Without Skin",
+        "fps": 30,
+        "keyframeReduction": "none",
+        "overdrive": 50,
+        "characterArmSpace": 50
+      },
+      "sha256": "254d5e35cf917f658efca96984f88f47acf954056c1bb323e296944e51e2cbe1"
+    },
+    {
+      "name": "Heavy_Overhead",
+      "sourceFile": "game/assets/raw/mixamo/Standing Melee Attack Downward.fbx",
+      "sourceMotionId": "c9ced340-b96c-11e4-a802-0aaa78deedf9",
+      "sourceClip": "Standing Melee Attack Downward",
+      "role": "brute heavy-sword overhead strike",
+      "loop": false,
+      "download": {
+        "format": "FBX Binary",
+        "skin": "Without Skin",
+        "fps": 30,
+        "keyframeReduction": "none",
+        "overdrive": 50,
+        "characterArmSpace": 50
+      },
+      "sha256": "c52c0d2d1f3c4fa0fd6ba2fd0788b50b86aac910dcbbd6ae53f2b550099a786b"
+    }
+  ]
+}
