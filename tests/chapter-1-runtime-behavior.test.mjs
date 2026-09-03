@@ -5,8 +5,12 @@ import test from "node:test";
 import {
   CHARACTER_ANIMATIONS,
   animationSpeeds,
+  keepCharacterRenderDetail,
 } from "../../game/client-scripts/character/animation.js";
-import { enemyActionAnimation } from "../../game/client-scripts/combat/effects.js";
+import {
+  enemyActionAnimation,
+  separateEnemyVisuals,
+} from "../../game/client-scripts/combat/effects.js";
 import {
   attackWarningGlyph,
   bowReticlePresentation,
@@ -134,6 +138,15 @@ test("bow reticle distinguishes a lock, recovery, and a blocked shot", () => {
       cooldownActive: false,
     }).labelKey,
     "targetNoShot",
+  );
+  assert.equal(
+    bowReticlePresentation({
+      hasTarget: true,
+      locked: true,
+      cooldownActive: false,
+      flightActive: true,
+    }).labelKey,
+    "targetFlight",
   );
   assert.deepEqual(visibleArrowEuler(0, Math.PI / 2), [90, -90, 0]);
 });
@@ -298,6 +311,16 @@ test("sprint uses the authored sprint cycle at the calibrated travel rate", () =
   );
 });
 
+test("combat NPC detail LOD preserves silhouettes and hero faces", () => {
+  assert.equal(keepCharacterRenderDetail("archer", "Eyes"), false);
+  assert.equal(keepCharacterRenderDetail("brute", "Male_Ranger_Body_Belt_1"), false);
+  assert.equal(keepCharacterRenderDetail("archer", "Male_Ranger_Acc_Pauldron"), false);
+  assert.equal(keepCharacterRenderDetail("archer", "Male_Ranger_Head_Hood"), true);
+  assert.equal(keepCharacterRenderDetail("brute", "Hair_Beard"), true);
+  assert.equal(keepCharacterRenderDetail("Vrishaketu", "Eyes"), true);
+  assert.equal(keepCharacterRenderDetail("Chitra", "Eyebrows"), true);
+});
+
 test("camera collision treats the route edge as a wall-sized occluder", () => {
   const floorAt = (x, z) => (x >= -6 && x <= 6 && z >= -18 && z <= 4 ? 0 : null);
   const target = { x: 4.9, y: 1.6, z: -8 };
@@ -358,4 +381,19 @@ test("a health drop owns the enemy animation frame and player hit-stun keeps the
     bowEquipped: false,
     swordEquipped: true,
   });
+});
+
+test("snapshot interpolation cannot visually collapse two attackers", () => {
+  const separated = separateEnemyVisuals([
+    { id: "courtyard-1-0", x: 21.946, z: 14.007, health: 60 },
+    { id: "courtyard-1-1", x: 22.422, z: 13.581, health: 60 },
+  ]);
+  assert.ok(Math.hypot(separated[0].x - separated[1].x, separated[0].z - separated[1].z) >= 1.349);
+  assert.deepEqual(
+    separated.map(({ id, health }) => ({ id, health })),
+    [
+      { id: "courtyard-1-0", health: 60 },
+      { id: "courtyard-1-1", health: 60 },
+    ],
+  );
 });
