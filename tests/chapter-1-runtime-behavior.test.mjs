@@ -79,6 +79,13 @@ test("voice requested before the manifest finishes is played after the manifest 
 
   assert.equal(state.deferredVoiceLine, null);
   assert.equal(createdAudio.at(-1)?.path, "/audio/chapter-1/voices/en/ch1-raid-begins.ogg");
+  state.settings.muteAll = true;
+  rt.playVoice("ch1-raid-begins");
+  assert.equal(state.deferredVoiceLine, "ch1-raid-begins");
+  state.settings.muteAll = false;
+  rt.playVoice(state.deferredVoiceLine);
+  assert.equal(state.deferredVoiceLine, null);
+  assert.equal(createdAudio.length, 2);
 });
 
 test("changing locale re-renders the already-open pause modal", () => {
@@ -146,4 +153,50 @@ test("changing locale re-renders the already-open pause modal", () => {
     globalThis.document = priorDocument;
     globalThis.window = priorWindow;
   }
+});
+
+test("pause remains available during offline fallback in active combat", () => {
+  const ui = {
+    modal: element({ hidden: true }),
+    modalTitle: element(),
+    modalCopy: element(),
+    modalPrimary: element(),
+    modalSecondary: element(),
+    controls: element(),
+    settings: element(),
+    storyPanel: element(),
+    storyImage: element(),
+    storySpeaker: element(),
+    storyText: element(),
+    pointerNote: element(),
+  };
+  let locallyPaused = false;
+  const state = {
+    settings: { locale: "en" },
+    playing: true,
+    paused: false,
+    sessionAccepted: false,
+    snapshot: { phase: "market" },
+    localSimulation: { setPaused: (value) => (locallyPaused = value) },
+    socket: null,
+  };
+  const rt = {
+    state,
+    ui,
+    canvas: { focus() {} },
+    STORY: { ending: [] },
+    STORY_VOICE_LINES: {},
+    PHASE_DETAILS: {},
+    t: (key) => key,
+    clearInput() {},
+    stopVoice() {},
+    queuePressed() {},
+  };
+  installModals(rt);
+  rt.showPause();
+  assert.equal(state.playing, false);
+  assert.equal(state.paused, true);
+  assert.equal(state.modalMode, "pause");
+  assert.equal(ui.modal.hidden, false);
+  assert.equal(locallyPaused, true);
 });

@@ -50,3 +50,8 @@ Object.assign(window.DWARKA_GAME_I18N.hi,{noSwitch:"हथियार बदल
 Object.assign(window.DWARKA_GAME_I18N.ta,{noSwitch:"ஆயுதம் மாற்ற தனி விசை இல்லை. குறியைப் பிடித்தால் பார்வையில் உள்ள சரியான எதிரி தானாகப் பூட்டப்படும்.",targetTracking:"இலக்கு தேடல்",targetAcquired:"இலக்கு பூட்டப்பட்டது",doorwayDetail:"2 வாள்வீரர், 1 வில்லாளர், 1 கனரக வீரரை வீழ்த்து"});
 Object.assign(window.DWARKA_GAME_I18N.kn,{noSwitch:"ಆಯುಧ ಬದಲಿಸಲು ಪ್ರತ್ಯೇಕ ಕೀ ಇಲ್ಲ. ಗುರಿ ಹಿಡಿದಾಗ ನೋಟದಲ್ಲಿರುವ ಸರಿಯಾದ ಶತ್ರು ಸ್ವಯಂ ಲಾಕ್ ಆಗುತ್ತಾನೆ.",targetTracking:"ಗುರಿ ಹುಡುಕುತ್ತಿದೆ",targetAcquired:"ಗುರಿ ಲಾಕ್",doorwayDetail:"2 ಕತ್ತಿಯೋಧರು, 1 ಬಿಲ್ಲುಗಾರ ಮತ್ತು 1 ಭಾರೀ ದಾಳಿಕೋರನನ್ನು ಸೋಲಿಸಿ"});
 Object.assign(window.DWARKA_GAME_I18N.te,{noSwitch:"ఆయుధం మార్చడానికి ప్రత్యేక కీ లేదు. గురి పట్టగానే చూపులోని సరైన శత్రువు స్వయంగా లాక్ అవుతాడు.",targetTracking:"లక్ష్యం వెతుకుతోంది",targetAcquired:"లక్ష్యం లాక్",doorwayDetail:"2 కత్తివీరులు, 1 విలుకాడు, 1 భారీ దాడిదారుని ఓడించు"});
+Object.assign(window.DWARKA_GAME_I18N.en,{chapterKicker:"CHAPTER 1"});
+Object.assign(window.DWARKA_GAME_I18N.hi,{chapterKicker:"अध्याय 1"});
+Object.assign(window.DWARKA_GAME_I18N.ta,{chapterKicker:"அத்தியாயம் 1"});
+Object.assign(window.DWARKA_GAME_I18N.kn,{chapterKicker:"ಅಧ್ಯಾಯ 1"});
+Object.assign(window.DWARKA_GAME_I18N.te,{chapterKicker:"అధ్యాయం 1"});

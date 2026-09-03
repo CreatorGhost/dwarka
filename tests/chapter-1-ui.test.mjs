@@ -192,8 +192,8 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   assert.ok(servedBundle.length > 80_000, "the served runtime must contain the Vite-built Chapter 1 bundle");
   assert.match(servedBundle, /Offline play/, "the served bundle must be generated from the readable runtime source");
   assert.doesNotMatch(runtime, /primitive\("sphere", "Indigo night sky"/, "an opaque sky mesh must not hide distant scenery");
-  assert.match(runtime, /ambientLight = new pc\.Color\(0\.16, 0\.18, 0\.29\)/);
-  assert.match(runtime, /scene\.exposure = 0\.74/);
+  assert.match(runtime, /ambientLight = new pc\.Color\(0\.055, 0\.075, 0\.15\)/);
+  assert.match(runtime, /scene\.exposure = 1/);
   assert.doesNotMatch(runtime, /new pc\.Entity\("Camera soft fill"\)/, "the camera must not carry a flattening headlight");
   assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
   assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
@@ -208,8 +208,8 @@ test("A1 uses the ledgered HDR, physical materials, native grading, and producti
     readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/chapter-1.css", root), "utf8"),
-    readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonless_golf_2k.hdr", root)),
-    readFile(new URL("../../game/assets/raw/polyhaven/moonless_golf_2k.hdr", import.meta.url)),
+    readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonlit_golf_2k.hdr", root)),
+    readFile(new URL("../../game/assets/raw/polyhaven/moonlit_golf_2k.hdr", import.meta.url)),
   ]);
   assert.deepEqual(hdr, sourceHdr, "the runtime HDR must be the exact ledgered CC0 source");
   assert.match(runtime, /EnvLighting\.generateSkyboxCubemap/);
@@ -217,8 +217,8 @@ test("A1 uses the ledgered HDR, physical materials, native grading, and producti
   assert.match(runtime, /scene\.skybox = state\.skyboxCubemap/);
   assert.match(runtime, /scene\.envAtlas = state\.environmentAtlas/);
   assert.match(runtime, /toneMapping = pc\.TONEMAP_ACES/);
-  assert.match(runtime, /state\.cameraFrame = null/, "native rendering must not pay for a full-screen intermediate frame");
-  assert.match(runtime, /maxPixelRatio = Math\.min\(1, window\.devicePixelRatio\)/);
+  assert.match(runtime, /new pc\.CameraFrame/, "desktop rendering should use the engine-native grading frame");
+  assert.match(runtime, /maxPixelRatio = Math\.min\(\s*1,\s*window\.devicePixelRatio,?\s*\)/);
   assert.match(runtime, /state\.renderScale === 1 && state\.lowFpsSeconds >= 2/);
   assert.match(runtime, /state\.renderScale === 0\.9 && state\.lowFpsSeconds >= 2/);
   assert.match(runtime, /value\.useMetalness = true/);
@@ -265,7 +265,7 @@ test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB ba
   assert.match(runtime, /new pc\.Entity\("Triangular festival pennant"/);
   assert.match(runtime, /fabric_pattern_07_col_1_512\.webp/);
   assert.match(runtime, /"Packed earth street slab"/);
-  assert.match(runtime, /"Wet ash fire decal"/);
+  assert.match(runtime, /"Wet ash fire patch"/);
   assert.match(runtime, /assignStaticModelToBatch\(entity\)/, "late-loaded GLBs must join the active static batch group");
 });
 
@@ -284,7 +284,7 @@ test("A7 gives the street distinct houses, Indian set dressing, real L-turns, an
   assert.ok(layout.placements.brass_diya_lantern.length >= 24);
   assert.ok(layout.placements.Kenney_fountain_round.length >= 3, "the arrival vista needs a built stone well");
   assert.ok(layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length >= 2, "the gate needs a two-wheel rath");
-  assert.match(runtime, /mats\.roadSand = material\(\[0\.66, 0\.65, 0\.63\]\)/);
+  assert.match(runtime, /mats\.roadSand = material\(\[0\.58, 0\.56, 0\.52\]\)/);
   assert.match(runtime, /const tones = \["lime", "ochre", "rose", "turquoise"\]/);
   assert.match(runtime, /"Household shrine niche"/);
   assert.match(runtime, /"Cool moon rim"/);
