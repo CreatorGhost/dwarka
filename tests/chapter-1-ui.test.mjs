@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
 
 const root = new URL("../", import.meta.url);
 const clientSourceRoot = new URL("../../game/client-scripts/", import.meta.url);
@@ -21,6 +22,38 @@ const readRuntime = async () => {
   const files = await clientSourceFiles();
   return (await Promise.all(files.map((url) => readFile(url, "utf8")))).join("\n");
 };
+
+test("every static Chapter 1 localization key resolves in all five locales", async () => {
+  const [markup, source] = await Promise.all([
+    readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
+    readFile(new URL("../../game/client-scripts/game-i18n.js", import.meta.url), "utf8"),
+  ]);
+  const context = { window: {} };
+  runInNewContext(source, context);
+  const dictionaries = context.window.DWARKA_GAME_I18N;
+  const keys = [...markup.matchAll(/data-i18n="([^"]+)"/g)].map((match) => match[1]);
+  assert.ok(keys.length > 0);
+  for (const locale of ["en", "hi", "ta", "kn", "te"])
+    for (const key of keys)
+      assert.equal(
+        typeof dictionaries[locale]?.[key],
+        "string",
+        `${locale} is missing data-i18n key ${key}`,
+      );
+});
+
+test("in-game story beats are full-bleed narrated moments, not boxed image cards", async () => {
+  const css = await readFile(
+    new URL("public/playcanvas/chapter-1/chapter-1.css", root),
+    "utf8",
+  );
+  assert.match(css, /\.modal\.story-beat\s*\{[^}]*padding:\s*0/);
+  assert.match(css, /\.story-beat\s+\.modal-card\s*\{[^}]*inset:\s*0/);
+  assert.match(css, /\.story-beat\s+#story-panel\s*\{[^}]*position:\s*absolute[^}]*inset:\s*0/);
+  assert.match(css, /\.story-beat\s+#story-panel\s+img\s*\{[^}]*object-fit:\s*cover/);
+  assert.match(css, /\.story-beat\s+#story-panel\s+div\s*\{[^}]*position:\s*absolute/);
+  assert.match(css, /linear-gradient\(0deg,rgba\(0,0,0,\.92\)/);
+});
 
 test("the Chapter 0 opening narrates eight beats and hands off on the night lane", async () => {
   const { BEATS } = await import(new URL("app/chapter-zero-beats.ts", root).href);
@@ -84,6 +117,23 @@ test("the Chapter 0 opening narrates eight beats and hands off on the night lane
     assert.ok(captionOut > spoken, `caption on ${beat.voice} fades before the line ends`);
     assert.ok(captionOut + CAPTION_FADE_MS <= frame, `caption on ${beat.voice} outlives its frame`);
   }
+
+  // Owner defect: narration kept playing after the game started. Every exit path
+  // must hard-stop, not just pause — including Esc-skip-all, which used to call
+  // onComplete directly with the voice and both beds still running.
+  const source = await readFile(new URL("app/ChapterZeroCinematic.tsx", root), "utf8");
+  const teardown = source.slice(source.indexOf("const stopAllAudio"), source.indexOf("const clearTitleHold"));
+  for (const step of ["audio.pause()", "audio.currentTime = 0", 'audio.src = ""', "audio.load()"]) {
+    assert.ok(teardown.includes(step), `stopAllAudio must ${step}`);
+  }
+  for (const ref of ["voiceRef.current = null", "ambienceRef.current = null", "bedsRef.current = [null, null]"]) {
+    assert.ok(teardown.includes(ref), `stopAllAudio must drop ${ref}`);
+  }
+  // Reached from the hand-off, from unmount, and from pagehide.
+  assert.match(source, /window\.addEventListener\("pagehide", stopAllAudio\)/);
+  assert.ok(source.split("stopAllAudio()").length - 1 >= 2, "stopAllAudio must run on more than one path");
+  // Skip-all no longer bypasses the teardown by calling onComplete directly.
+  assert.doesNotMatch(source, /onClick=\{onComplete\}/, "skip-all must route through leave(), not raw onComplete");
 
   // Both music beds ship, and the darker one takes over at the raid.
   await readFile(new URL("public/audio/chapter-0/music-bed.ogg", root));

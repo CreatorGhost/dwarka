@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { ChapterDictionary, Locale } from "./game/chapter-1/localization";
 import type { ChapterProfile, ChapterSettings } from "./game/chapter-1/progress";
+import EmberField from "./EmberField";
 import {
   BEATS,
   BEAT_TAIL_MS,
@@ -129,6 +130,22 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     }, duration);
   }, [clearFallback]);
 
+  // Nothing the cinematic owns may survive into the game. Every exit path runs
+  // this: the automatic hand-off, Esc-skip-all, unmount, and pagehide.
+  const stopAllAudio = useCallback(() => {
+    const all = [voiceRef.current, ambienceRef.current, ...bedsRef.current];
+    all.forEach((audio) => {
+      if (!audio) return;
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = "";
+      audio.load();
+    });
+    voiceRef.current = null;
+    ambienceRef.current = null;
+    bedsRef.current = [null, null];
+  }, []);
+
   const clearTitleHold = useCallback(() => {
     if (titleTimerRef.current !== null) window.clearTimeout(titleTimerRef.current);
     titleTimerRef.current = null;
@@ -137,11 +154,15 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
 
   const leave = useCallback(() => {
     setMode("leaving");
+    // The voice stops immediately; the beds fade out under the black.
     voiceRef.current?.pause();
     if (ambienceRef.current) rampVolume(ambienceRef.current, 0, LEAVE_FADE_MS);
     bedsRef.current.forEach((bed) => { if (bed) rampVolume(bed, 0, LEAVE_FADE_MS); });
-    window.setTimeout(() => completeRef.current(), LEAVE_FADE_MS);
-  }, []);
+    window.setTimeout(() => {
+      stopAllAudio();
+      completeRef.current();
+    }, LEAVE_FADE_MS);
+  }, [stopAllAudio]);
 
   const armTitleHold = useCallback((duration = TITLE_HOLD_MS) => {
     if (titleTimerRef.current !== null) window.clearTimeout(titleTimerRef.current);
@@ -224,18 +245,32 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     bedsRef.current = beds;
     const cancelMusicFade = rampVolume(beds[0], bedVolume(settingsRef.current, false), MUSIC_FADE_MS);
 
+    // A browser that keeps this document alive through the navigation must not
+    // leak narration over the game.
+    window.addEventListener("pagehide", stopAllAudio);
+
+    // Autoplay may be refused before the page has a gesture; retry once on the
+    // first real interaction so the bed is never silently missing.
+    const retryAudio = () => {
+      ambienceRef.current?.play().catch(() => undefined);
+      bedsRef.current.forEach((bed) => bed?.play().catch(() => undefined));
+    };
+    window.addEventListener("pointerdown", retryAudio, { once: true });
+    window.addEventListener("keydown", retryAudio, { once: true });
+
     return () => {
       cancelMusicFade();
+      window.removeEventListener("pagehide", stopAllAudio);
+      window.removeEventListener("pointerdown", retryAudio);
+      window.removeEventListener("keydown", retryAudio);
       ambience.pause();
       beds.forEach((bed) => bed.pause());
-      ambienceRef.current = null;
-      bedsRef.current = [null, null];
-      voiceRef.current?.pause();
+      stopAllAudio();
       clearFallback();
       clearTitleHold();
       if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
     };
-  }, [bedVolume, clearFallback, clearTitleHold]);
+  }, [bedVolume, clearFallback, clearTitleHold, stopAllAudio]);
 
   useEffect(() => {
     const settings = profile.settings;
@@ -436,6 +471,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       {outgoingBeat !== null ? <div className="cinematic-image cinematic-image-outgoing" aria-hidden="true"><Image src={BEATS[outgoingBeat].image} alt="" fill sizes="100vw" priority unoptimized /></div> : null}
       {mode === "panels" ? <div className={`cinematic-image cinematic-image-current${current.hero ? " is-hero" : ""}`} key={beat} style={motionStyle}><Image src={current.image} alt={currentCopy.text} fill sizes="100vw" priority unoptimized /></div> : null}
       <div className="cinematic-shade" aria-hidden="true" />
+      <EmberField className="cinematic-embers" />
       {mode === "panels" && profile.settings.captions ? <div className={`cinematic-caption${current.mission ? " is-mission" : ""}`} key={`caption-${beat}`} style={motionStyle}>
         {current.hero ? null : <p className="cinematic-count">{String(beat + 1).padStart(2, "0")} / {String(BEATS.length).padStart(2, "0")}</p>}
         <h2 id="cinematic-title">{currentCopy.title}</h2>
@@ -459,10 +495,12 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       <p className="cinematic-handing" role="status">{ui.handing}</p>
     </div> : null}
 
+    <div className="cinematic-bloom" aria-hidden="true" />
+
     {mode === "panels" ? <p className="cinematic-hint">Space · {ui.advance}<span>Esc · {copy.chapter0.skip}</span></p> : null}
 
     {skipConfirm ? <div ref={skipDialogRef} className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="skip-title">
-      <div><p className="eyebrow">{copy.chapter0.skipLabel}</p><h2 id="skip-title">{copy.chapter0.skipTitle}</h2><p>{copy.chapter0.skipBody}</p><div><button type="button" onClick={() => setSkipConfirm(false)}>{copy.chapter0.cancel}</button><button className="primary" type="button" onClick={onComplete}>{copy.chapter0.skipConfirm}</button></div></div>
+      <div><p className="eyebrow">{copy.chapter0.skipLabel}</p><h2 id="skip-title">{copy.chapter0.skipTitle}</h2><p>{copy.chapter0.skipBody}</p><div><button type="button" onClick={() => setSkipConfirm(false)}>{copy.chapter0.cancel}</button><button className="primary" type="button" onClick={() => { setSkipConfirm(false); leave(); }}>{copy.chapter0.skipConfirm}</button></div></div>
     </div> : null}
   </div>;
 }

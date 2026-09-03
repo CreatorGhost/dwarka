@@ -15,6 +15,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -25,17 +26,30 @@ STORY_DIR = ROOT / "public" / "story-a"
 GENERATED_DIR = STORY_DIR / "generated"
 CONTACT_SHEET = ROOT / "tests" / "browser-artifacts" / "front" / "story-panels-contact-sheet.png"
 API_URL = "https://api.openai.com/v1/images/generations"
+# gpt-image-2 is a large step up on contrast and focal detail; 1.5 is the fallback
+# if a call errors. Sizes are tried widest-first and the winner is reused.
+MODELS = ("gpt-image-2", "gpt-image-1.5")
+SIZES = ("1792x1024", "1536x1024")
 
+# One preamble for every panel: consistency across the set matters as much as
+# any single frame. Written against gpt-image-2, which holds contrast and focal
+# detail far better than gpt-image-1 did.
 STYLE = (
-    "Painterly cinematic historical fantasy illustration for a browser-game cutscene. "
-    "Mahabharata-era ancient India with researched dhoti, angavastram, gold ornaments, "
-    "curved bows, wooden chariots, oil lamps, mud-brick and carved-stone architecture. "
-    "Rich full colour, broad confident brushwork, realistic cloth and skin, deep atmospheric "
-    "perspective, restrained human emotion, dramatic film lighting. Every frame must share one "
-    "consistent visual language. Compose for a wide 16:9 crop with the main subject inside the "
-    "central safe area. No text, lettering, captions, logos, borders, watermark, signature, "
-    "comic panels, monochrome line art, modern objects, European armour, blue skin, divine halos, "
-    "or visible deity faces. All visible characters are mortal humans."
+    "Cinematic key-lit illustration for a AAA game cutscene, Mahabharata-era ancient India. "
+    "ONE dominant motivated key light per frame — low sun, firelight, or an oil lamp — with a "
+    "second cool rim light separating the subject from the background. Strong readable silhouette. "
+    "Deep true blacks and real colour saturation in a tight ember-orange, deep-indigo and antique-gold "
+    "palette; never a flat brown or grey haze, never washed out, never muddy midtones. High dynamic "
+    "range with crisp sharp detail on faces, hands and cloth folds, falling off into soft atmospheric "
+    "depth. Visible air: drifting smoke, dust motes and sparks catching the light. Painterly realism "
+    "with confident brushwork and fine rendered detail, closer to a modern concept-art keyframe than "
+    "to loose oil sketching. "
+    "Researched period dress: dhoti, angavastram, gold ornaments, curved composite bows, wooden "
+    "chariots, clay oil lamps, mud-brick and carved-stone architecture. "
+    "Composed for a wide 16:9 crop with the subject in the central safe area. "
+    "No text, lettering, captions, logos, borders, watermark, signature, comic panels, speech "
+    "bubbles, monochrome line art, modern objects, European armour, blue skin, divine halos, or "
+    "visible deity faces. All visible characters are mortal humans."
 )
 
 KARNA = (
@@ -49,11 +63,25 @@ VRISHAKETU = (
 )
 
 PANELS: list[tuple[str, str]] = [
+    # Framing beat: the player opens an ancient account, and the story comes alive.
+    (
+        "00-manuscript",
+        "An ancient palm-leaf manuscript open on a low carved wooden stand in a dark stone alcove. "
+        "A single clay oil lamp at the left edge is the only light, raking warm across the leaves so "
+        "the incised script catches the flame and the deep background falls to true black. The script "
+        "is dense, old and Devanagari-like but deliberately unreadable, never forming real words. "
+        "Aged fibre texture, frayed edges, a cord threaded through the leaves, a dark brass stylus "
+        "resting beside them. Dust motes hang in the lamplight. No people, no hands, no faces. "
+        "Reverent, still, the moment before a story is read.",
+    ),
     (
         "01-battlefield",
-        "A vast Kurukshetra battlefield at bronze dusk on the seventeenth day. Broken wooden "
-        "chariots, torn standards, distant war elephants and exhausted mortal armies dissolve into "
-        "dust beneath a low copper sun. No central hero, no bodies in close detail, immense scale.",
+        "A vast Kurukshetra battlefield on the evening of the seventeenth day. A huge low blood-orange "
+        "sun sits on the horizon as the single key light, throwing long hard shadows toward the viewer "
+        "and rim-lighting every silhouette. Broken wooden chariots, torn crimson standards, distant war "
+        "elephants and exhausted mortal armies read as crisp black silhouettes against the burning sky, "
+        "receding through layers of luminous dust. Foreground wreckage is sharply detailed; the far "
+        "field falls away into haze. Immense scale, no central hero, no bodies in close detail.",
     ),
     (
         "02-karna-looses",
@@ -67,9 +95,11 @@ PANELS: list[tuple[str, str]] = [
     ),
     (
         "03-wheel-sinks",
-        "Close low view of an ornate wooden chariot wheel sinking into rain-dark battlefield mud. "
-        "A mortal warrior's bare foot braces beside it, bronze-red cloth at the edge of frame. Wet "
-        "earth grips the spokes with terrible weight. No faces, no wound, no arrow impact.",
+        "Extreme low close view of an ornate wooden chariot wheel sunk deep into rain-black battlefield "
+        "mud. Hard low sunlight rakes across the wet mud so every rut and water-filled hollow glitters, "
+        "and the carved spokes throw long shadows. A mortal warrior's bare foot and calf brace beside "
+        "it, caked in mud, bronze-red cloth at the edge of frame. The wet earth visibly grips the "
+        "spokes. Sharp macro detail on grain, mud and water; deep black background. No faces, no wound.",
     ),
     (
         "04-karna-lifts",
@@ -82,41 +112,57 @@ PANELS: list[tuple[str, str]] = [
     ),
     (
         "05-ash",
-        "The battlefield after the unseen death, quiet before dawn. Pale ash crosses blackened "
-        "earth, a broken wheel and abandoned bow lie far apart. In the close foreground, a small "
-        "child-made sun cut from folded cream paper lies torn and ash-streaked, its creases and ragged "
-        "rays unmistakable in one ember-orange glow. No people, corpse, or arrow; mournful negative space.",
+        "The battlefield hours after the unseen death, in the cold blue hour before dawn. The frame is "
+        "almost monochrome deep indigo and black ash, lit by one small dying ember on the ground that "
+        "is the only warm source. In sharp close foreground that ember glow catches a small child-made "
+        "sun cut from folded cream paper, torn and ash-streaked, every crease and ragged ray crisply "
+        "rendered. A broken wheel and an abandoned bow are far-off silhouettes. Drifting ash in the air. "
+        "No people, corpse, or arrow; vast mournful negative space.",
     ),
     (
         "06-kunti-reveals",
-        f"Inside a shadowed Hastinapura chamber at night, Kunti, an elderly mortal queen in a plain "
-        f"cream widow's sari, reveals a gold ring to {VRISHAKETU} He stands rigid in profile while "
-        "another older archer turns away in the background. Indigo shadows, one amber oil lamp, no deity.",
+        f"A shadowed Hastinapura stone chamber at night. A single amber oil lamp on a low table is the "
+        f"only key light, lighting faces from below and leaving the carved walls in near-black indigo. "
+        f"Kunti, an elderly mortal queen in a plain cream widow's sari, holds out a small gold ring; "
+        f"the lamp catches the metal as the brightest point in the frame. {VRISHAKETU} stands rigid in "
+        "profile, jaw tight, half his face in shadow, sharply rendered. Another older archer turns away "
+        "into darkness behind. Smoke curls through the lamplight. Intimate, tense, no deity.",
     ),
     (
         "07-raid",
-        "A night raid through a narrow charioteers' street in an ancient Indian city. Mortal raiders "
-        "in rough dark cloth move between burning timber doorways while families flee toward the "
-        "foreground. Deep indigo night, ember-orange fire, small gold highlights, no monsters or deities.",
+        "A night raid down a narrow charioteers' street in an ancient Indian city. A burning timber "
+        "doorway mid-frame is the fierce ember-orange key light, throwing raiders in rough dark cloth "
+        "into hard black silhouette and rim-lighting the fleeing families in the foreground with "
+        "orange edges. Deep indigo night above, cool moonlight on the wet street stones as a secondary "
+        "source. Sparks and thick smoke pour through the light. Faces of the fleeing read clearly and "
+        "sharply; the depth of the lane falls into smoke. No monsters, no deities.",
     ),
     (
         "08-chitra-dies",
-        f"{VRISHAKETU} kneels in a burned doorway holding his dying ten-year-old foster brother "
-        "Chitra. A small handmade sun rosette of creased cream paper is pinned to the child's plain "
-        "cloth tunic; it must look fragile and homemade, never like a royal crown. The child's hand "
-        "rests against Vrishaketu's wrist. Falling embers, intimate grief, no graphic wound or blood.",
+        f"{VRISHAKETU} kneels in a burned doorway cradling his dying ten-year-old foster brother Chitra. "
+        "Dying firelight from off-frame left is the warm key on both faces; everything beyond the "
+        "doorway is deep black. A small handmade sun rosette of creased cream paper is pinned to the "
+        "child's plain cloth tunic, catching the light — fragile and homemade, never a royal crown. "
+        "The child's small hand rests against Vrishaketu's wrist, both hands sharply rendered. Embers "
+        "fall slowly through the dark air. Restrained intimate grief, no graphic wound, no blood.",
     ),
     (
         "09-horse-loosed",
-        "At first gold dawn, a white Ashvamedha horse runs free from an ancient Indian sacrificial "
-        "ground. Priests and mortal warriors remain small and distant beside low fire altars and tall "
-        "cloth standards. Long road ahead, indigo haze yielding to ember-orange and gold.",
+        "First gold dawn. A white Ashvamedha horse runs free from an ancient Indian sacrificial ground, "
+        "backlit by the rising sun so its mane and the dust off its hooves blaze with rim light while "
+        "its body reads as a strong pale silhouette. Priests and mortal warriors stay small and "
+        "distant beside low fire altars and tall cloth standards. Long empty road ahead, cold indigo "
+        "shadow in the foreground giving way to ember-orange and gold at the horizon. Crisp detail on "
+        "the horse, deep atmospheric falloff behind.",
     ),
     (
         "10-oath",
-        f"{VRISHAKETU} stands alone on a road at sunrise, viewed three-quarters from behind, tying "
-        "Chitra's torn paper sun crown to his belt before lifting his curved bow onto his shoulder. "
-        "Hoofprints lead toward a distant walled city. Restrained resolve, no halo or divine figure.",
+        f"{VRISHAKETU} stands alone on an empty road at sunrise, seen three-quarters from behind, tying "
+        "Chitra's torn paper sun crown to his belt, his curved bow rising onto his shoulder. The low "
+        "sun is directly ahead of him, so he is a strong dark silhouette with a hot gold rim along his "
+        "shoulder, arm and bow, and his long shadow runs back toward the viewer. Hoofprints lead away "
+        "toward a distant walled city in luminous haze. The paper crown catches the light and is "
+        "sharply detailed. Restrained resolve, no halo, no divine figure.",
     ),
     # Hand-off frame: must match the third-person camera the player gets one second later.
     (
@@ -144,6 +190,32 @@ def preserve_original(name: str) -> None:
         shutil.copy2(live, backup)
 
 
+def png_size(path: Path) -> tuple[int, int]:
+    header = path.read_bytes()[16:24]
+    return int.from_bytes(header[:4], "big"), int.from_bytes(header[4:], "big")
+
+
+def request_image(prompt: str, api_key: str, quality: str) -> tuple[bytes, str]:
+    """Widest size on the best model, falling back through SIZES then MODELS."""
+    last = None
+    for model in MODELS:
+        for size in SIZES:
+            request = urllib.request.Request(
+                API_URL,
+                data=json.dumps({"model": model, "prompt": prompt, "size": size, "quality": quality, "n": 1}).encode(),
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=900) as response:
+                    payload = json.load(response)
+                return base64.b64decode(payload["data"][0]["b64_json"]), f"{model} {size}"
+            except urllib.error.HTTPError as error:
+                last = f"{model} {size}: HTTP {error.code} {error.read()[:160].decode(errors='replace')}"
+            except Exception as error:  # noqa: BLE001 - report and try the next combination
+                last = f"{model} {size}: {error}"
+    raise RuntimeError(last or "no image model accepted the request")
+
+
 def generate_panel(item: tuple[str, str], api_key: str, force: bool, quality: str, budget: int) -> str:
     name, scene = item
     preserve_original(name)
@@ -151,51 +223,30 @@ def generate_panel(item: tuple[str, str], api_key: str, force: bool, quality: st
     output = GENERATED_DIR / f"{name}.webp"
     if output.exists() and not force:
         return f"{name}: cached"
-    if output.exists():
-        shutil.copy2(output, GENERATED_DIR / f"{name}.prev.webp")
+    # Keep the gpt-image-1 generation so old and new can be compared and reverted.
+    legacy = GENERATED_DIR / f"{name}.gpt1.webp"
+    if output.exists() and not legacy.exists():
+        shutil.copy2(output, legacy)
 
-    request = urllib.request.Request(
-        API_URL,
-        data=json.dumps(
-            {
-                "model": "gpt-image-1",
-                "prompt": f"{STYLE} Scene: {scene}",
-                "size": "1536x1024",
-                "quality": quality,
-                "n": 1,
-            }
-        ).encode(),
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-    )
-
-    with urllib.request.urlopen(request, timeout=900) as response:
-        payload = json.load(response)
+    raw, used = request_image(f"{STYLE} Scene: {scene}", api_key, quality)
 
     with tempfile.TemporaryDirectory(prefix="dwarka-panel-") as temporary:
         source = Path(temporary) / f"{name}.png"
-        source.write_bytes(base64.b64decode(payload["data"][0]["b64_json"]))
-        run(
-            [
-                "cwebp",
-                "-quiet",
-                "-mt",
-                "-crop",
-                "0",
-                "80",
-                "1536",
-                "864",
-                "-size",
-                str(budget),
-                str(source),
-                "-o",
-                str(output),
-            ]
-        )
+        source.write_bytes(raw)
+        width, height = png_size(source)
+        # Centre-crop whatever the model returned down to exactly 16:9.
+        target_height = int(width * 9 / 16)
+        if target_height <= height:
+            crop = ["-crop", "0", str((height - target_height) // 2), str(width), str(target_height)]
+        else:
+            target_width = int(height * 16 / 9)
+            crop = ["-crop", str((width - target_width) // 2), "0", str(target_width), str(height)]
+        run(["cwebp", "-quiet", "-mt", *crop, "-size", str(budget), str(source), "-o", str(output)])
 
     if output.stat().st_size > budget * 1.2:
         output.unlink(missing_ok=True)
         raise RuntimeError(f"{name}: compressed file exceeds its {budget // 1024} KB budget")
-    return f"{name}: OK ({output.stat().st_size // 1024} KB)"
+    return f"{name}: OK via {used} -> {width}x{height} ({output.stat().st_size // 1024} KB)"
 
 
 def build_contact_sheet() -> None:

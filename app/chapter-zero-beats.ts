@@ -24,9 +24,9 @@ export const BEATS: readonly Beat[] = [
 ];
 
 /** Breath held after a line ends before the picture changes. */
-export const BEAT_TAIL_MS = 900;
+export const BEAT_TAIL_MS = 450;
 /** Caption keeps holding this long after the voice stops, then fades. */
-export const CAPTION_HOLD_AFTER_VOICE_MS = 200;
-export const CAPTION_FADE_MS = 500;
+export const CAPTION_HOLD_AFTER_VOICE_MS = 120;
+export const CAPTION_FADE_MS = 300;
 /** Index at which the darker bed takes over from the piano. */
 export const RAID_BED_FROM_BEAT = 6;

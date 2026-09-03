@@ -1,0 +1,18 @@
+Cinzel-400.woff2, Cinzel-600.woff2, Cinzel-700.woff2
+Designer: Natanael Gama
+Source: https://fonts.google.com/specimen/Cinzel
+License: SIL Open Font License 1.1
+
+CormorantGaramond-400.woff2, CormorantGaramond-600.woff2,
+CormorantGaramond-400-italic.woff2
+Designer: Christian Thalmann / Catharsis Fonts
+Source: https://fonts.google.com/specimen/Cormorant+Garamond
+License: SIL Open Font License 1.1
+
+Downloaded 2026-09-04 as the latin subset only (woff2, unmodified) and served
+from /fonts so the build makes no runtime request to Google. The OFL permits
+redistribution; neither family is sold or used as a reserved font name.
+
+Cinzel sets chapter titles and UI display type; Cormorant Garamond sets the
+narration captions. Neither family covers Devanagari, Tamil, Kannada or Telugu,
+so those scripts fall through to the system serif by design.
