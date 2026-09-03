@@ -57,10 +57,13 @@ PANELS: list[tuple[str, str]] = [
     ),
     (
         "02-karna-looses",
-        f"{KARNA} Seen from behind and below in his chariot one heartbeat after loosing. He holds only "
-        "an empty curved bow in his extended left hand; his open right hand has released the string "
-        "beside his cheek. The shot has passed fully beyond the frame. Absolutely no arrow, projectile, "
-        "shaft, arrowhead, nocked missile, impact, wound, or opponent appears anywhere in the image.",
+        f"{KARNA} Three-quarter view from behind and slightly below, high in his chariot at the exact "
+        "moment of release. His extended left arm holds an empty curved bow; the bowstring is caught "
+        "mid-vibration in a soft blur beside the grip. His right hand has just opened beside his jaw, "
+        "fingers still splayed. His head is turned downrange, away from us, gaze following the shot into "
+        "the dust — face unreadable, lost to shadow and profile. Dust and torn standards streak past. "
+        "Absolutely no arrow, projectile, shaft, arrowhead, nocked missile, impact, wound, target, or "
+        "opponent appears anywhere in the image; the frame holds only the release itself.",
     ),
     (
         "03-wheel-sinks",
@@ -70,9 +73,12 @@ PANELS: list[tuple[str, str]] = [
     ),
     (
         "04-karna-lifts",
-        f"{KARNA} He has set his curved bow on the mud several paces away and strains with both hands "
-        "to lift the buried wheel. His back faces us, head bowed, dignity rather than spectacle. A "
-        "distant opposing chariot waits through dust. No fatal arrow, no wound, no blood.",
+        f"{KARNA} Low angle from ground level, close to the mud. He has set his curved bow down several "
+        "paces away. Both arms are driven under the rim of the sunken chariot wheel, forearms and hands "
+        "gripping the wet spokes, one shoulder jammed hard into the wheel, one knee braced in the churned "
+        "mud. Back and neck strain visibly, head bowed and turned away so his face stays in shadow. Mud "
+        "clings to his arms and dhoti; wet earth runs off the rim. Effort and dignity, never spectacle. "
+        "A distant opposing chariot waits through dust. No fatal arrow, no wound, no blood.",
     ),
     (
         "05-ash",
@@ -112,6 +118,17 @@ PANELS: list[tuple[str, str]] = [
         "Chitra's torn paper sun crown to his belt before lifting his curved bow onto his shoulder. "
         "Hoofprints lead toward a distant walled city. Restrained resolve, no halo or divine figure.",
     ),
+    # Hand-off frame: must match the third-person camera the player gets one second later.
+    (
+        "11-lane-mouth",
+        f"{VRISHAKETU} Seen from behind over his right shoulder in a third-person game camera framing, "
+        "standing at the mouth of a narrow charioteers' lane in an ancient Indian city at night. He is "
+        "low and central in the frame, back to us, face never visible, the curved bow held down in his "
+        "left hand. The lane runs away from us between mud-brick and carved-stone houses hung with small "
+        "oil lamps; one doorway far up the lane burns ember-orange behind thin smoke. Deep indigo night, "
+        "warm lamp pools every few paces, wet street stones catching the light. No raiders, no fighting, "
+        "no bodies, no fire in the foreground. The stillness one breath before it begins.",
+    ),
 ]
 
 
@@ -120,21 +137,22 @@ def run(command: list[str]) -> None:
 
 
 def preserve_original(name: str) -> None:
+    # Panels added after the first pass (11-lane-mouth) have no live file to keep.
     live = STORY_DIR / f"{name}.webp"
     backup = STORY_DIR / f"{name}.old.webp"
-    if not live.exists():
-        raise FileNotFoundError(f"missing live panel: {live}")
-    if not backup.exists():
+    if live.exists() and not backup.exists():
         shutil.copy2(live, backup)
 
 
-def generate_panel(item: tuple[str, str], api_key: str, force: bool) -> str:
+def generate_panel(item: tuple[str, str], api_key: str, force: bool, quality: str, budget: int) -> str:
     name, scene = item
     preserve_original(name)
     GENERATED_DIR.mkdir(parents=True, exist_ok=True)
     output = GENERATED_DIR / f"{name}.webp"
     if output.exists() and not force:
         return f"{name}: cached"
+    if output.exists():
+        shutil.copy2(output, GENERATED_DIR / f"{name}.prev.webp")
 
     request = urllib.request.Request(
         API_URL,
@@ -143,7 +161,7 @@ def generate_panel(item: tuple[str, str], api_key: str, force: bool) -> str:
                 "model": "gpt-image-1",
                 "prompt": f"{STYLE} Scene: {scene}",
                 "size": "1536x1024",
-                "quality": "medium",
+                "quality": quality,
                 "n": 1,
             }
         ).encode(),
@@ -167,16 +185,16 @@ def generate_panel(item: tuple[str, str], api_key: str, force: bool) -> str:
                 "1536",
                 "864",
                 "-size",
-                "340000",
+                str(budget),
                 str(source),
                 "-o",
                 str(output),
             ]
         )
 
-    if output.stat().st_size > 400_000:
+    if output.stat().st_size > budget * 1.2:
         output.unlink(missing_ok=True)
-        raise RuntimeError(f"{name}: compressed file exceeds 400 KB")
+        raise RuntimeError(f"{name}: compressed file exceeds its {budget // 1024} KB budget")
     return f"{name}: OK ({output.stat().st_size // 1024} KB)"
 
 
@@ -219,8 +237,10 @@ def build_contact_sheet() -> None:
     )
 
 
-def install_generated() -> None:
+def install_generated(names: list[str] | None = None) -> None:
     for name, _scene in PANELS:
+        if names and name not in names:
+            continue
         preserve_original(name)
         shutil.copy2(GENERATED_DIR / f"{name}.webp", STORY_DIR / f"{name}.webp")
 
@@ -237,6 +257,8 @@ def parse_args() -> argparse.Namespace:
         help="generate only this panel (repeatable); the contact sheet still uses all cached candidates",
     )
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--quality", default="medium", choices=["low", "medium", "high"])
+    parser.add_argument("--size", type=int, default=340_000, help="cwebp byte budget per panel")
     return parser.parse_args()
 
 
@@ -248,13 +270,16 @@ def main() -> None:
             raise RuntimeError("OPENAI_API_KEY is required")
         selected_panels = [item for item in PANELS if not args.panel or item[0] in args.panel]
         with ThreadPoolExecutor(max_workers=max(1, min(args.workers, 4))) as pool:
-            for result in pool.map(lambda item: generate_panel(item, api_key, args.force), selected_panels):
+            for result in pool.map(
+                lambda item: generate_panel(item, api_key, args.force, args.quality, args.size),
+                selected_panels,
+            ):
                 print(result, flush=True)
     build_contact_sheet()
     print(f"contact sheet: {CONTACT_SHEET}", flush=True)
     if args.install:
-        install_generated()
-        print("installed approved panels", flush=True)
+        install_generated(args.panel)
+        print(f"installed: {', '.join(args.panel) if args.panel else 'all panels'}", flush=True)
 
 
 if __name__ == "__main__":

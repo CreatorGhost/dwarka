@@ -6,3 +6,30 @@ Downloaded: 2026-09-04
 
 The source Ogg file was transcoded to 44.1 kHz stereo Vorbis at 64 kbps and
 renamed ambience.ogg for the DWARKA Chapter 0 cinematic.
+
+music-bed.ogg
+Author: Tri-Tachyon
+Title: "Soundscape - Last 31 - Cinematic Piano"
+Source: https://opengameart.org/content/soundscape-last-31-cinematic-piano
+License: Creative Commons Attribution 4.0 (CC-BY 4.0)
+Downloaded: 2026-09-04
+Source SHA-256: 97c003be751eb95ebcbfabca67fca7ec4ed17aa73e8af5724167c39e239c369f
+
+The source MP3 (36.5 s, 320 kbps) was transcoded unmodified to 44.1 kHz stereo
+Vorbis at 64 kbps and renamed music-bed.ogg. It loops under the Karna half of
+the Chapter 0 opening.
+
+music-raid.ogg
+Author: Tri-Tachyon
+Title: "Soundscape - Dust - Ambient Guitar"
+Source: https://opengameart.org/content/soundscape-dust-ambient-guitar
+License: Creative Commons Attribution 4.0 (CC-BY 4.0)
+Downloaded: 2026-09-04
+Source SHA-256: 4a24adedba90364887322db6df0b9c365567adf7ea96bf83aa95188b7f29f6cd
+
+Excerpted from the 3:30 source (from 00:12, 62 s, 3 s fades in and out) and
+transcoded to 44.1 kHz stereo Vorbis at 56 kbps. It crossfades in under the raid
+frame and loops to the end of the opening.
+
+CC-BY requires attribution: Tri-Tachyon is credited by name in the in-game
+Credits dialog (app/page.tsx, titleCopy[*].creditsBody).

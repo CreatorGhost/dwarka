@@ -4,27 +4,22 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { ChapterDictionary, Locale } from "./game/chapter-1/localization";
 import type { ChapterProfile, ChapterSettings } from "./game/chapter-1/progress";
-
-const PANEL_IMAGES = [
-  "/story-a/01-battlefield.webp",
-  "/story-a/02-karna-looses.webp",
-  "/story-a/03-wheel-sinks.webp",
-  "/story-a/04-karna-lifts.webp",
-  "/story-a/05-ash.webp",
-] as const;
-
-const PANEL_VOICE_IDS = [
-  "ch0-panel-01-battlefield",
-  "ch0-panel-02-last-stand",
-  "ch0-panel-03-wheel",
-  "ch0-panel-04-pause-owed",
-  "ch0-panel-05-what-remained",
-] as const;
+import {
+  BEATS,
+  BEAT_TAIL_MS,
+  CAPTION_FADE_MS,
+  CAPTION_HOLD_AFTER_VOICE_MS,
+  RAID_BED_FROM_BEAT,
+} from "./chapter-zero-beats";
 
 const AMBIENCE_PATH = "/audio/chapter-0/ambience.ogg";
+const MUSIC_PATHS = ["/audio/chapter-0/music-bed.ogg", "/audio/chapter-0/music-raid.ogg"] as const;
 const FALLBACK_DURATION_MS = 7_000;
 const CROSSFADE_MS = 1_200;
-const TITLE_HOLD_MS = 2_000;
+const TITLE_HOLD_MS = 2_600;
+const LEAVE_FADE_MS = 900;
+const MUSIC_FADE_MS = 3_200;
+const BED_CROSSFADE_MS = 2_600;
 
 type VoiceEntry = {
   sourceLineId: string;
@@ -33,12 +28,12 @@ type VoiceEntry = {
   assets: { codec: string; runtimePath: string }[];
 };
 
-const interfaceCopy: Record<Locale, { chapter: string; advance: string; enter: string; controls: string; pointer: string }> = {
-  en: { chapter: "Chapter 1", advance: "skip scene", enter: "Click to enter the street", controls: "W A S D · mouse · Shift · Space · RMB aim · LMB attack · E", pointer: "Your mouse will be captured. Press Esc to release it." },
-  hi: { chapter: "अध्याय 1", advance: "दृश्य छोड़ें", enter: "गली में प्रवेश करने के लिए क्लिक करें", controls: "W A S D · माउस · Shift · Space · RMB निशाना · LMB वार · E", pointer: "माउस खेल के नियंत्रण में होगा। उसे छोड़ने के लिए Esc दबाएँ।" },
-  ta: { chapter: "அத்தியாயம் 1", advance: "காட்சியைத் தாண்டு", enter: "தெருவில் நுழைய கிளிக் செய்யவும்", controls: "W A S D · சுட்டி · Shift · Space · RMB குறி · LMB தாக்குதல் · E", pointer: "சுட்டி விளையாட்டின் கட்டுப்பாட்டில் இருக்கும். விடுவிக்க Esc அழுத்தவும்." },
-  kn: { chapter: "ಅಧ್ಯಾಯ 1", advance: "ದೃಶ್ಯ ಬಿಡಿ", enter: "ಬೀದಿಗೆ ಪ್ರವೇಶಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ", controls: "W A S D · ಮೌಸ್ · Shift · Space · RMB ಗುರಿ · LMB ದಾಳಿ · E", pointer: "ಮೌಸ್ ಆಟದ ನಿಯಂತ್ರಣಕ್ಕೆ ಬರುತ್ತದೆ. ಬಿಡಿಸಲು Esc ಒತ್ತಿ." },
-  te: { chapter: "అధ్యాయం 1", advance: "దృశ్యాన్ని దాటండి", enter: "వీధిలోకి ప్రవేశించడానికి క్లిక్ చేయండి", controls: "W A S D · మౌస్ · Shift · Space · RMB గురి · LMB దాడి · E", pointer: "మౌస్ ఆట నియంత్రణలోకి వస్తుంది. విడిచిపెట్టడానికి Esc నొక్కండి." },
+const interfaceCopy: Record<Locale, { chapter: string; advance: string; handing: string }> = {
+  en: { chapter: "Chapter 1", advance: "skip scene", handing: "Entering the street" },
+  hi: { chapter: "अध्याय 1", advance: "दृश्य छोड़ें", handing: "गली में प्रवेश" },
+  ta: { chapter: "அத்தியாயம் 1", advance: "காட்சியைத் தாண்டு", handing: "தெருவில் நுழைகிறது" },
+  kn: { chapter: "ಅಧ್ಯಾಯ 1", advance: "ದೃಶ್ಯ ಬಿಡಿ", handing: "ಬೀದಿಗೆ ಪ್ರವೇಶ" },
+  te: { chapter: "అధ్యాయం 1", advance: "దృశ్యాన్ని దాటండి", handing: "వీధిలోకి ప్రవేశం" },
 };
 
 let voiceManifestPromise: Promise<VoiceEntry[]> | null = null;
@@ -53,6 +48,25 @@ function loadVoiceEntries() {
   return voiceManifestPromise;
 }
 
+// ponytail: linear ramp on a plain <audio>, not WebAudio — a bed fading under a
+// voice does not need a graph. Move to WebAudio only if we ever need real ducking.
+function rampVolume(audio: HTMLAudioElement, to: number, ms: number) {
+  const from = audio.volume;
+  if (ms <= 0 || Math.abs(to - from) < 0.005) {
+    audio.volume = Math.max(0, Math.min(1, to));
+    return () => undefined;
+  }
+  const startedAt = performance.now();
+  let frame = 0;
+  const step = () => {
+    const progress = Math.min(1, (performance.now() - startedAt) / ms);
+    audio.volume = Math.max(0, Math.min(1, from + (to - from) * progress));
+    if (progress < 1) frame = requestAnimationFrame(step);
+  };
+  frame = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(frame);
+}
+
 type Props = {
   copy: ChapterDictionary;
   locale: Locale;
@@ -63,32 +77,49 @@ type Props = {
 };
 
 export default function ChapterZeroCinematic({ copy, locale, profile, chapterTitle, onSaveSetting, onComplete }: Props) {
-  const [panel, setPanel] = useState(0);
-  const [outgoingPanel, setOutgoingPanel] = useState<number | null>(null);
-  const [mode, setMode] = useState<"panels" | "title" | "entry" | "leaving">("panels");
+  const [beat, setBeat] = useState(0);
+  const [outgoingBeat, setOutgoingBeat] = useState<number | null>(null);
+  const [mode, setMode] = useState<"panels" | "title" | "leaving">("panels");
   const [skipConfirm, setSkipConfirm] = useState(false);
   const [voiceNotice, setVoiceNotice] = useState(false);
-  const [panelDuration, setPanelDuration] = useState(FALLBACK_DURATION_MS);
+  const [beatDuration, setBeatDuration] = useState<number>(BEATS[0].hold);
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const ambienceRef = useRef<HTMLAudioElement | null>(null);
+  const bedsRef = useRef<(HTMLAudioElement | null)[]>([null, null]);
   const settingsRef = useRef(profile.settings);
   const outgoingTimerRef = useRef<number | null>(null);
   const titleTimerRef = useRef<number | null>(null);
   const titleHoldRef = useRef({ remaining: TITLE_HOLD_MS, startedAt: 0, active: false });
   const advanceRef = useRef<() => void>(() => undefined);
+  const completeRef = useRef(onComplete);
   const advancingRef = useRef(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const skipDialogRef = useRef<HTMLDivElement | null>(null);
   const fallbackRef = useRef<{ timer: number | null; remaining: number; startedAt: number; active: boolean }>({ timer: null, remaining: FALLBACK_DURATION_MS, startedAt: 0, active: false });
 
   useEffect(() => { settingsRef.current = profile.settings; }, [profile.settings]);
+  useEffect(() => { completeRef.current = onComplete; }, [onComplete]);
+  const beatRef = useRef(0);
+  useEffect(() => { beatRef.current = beat; }, [beat]);
+
+  const bedVolume = useCallback((settings: ChapterSettings, ducked: boolean) => {
+    if (settings.muteAll) return 0;
+    return Math.min(.34, settings.master * settings.music * (ducked ? .16 : .28));
+  }, []);
+
+  const duckBeds = useCallback((ducked: boolean, ms: number) => {
+    const active = beatRef.current >= RAID_BED_FROM_BEAT ? 1 : 0;
+    bedsRef.current.forEach((bed, index) => {
+      if (bed) rampVolume(bed, index === active ? bedVolume(settingsRef.current, ducked) : 0, ms);
+    });
+  }, [bedVolume]);
 
   const clearFallback = useCallback(() => {
     if (fallbackRef.current.timer !== null) window.clearTimeout(fallbackRef.current.timer);
     fallbackRef.current = { timer: null, remaining: FALLBACK_DURATION_MS, startedAt: 0, active: false };
   }, []);
 
-  const armFallback = useCallback((duration = FALLBACK_DURATION_MS) => {
+  const armFallback = useCallback((duration: number) => {
     clearFallback();
     fallbackRef.current = { timer: null, remaining: duration, startedAt: performance.now(), active: true };
     fallbackRef.current.timer = window.setTimeout(() => {
@@ -104,85 +135,135 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     titleHoldRef.current = { remaining: TITLE_HOLD_MS, startedAt: 0, active: false };
   }, []);
 
+  const leave = useCallback(() => {
+    setMode("leaving");
+    voiceRef.current?.pause();
+    if (ambienceRef.current) rampVolume(ambienceRef.current, 0, LEAVE_FADE_MS);
+    bedsRef.current.forEach((bed) => { if (bed) rampVolume(bed, 0, LEAVE_FADE_MS); });
+    window.setTimeout(() => completeRef.current(), LEAVE_FADE_MS);
+  }, []);
+
   const armTitleHold = useCallback((duration = TITLE_HOLD_MS) => {
     if (titleTimerRef.current !== null) window.clearTimeout(titleTimerRef.current);
     titleHoldRef.current = { remaining: duration, startedAt: performance.now(), active: true };
     titleTimerRef.current = window.setTimeout(() => {
       titleTimerRef.current = null;
       titleHoldRef.current.active = false;
-      setMode("entry");
+      leave();
     }, duration);
-  }, []);
+  }, [leave]);
 
   const advance = useCallback(() => {
-    if (advancingRef.current || skipConfirm || mode === "entry" || mode === "leaving") return;
+    if (advancingRef.current || skipConfirm || mode === "leaving") return;
     advancingRef.current = true;
-    window.setTimeout(() => { advancingRef.current = false; }, 500);
+    window.setTimeout(() => { advancingRef.current = false; }, 450);
     clearFallback();
     voiceRef.current?.pause();
     voiceRef.current = null;
 
     if (mode === "title") {
       clearTitleHold();
-      setMode("entry");
+      leave();
       return;
     }
-    if (panel < PANEL_IMAGES.length - 1) {
+    if (beat < BEATS.length - 1) {
       setVoiceNotice(false);
-      setPanelDuration(FALLBACK_DURATION_MS);
-      setOutgoingPanel(panel);
-      setPanel((value) => value + 1);
+      setBeatDuration(BEATS[beat + 1].hold);
+      setOutgoingBeat(beat);
+      setBeat((value) => value + 1);
       if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
-      outgoingTimerRef.current = window.setTimeout(() => setOutgoingPanel(null), CROSSFADE_MS);
+      outgoingTimerRef.current = window.setTimeout(() => setOutgoingBeat(null), CROSSFADE_MS);
       return;
     }
-    setOutgoingPanel(panel);
+    setOutgoingBeat(beat);
     setMode("title");
     if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
-    outgoingTimerRef.current = window.setTimeout(() => setOutgoingPanel(null), CROSSFADE_MS);
-  }, [clearFallback, clearTitleHold, mode, panel, skipConfirm]);
+    outgoingTimerRef.current = window.setTimeout(() => setOutgoingBeat(null), CROSSFADE_MS);
+  }, [beat, clearFallback, clearTitleHold, leave, mode, skipConfirm]);
 
   useEffect(() => { advanceRef.current = advance; }, [advance]);
 
+  // The piano hands over to the darker bed as the raid frame comes up.
   useEffect(() => {
-    PANEL_IMAGES.forEach((source) => {
+    if (mode !== "panels") return;
+    const active = beat >= RAID_BED_FROM_BEAT ? 1 : 0;
+    bedsRef.current.forEach((bed, index) => {
+      if (bed) rampVolume(bed, index === active ? bedVolume(settingsRef.current, Boolean(voiceRef.current)) : 0, BED_CROSSFADE_MS);
+    });
+  }, [beat, bedVolume, mode]);
+
+  useEffect(() => {
+    BEATS.forEach((item) => {
       const image = new window.Image();
-      image.src = source;
+      image.src = item.image;
     });
   }, []);
 
   useEffect(() => {
     rootRef.current?.focus();
+    const settings = settingsRef.current;
     const ambience = new Audio(AMBIENCE_PATH);
     ambience.loop = true;
     ambience.preload = "auto";
-    const settings = settingsRef.current;
     ambience.volume = settings.muteAll ? 0 : Math.min(.2, settings.master * settings.music * .18);
     ambienceRef.current = ambience;
     ambience.play().catch(() => undefined);
+
+    // Two beds under the ambience: piano for Karna's half, a darker one from the
+    // raid on. The first enters under the hero frame rather than with it, so panel
+    // 01 opens on picture alone. A missing file simply never sounds.
+    const beds = MUSIC_PATHS.map((path) => {
+      const bed = new Audio(path);
+      bed.loop = true;
+      bed.preload = "auto";
+      bed.volume = 0;
+      bed.addEventListener("error", () => { bedsRef.current = bedsRef.current.map((item) => (item === bed ? null : item)); }, { once: true });
+      bed.play().catch(() => undefined);
+      return bed;
+    });
+    bedsRef.current = beds;
+    const cancelMusicFade = rampVolume(beds[0], bedVolume(settingsRef.current, false), MUSIC_FADE_MS);
+
     return () => {
+      cancelMusicFade();
       ambience.pause();
+      beds.forEach((bed) => bed.pause());
       ambienceRef.current = null;
+      bedsRef.current = [null, null];
       voiceRef.current?.pause();
       clearFallback();
       clearTitleHold();
       if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
     };
-  }, [clearFallback, clearTitleHold]);
+  }, [bedVolume, clearFallback, clearTitleHold]);
 
   useEffect(() => {
-    if (ambienceRef.current) ambienceRef.current.volume = profile.settings.muteAll ? 0 : Math.min(.2, profile.settings.master * profile.settings.music * .18);
-    if (voiceRef.current) voiceRef.current.volume = profile.settings.muteAll ? 0 : Math.max(0, Math.min(1, profile.settings.master * profile.settings.dialogue));
-  }, [profile.settings.dialogue, profile.settings.master, profile.settings.music, profile.settings.muteAll]);
+    const settings = profile.settings;
+    if (ambienceRef.current) ambienceRef.current.volume = settings.muteAll ? 0 : Math.min(.2, settings.master * settings.music * .18);
+    const active = beatRef.current >= RAID_BED_FROM_BEAT ? 1 : 0;
+    bedsRef.current.forEach((bed, index) => {
+      if (bed) bed.volume = index === active ? bedVolume(settings, Boolean(voiceRef.current)) : 0;
+    });
+    if (voiceRef.current) voiceRef.current.volume = settings.muteAll ? 0 : Math.max(0, Math.min(1, settings.master * settings.dialogue));
+  }, [bedVolume, profile.settings]);
 
   useEffect(() => {
     if (mode !== "panels") return;
+    const current = BEATS[beat];
     let cancelled = false;
-    armFallback();
+    let tailTimer: number | null = null;
+    // beatDuration is already this beat's authored hold: advance() sets it on the
+    // way in, and loadedmetadata below stretches it to the measured line.
+    armFallback(current.hold);
+
+    const endBeat = () => {
+      if (cancelled) return;
+      tailTimer = window.setTimeout(() => advanceRef.current(), BEAT_TAIL_MS);
+    };
 
     loadVoiceEntries().then((entries) => {
       if (cancelled) return;
-      const entry = entries.find((candidate) => candidate.sourceLineId === PANEL_VOICE_IDS[panel] && candidate.locale === profile.settings.voiceLocale && candidate.status === "validated");
+      const entry = entries.find((candidate) => candidate.sourceLineId === current.voice && candidate.locale === profile.settings.voiceLocale && candidate.status === "validated");
       const probe = document.createElement("audio");
       const asset = entry?.assets.find((candidate) => candidate.codec === "ogg" && probe.canPlayType("audio/ogg"))
         ?? entry?.assets.find((candidate) => candidate.codec === "mp3")
@@ -198,36 +279,45 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       audio.volume = settings.muteAll ? 0 : Math.max(0, Math.min(1, settings.master * settings.dialogue));
       voiceRef.current = audio;
       audio.addEventListener("loadedmetadata", () => {
-        if (!cancelled && Number.isFinite(audio.duration)) setPanelDuration(Math.max(4_000, audio.duration * 1_000));
+        // Hold the frame for the line plus a breath, never shorter than the authored beat.
+        if (!cancelled && Number.isFinite(audio.duration)) setBeatDuration(Math.max(current.hold, audio.duration * 1_000 + BEAT_TAIL_MS));
       });
-      audio.addEventListener("playing", clearFallback);
-      audio.addEventListener("ended", () => { if (!cancelled) advanceRef.current(); });
+      audio.addEventListener("playing", () => {
+        clearFallback();
+        duckBeds(true, 600);
+        if (!cancelled && Number.isFinite(audio.duration)) armFallback(audio.duration * 1_000 + BEAT_TAIL_MS * 2);
+      });
+      audio.addEventListener("ended", () => {
+        duckBeds(false, 900);
+        endBeat();
+      });
       audio.addEventListener("error", () => {
         if (!cancelled) {
           setVoiceNotice(true);
-          armFallback();
+          armFallback(current.hold);
         }
       }, { once: true });
       audio.play().catch(() => {
         if (!cancelled) {
           setVoiceNotice(true);
-          armFallback();
+          armFallback(current.hold);
         }
       });
     }).catch(() => {
       if (!cancelled) {
         setVoiceNotice(true);
-        armFallback();
+        armFallback(current.hold);
       }
     });
 
     return () => {
       cancelled = true;
+      if (tailTimer !== null) window.clearTimeout(tailTimer);
       voiceRef.current?.pause();
       voiceRef.current = null;
       clearFallback();
     };
-  }, [armFallback, clearFallback, mode, panel, profile.settings.voiceLocale]);
+  }, [armFallback, beat, clearFallback, duckBeds, mode, profile.settings.voiceLocale]);
 
   useEffect(() => {
     if (mode !== "title") return;
@@ -239,6 +329,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     const pause = () => {
       voiceRef.current?.pause();
       ambienceRef.current?.pause();
+      bedsRef.current.forEach((bed) => bed?.pause());
       const fallback = fallbackRef.current;
       if (fallback.active && fallback.timer !== null) {
         window.clearTimeout(fallback.timer);
@@ -256,6 +347,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       if (document.hidden) return;
       voiceRef.current?.play().catch(() => undefined);
       ambienceRef.current?.play().catch(() => undefined);
+      bedsRef.current.forEach((bed) => bed?.play().catch(() => undefined));
       const fallback = fallbackRef.current;
       if (fallback.active && fallback.timer === null) armFallback(fallback.remaining);
       const titleHold = titleHoldRef.current;
@@ -307,22 +399,31 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       if (event.key === "Escape") {
         event.preventDefault();
         setSkipConfirm(true);
-      } else if ((event.key === " " || event.key === "Enter") && mode !== "entry") {
-        if ((event.target as HTMLElement | null)?.closest("button, a, input, select, textarea")) return;
+      } else if (event.key === " " || event.code === "Space" || event.key === "Enter") {
+        // Only the cinematic's own controls may swallow the key; focus left behind
+        // on the title screen underneath must not silently break "Space to skip".
+        const control = (event.target as HTMLElement | null)?.closest("button, a, input, select, textarea");
+        if (control?.closest(".chapter-zero-cinematic")) return;
         event.preventDefault();
         advanceRef.current();
       }
     };
     window.addEventListener("keydown", keyboard);
     return () => window.removeEventListener("keydown", keyboard);
-  }, [mode, skipConfirm]);
+  }, [skipConfirm]);
 
-  const currentPanel = copy.chapter0.panels[panel];
+  const current = BEATS[beat];
+  const currentCopy = copy.chapter0.panels[beat];
   const storyMuted = profile.settings.muteAll || profile.settings.dialogue === 0;
   const ui = interfaceCopy[locale];
+  // The hero frame opens on picture alone: no chrome, no counter, a later caption.
+  const bare = mode === "panels" && current.hero;
   const motionStyle = {
-    "--panel-duration": `${panelDuration}ms`,
-    "--pan-x": panel % 2 === 0 ? "1.5%" : "-1.5%",
+    "--panel-duration": `${beatDuration}ms`,
+    "--pan-x": beat % 2 === 0 ? "1.4%" : "-1.4%",
+    "--caption-delay": current.hero ? "2400ms" : "1100ms",
+    "--caption-fade": `${CAPTION_FADE_MS}ms`,
+    "--caption-out": `${Math.max(1_000, beatDuration - BEAT_TAIL_MS + CAPTION_HOLD_AFTER_VOICE_MS)}ms`,
   } as CSSProperties;
 
   function toggleMute() {
@@ -330,20 +431,15 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     else onSaveSetting("dialogue", profile.settings.dialogue > 0 ? 0 : 1);
   }
 
-  function enterStreet() {
-    setMode("leaving");
-    window.setTimeout(onComplete, 650);
-  }
-
-  return <div ref={rootRef} className={`chapter-zero-cinematic mode-${mode}`} role="dialog" aria-modal="true" aria-labelledby="cinematic-title" tabIndex={-1}>
+  return <div ref={rootRef} className={`chapter-zero-cinematic mode-${mode}${bare ? " is-bare" : ""}`} role="dialog" aria-modal="true" aria-labelledby="cinematic-title" tabIndex={-1}>
     <div className="cinematic-frame">
-      {outgoingPanel !== null ? <div className="cinematic-image cinematic-image-outgoing" aria-hidden="true"><Image src={PANEL_IMAGES[outgoingPanel]} alt="" fill sizes="100vw" priority /></div> : null}
-      {mode === "panels" ? <div className="cinematic-image cinematic-image-current" key={panel} style={motionStyle}><Image src={PANEL_IMAGES[panel]} alt={currentPanel.text} fill sizes="100vw" priority /></div> : null}
+      {outgoingBeat !== null ? <div className="cinematic-image cinematic-image-outgoing" aria-hidden="true"><Image src={BEATS[outgoingBeat].image} alt="" fill sizes="100vw" priority unoptimized /></div> : null}
+      {mode === "panels" ? <div className={`cinematic-image cinematic-image-current${current.hero ? " is-hero" : ""}`} key={beat} style={motionStyle}><Image src={current.image} alt={currentCopy.text} fill sizes="100vw" priority unoptimized /></div> : null}
       <div className="cinematic-shade" aria-hidden="true" />
-      {mode === "panels" && profile.settings.captions ? <div className="cinematic-caption" key={`caption-${panel}`} style={motionStyle}>
-        <p className="cinematic-count">{String(panel + 1).padStart(2, "0")} / 05</p>
-        <h2 id="cinematic-title">{currentPanel.title}</h2>
-        <p>{currentPanel.text}</p>
+      {mode === "panels" && profile.settings.captions ? <div className={`cinematic-caption${current.mission ? " is-mission" : ""}`} key={`caption-${beat}`} style={motionStyle}>
+        {current.hero ? null : <p className="cinematic-count">{String(beat + 1).padStart(2, "0")} / {String(BEATS.length).padStart(2, "0")}</p>}
+        <h2 id="cinematic-title">{currentCopy.title}</h2>
+        <p>{currentCopy.text}</p>
         {voiceNotice ? <small role="status">{copy.chapter0.voiceUnavailable}</small> : null}
       </div> : <h2 className="sr-only" id="cinematic-title">{copy.chapter0.label}</h2>}
     </div>
@@ -357,17 +453,13 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       </div>
     </div>
 
-    {mode === "title" || mode === "entry" || mode === "leaving" ? <div className="cinematic-title-card" aria-live="polite">
+    {mode === "title" || mode === "leaving" ? <div className="cinematic-title-card" aria-live="polite">
       <p>{ui.chapter}</p>
       <h2>{chapterTitle}</h2>
-      {mode === "entry" || mode === "leaving" ? <div className="cinematic-entry">
-        <button type="button" onClick={enterStreet}>{ui.enter}</button>
-        <p>{ui.controls}</p>
-        <small>{ui.pointer}</small>
-      </div> : null}
+      <p className="cinematic-handing" role="status">{ui.handing}</p>
     </div> : null}
 
-    {mode === "panels" ? <p className="cinematic-hint">Space / Enter · {ui.advance}<span>Esc · {copy.chapter0.skip}</span></p> : null}
+    {mode === "panels" ? <p className="cinematic-hint">Space · {ui.advance}<span>Esc · {copy.chapter0.skip}</span></p> : null}
 
     {skipConfirm ? <div ref={skipDialogRef} className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="skip-title">
       <div><p className="eyebrow">{copy.chapter0.skipLabel}</p><h2 id="skip-title">{copy.chapter0.skipTitle}</h2><p>{copy.chapter0.skipBody}</p><div><button type="button" onClick={() => setSkipConfirm(false)}>{copy.chapter0.cancel}</button><button className="primary" type="button" onClick={onComplete}>{copy.chapter0.skipConfirm}</button></div></div>

@@ -179,11 +179,11 @@ a { color: inherit; }
   text-align: left;
   text-transform: uppercase;
   cursor: pointer;
-  transition: color 140ms ease, padding-left 140ms ease;
+  transition: color 140ms ease, translate 140ms ease;
 }
 
 .title-menu button:hover {
-  padding-left: 7px;
+  translate: 7px 0;
   color: #d8a84f;
 }
 
@@ -458,7 +458,7 @@ h1 {
   color: #f8f1e5;
   outline: none;
   opacity: 1;
-  transition: opacity 650ms ease;
+  transition: opacity 900ms ease;
 }
 
 .chapter-zero-cinematic.mode-leaving { opacity: 0; }
@@ -468,7 +468,16 @@ h1 {
   inset: 6vh 0;
   overflow: hidden;
   background: #06070d;
+  transition: inset 900ms cubic-bezier(.4, 0, .2, 1);
 }
+
+/* The hero frame plays full-bleed with no chrome: picture and caption only. */
+.chapter-zero-cinematic.is-bare .cinematic-frame { inset: 0; }
+.chapter-zero-cinematic.is-bare .cinematic-topbar,
+.chapter-zero-cinematic.is-bare .cinematic-hint { opacity: 0; pointer-events: none; }
+
+.cinematic-topbar,
+.cinematic-hint { transition: opacity 700ms ease; }
 
 .cinematic-image {
   position: absolute;
@@ -489,6 +498,16 @@ h1 {
 .cinematic-image-current img {
   animation: cinematic-ken-burns var(--panel-duration, 7000ms) linear forwards;
   transform-origin: center;
+}
+
+/* Title-quality grade and a deliberate, slower move on the opening frame. */
+.cinematic-image-current.is-hero {
+  animation-duration: 2.2s;
+}
+
+.cinematic-image-current.is-hero img {
+  animation: cinematic-hero-move var(--panel-duration, 11000ms) cubic-bezier(.33, 0, .3, 1) forwards;
+  filter: saturate(1.06) contrast(1.05) brightness(1.02);
 }
 
 .cinematic-image-outgoing {
@@ -519,7 +538,25 @@ h1 {
   text-align: center;
   text-shadow: 0 2px 9px #000;
   transform: translateX(-50%);
-  animation: cinematic-caption-life var(--panel-duration, 7000ms) linear both;
+  /* Two independent animations, so the hold is never a percentage of the line:
+     it fades in a beat after the image settles, then out only once the voice
+     has finished (--caption-out is armed past the end of the spoken line). */
+  animation:
+    cinematic-caption-in 700ms var(--caption-delay, 1100ms) ease both,
+    cinematic-caption-out var(--caption-fade, 500ms) var(--caption-out, 6500ms) ease forwards;
+}
+
+/* Vrishaketu speaking in first person, not the narrator over him. */
+.cinematic-caption.is-mission {
+  width: min(1020px, calc(100vw - 200px));
+  border-top-color: rgba(222, 173, 85, .95);
+}
+
+.cinematic-caption.is-mission h2 { color: #f0c877; letter-spacing: .22em; }
+
+.cinematic-caption.is-mission > p:not(.cinematic-count) {
+  max-width: 940px;
+  font-size: clamp(22px, 1.62vw, 31px);
 }
 
 .cinematic-caption h2 {
@@ -599,8 +636,7 @@ h1 {
 }
 
 .cinematic-utilities button:hover,
-.cinematic-utilities button:focus-visible,
-.cinematic-entry button:focus-visible {
+.cinematic-utilities button:focus-visible {
   outline: 2px solid #e3b45e;
   outline-offset: 3px;
   color: #fff;
@@ -647,39 +683,13 @@ h1 {
   letter-spacing: -.035em;
 }
 
-.cinematic-entry {
-  width: min(720px, calc(100vw - 80px));
-  margin: 46px auto 0;
-  padding-top: 30px;
-  border-top: 1px solid rgba(248, 241, 229, .2);
-  animation: cinematic-entry-reveal .65s .1s ease both;
-}
-
-.cinematic-entry button {
-  min-width: min(440px, 100%);
-  min-height: 62px;
-  padding: 0 28px;
-  border: 1px solid #d6a54b;
-  background: #b97c21;
-  color: #070604;
-  font: 760 14px/1 var(--font-geist-sans), sans-serif;
-  letter-spacing: .1em;
+.cinematic-handing {
+  margin: 34px 0 0;
+  color: rgba(248, 241, 229, .42);
+  font: 600 10px/1 var(--font-geist-mono), monospace;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  cursor: pointer;
-}
-
-.cinematic-entry > p {
-  margin: 23px 0 0;
-  color: rgba(248, 241, 229, .76);
-  font: 620 12px/1.5 var(--font-geist-mono), monospace;
-  letter-spacing: .04em;
-}
-
-.cinematic-entry small {
-  display: block;
-  margin-top: 11px;
-  color: rgba(248, 241, 229, .46);
-  font: 12px/1.5 var(--font-geist-sans), sans-serif;
+  animation: cinematic-title-reveal 1s .8s ease both;
 }
 
 @keyframes cinematic-frame-in {
@@ -697,10 +707,19 @@ h1 {
   to { transform: scale(1.08) translateX(var(--pan-x, 1.5%)); }
 }
 
-@keyframes cinematic-caption-life {
-  0%, 4% { opacity: 0; transform: translate(-50%, 12px); }
-  13%, 82% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, -5px); }
+@keyframes cinematic-hero-move {
+  from { transform: scale(1.02) translate3d(0, 1.1%, 0); }
+  to { transform: scale(1.13) translate3d(0, -1.1%, 0); }
+}
+
+@keyframes cinematic-caption-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes cinematic-caption-out {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -5px); }
 }
 
 @keyframes cinematic-title-reveal {
@@ -708,10 +727,6 @@ h1 {
   to { opacity: 1; }
 }
 
-@keyframes cinematic-entry-reveal {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 .confirm-dialog { position: fixed; z-index: 120; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(3,4,13,.82); color: #faf2df; }
 .confirm-dialog > div { width: min(560px, 100%); padding: clamp(28px, 5vw, 54px); border: 1px solid #e1b15d; background: #16182f; box-shadow: 0 30px 90px #000a; }
 .confirm-dialog h2 { margin: 0; font: 500 42px/1 Georgia, serif; }
@@ -742,7 +757,7 @@ h1 {
 .mouse-map span { min-height: 88px; display: flex; flex-direction: column; gap: 7px; justify-content: center; padding: 14px 18px; background: #fffaf0; font-size: 13px; line-height: 1.35; }
 .mouse-map span + span { border-left: 1px solid #6e6254; }
 .mouse-map b { color: var(--red-dark); }
-.control-note { grid-column: 1 / -1; padding: 12px 14px; border-left: 3px solid var(--gold); background: #e3dac8; }
+.control-note { grid-column: 1 / -1; padding: 12px 14px; border: 1px solid rgba(185, 134, 63, .5); background: #e3dac8; }
 .control-shortcuts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
 .control-shortcuts div { padding: 10px; border: 1px solid var(--line); background: var(--paper-light); }
 .control-shortcuts dt { font: 800 12px var(--font-geist-mono), monospace; }
@@ -784,6 +799,7 @@ h1 {
   .story-card h2 { font-size: 48px; }
   .decision { padding: 70px 22px; }
   .cinematic-frame { inset: 58px 0 78px; }
+  .chapter-zero-cinematic.is-bare .cinematic-frame { inset: 0; }
   .cinematic-topbar { min-height: 58px; height: 58px; padding: 0 18px; }
   .cinematic-topbar span { display: none; }
   .cinematic-caption { bottom: 24px; width: calc(100vw - 28px); padding: 18px 16px 20px; }
@@ -801,5 +817,5 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .title-art img, .title-grain, .cinematic-image-current, .cinematic-image-current img, .cinematic-image-outgoing, .cinematic-caption, .cinematic-title-card, .cinematic-entry { animation: none; }
+  .title-art img, .title-grain, .cinematic-image-current, .cinematic-image-current img, .cinematic-image-outgoing, .cinematic-caption, .cinematic-title-card, .cinematic-handing { animation: none; opacity: 1; }
 }

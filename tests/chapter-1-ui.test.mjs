@@ -22,32 +22,85 @@ const readRuntime = async () => {
   return (await Promise.all(files.map((url) => readFile(url, "utf8")))).join("\n");
 };
 
-test("Chapter 0 uses the five required panels in a hands-free cinematic", async () => {
-  const [cinematic, home, localization] = await Promise.all([
-    readFile(new URL("app/ChapterZeroCinematic.tsx", root), "utf8"),
-    readFile(new URL("app/page.tsx", root), "utf8"),
-    readFile(new URL("app/game/chapter-1/localization.ts", root), "utf8"),
-  ]);
-  const positions = [
-    "01-battlefield.webp",
-    "02-karna-looses.webp",
-    "03-wheel-sinks.webp",
-    "04-karna-lifts.webp",
-    "05-ash.webp",
-  ].map((name) => cinematic.indexOf(name));
-  assert.ok(positions.every((value) => value >= 0));
-  assert.deepEqual(
-    [...positions].sort((a, b) => a - b),
-    positions,
+test("the Chapter 0 opening narrates eight beats and hands off on the night lane", async () => {
+  const { BEATS } = await import(new URL("app/chapter-zero-beats.ts", root).href);
+  const { dictionaries, locales } = await import(new URL("app/game/chapter-1/localization.ts", root).href);
+  const manifest = JSON.parse(await readFile(new URL("public/audio/chapter-1/voice-manifest.json", root), "utf8"));
+
+  // The opening covers Karna's death and the raid, then stops. Panels 08-10 are
+  // Chapter 1's ending (Chitra, the horse, the oath) and must never spoil it here.
+  assert.equal(BEATS.length, 8);
+  assert.equal(BEATS[0].image, "/story-a/01-battlefield.webp");
+  assert.equal(BEATS[0].hero, true);
+  assert.equal(BEATS.at(-1).image, "/story-a/11-lane-mouth.webp");
+  assert.equal(BEATS.at(-1).mission, true);
+  for (const forbidden of ["08-chitra-dies", "09-horse-loosed", "10-oath"]) {
+    assert.ok(!BEATS.some((beat) => beat.image.includes(forbidden)), `${forbidden} belongs to the ending`);
+  }
+  // The hero frame holds longest, so panel 01 reads as a title shot.
+  assert.ok(BEATS[0].hold > Math.max(...BEATS.slice(1, -1).map((beat) => beat.hold)));
+
+  for (const beat of BEATS) {
+    await readFile(new URL(`public${beat.image}`, root));
+    for (const locale of locales) {
+      const entry = manifest.entries.find((item) => item.sourceLineId === beat.voice && item.locale === locale);
+      assert.ok(entry, `missing voice entry ${beat.voice} / ${locale}`);
+      assert.equal(entry.status, "validated", `${beat.voice} / ${locale} is not validated`);
+      for (const asset of entry.assets) await readFile(new URL(`public${asset.runtimePath}`, root));
+    }
+  }
+
+  // Every beat is captioned in every language, so the opening reads fully muted,
+  // and each caption is the text that was actually sent to the voice engine.
+  for (const locale of locales) {
+    const panels = dictionaries[locale].chapter0.panels;
+    assert.equal(panels.length, BEATS.length, `${locale} is missing captions`);
+    for (const [index, beat] of BEATS.entries()) {
+      const spoken = manifest.entries.find((item) => item.sourceLineId === beat.voice && item.locale === locale).text;
+      assert.equal(panels[index].text.replace(/\s+/g, " ").trim(), spoken.replace(/\s+/g, " ").trim(),
+        `caption ${index + 1} does not match the ${locale} voice line`);
+      assert.ok(panels[index].title.length > 0);
+    }
+  }
+
+  // Regression: the caption used to fade at a fixed percentage of the frame, so it
+  // cleared while the line was still being spoken. The fade is now armed off the end
+  // of the audio, and the frame always outlasts the audio by BEAT_TAIL_MS.
+  const { BEAT_TAIL_MS, CAPTION_FADE_MS, CAPTION_HOLD_AFTER_VOICE_MS } =
+    await import(new URL("app/chapter-zero-beats.ts", root).href);
+  assert.ok(CAPTION_HOLD_AFTER_VOICE_MS > 0, "caption must keep holding after the voice stops");
+  assert.ok(
+    CAPTION_HOLD_AFTER_VOICE_MS + CAPTION_FADE_MS < BEAT_TAIL_MS,
+    "the caption must start fading after the line ends and finish before the crossfade",
   );
-  assert.match(cinematic, /FALLBACK_DURATION_MS = 7_000/);
-  assert.match(cinematic, /audio\.addEventListener\("ended"/);
-  assert.match(cinematic, /event\.key === " " \|\| event\.key === "Enter"/);
-  assert.match(cinematic, /event\.key === "Escape"/);
-  assert.match(cinematic, /TITLE_HOLD_MS = 2_000/);
+  const css = await readFile(new URL("app/globals.css", root), "utf8");
+  assert.doesNotMatch(css, /cinematic-caption-life/, "percentage-of-frame caption timing is the bug");
+  assert.match(css, /cinematic-caption-out var\(--caption-fade/);
+  // For a real line, the fade must start strictly after the audio has finished.
+  for (const beat of BEATS) {
+    const spoken = 8_600; // longest measured en narration line, ms
+    const frame = Math.max(beat.hold, spoken + BEAT_TAIL_MS);
+    const captionOut = frame - BEAT_TAIL_MS + CAPTION_HOLD_AFTER_VOICE_MS;
+    assert.ok(captionOut > spoken, `caption on ${beat.voice} fades before the line ends`);
+    assert.ok(captionOut + CAPTION_FADE_MS <= frame, `caption on ${beat.voice} outlives its frame`);
+  }
+
+  // Both music beds ship, and the darker one takes over at the raid.
+  await readFile(new URL("public/audio/chapter-0/music-bed.ogg", root));
+  await readFile(new URL("public/audio/chapter-0/music-raid.ogg", root));
+  const licence = await readFile(new URL("public/audio/chapter-0/LICENSE.txt", root), "utf8");
+  for (const file of ["ambience.ogg", "music-bed.ogg", "music-raid.ogg"]) {
+    assert.match(licence, new RegExp(file.replace(".", "\\.")), `${file} is not in the audio licence file`);
+  }
+
+  // The sequence is hands-free and the game owns the only click-to-enter prompt.
+  const cinematic = await readFile(new URL("app/ChapterZeroCinematic.tsx", root), "utf8");
+  const home = await readFile(new URL("app/page.tsx", root), "utf8");
+  assert.doesNotMatch(cinematic, /cinematic-entry|ArrowLeft|ArrowRight/);
   assert.match(home, /entry=cinematic/);
-  assert.doesNotMatch(cinematic, /ArrowLeft|ArrowRight/);
-  assert.match(localization, /Adapted from the Jaiminiya Ashvamedha Parva/);
+  assert.match(dictionaries.en.chapter0.attribution, /Jaiminiya Ashvamedha Parva/);
+  // CC-BY assets must stay credited on the title screen.
+  assert.match(home, /Tri-Tachyon/);
 });
 
 test("the served Chapter 1 world layout is emitted from the game source", async () => {
@@ -296,8 +349,13 @@ test("every character variant uses one face-safe skeleton and all blades stay ha
   );
   assert.match(
     runtime,
-    /smoothEnemyFacing\(entity, player\.x, player\.z, dt\)/,
-    "enemy facing must remain yaw-only, upright, and smoothed",
+    /smoothEnemyYaw\(entity, enemy\.yaw, dt\)/,
+    "enemy facing must use the server yaw directly with one smoothed path",
+  );
+  assert.doesNotMatch(
+    runtime,
+    /smoothEnemyFacing|entity\.getPosition\(\)\.x \+ velocity\.x/,
+    "enemy facing must not switch back to a velocity-derived target",
   );
   const jsonLength = combatGlb.readUInt32LE(12);
   const combatJson = JSON.parse(
@@ -788,7 +846,7 @@ test("A5 layers responsive aim, blended locomotion, impact feel, and camera spri
   assert.match(runtime, /upperBody\.mask = \{ \[spine\.path\]: \{ children: true \} \}/);
   assert.match(runtime, /state\.hitStopUntil/);
   assert.match(runtime, /entity\.dwarkaHitUntil/);
-  assert.match(runtime, /function smoothEnemyFacing/);
+  assert.match(runtime, /function smoothEnemyYaw/);
   assert.match(runtime, /function springCameraAxis/);
 });
 
