@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ChapterZeroCinematic from "./ChapterZeroCinematic";
 import EmberField from "./EmberField";
+import { storyDestination, titleAction } from "./title-action";
 import { dictionaries, languageNames, locales, type ChapterDictionary, type Locale } from "./game/chapter-1/localization";
 import { CHANNEL_NAME, readProfile, resetProgress, saveProfile, updateSettings, type ChapterProfile, type ChapterSettings } from "./game/chapter-1/progress";
 
@@ -120,14 +121,7 @@ export default function Home() {
   const locale = profile?.settings.locale ?? "en";
   const copy = dictionaries[locale];
   const menuCopy = titleCopy[locale];
-  // Replay is a player asking to experience the chapter again, so it plays the
-  // narration. Only a mid-chapter Continue resumes straight into the street.
-  const action = useMemo(() => {
-    if (profile?.progressSummary?.chapterComplete) return { kind: "story" as const, story: "replay" as const };
-    if (profile?.progressToken && profile.progressSummary) return { kind: "game" as const, href: "/game/chapter-1" };
-    if (profile?.storyIntroComplete) return { kind: "game" as const, href: "/game/chapter-1" };
-    return { kind: "story" as const, story: "enter" as const };
-  }, [profile]);
+  const action = useMemo(() => titleAction(profile), [profile]);
   const titleStatus = profile?.progressSummary?.chapterComplete
     ? copy.home.complete
     : profile?.progressToken && profile.progressSummary
@@ -143,8 +137,9 @@ export default function Home() {
     const mode = storyMode;
     setStoryMode(null);
     // "Watch the opening" returns to the title; the other two enter the street.
-    if (mode === "watch") { requestAnimationFrame(() => watchInvokerRef.current?.focus()); return; }
-    window.location.assign(mode === "replay" ? "/game/chapter-1?replay=1&entry=cinematic" : "/game/chapter-1?entry=cinematic");
+    const destination = mode ? storyDestination(mode) : null;
+    if (!destination) { requestAnimationFrame(() => watchInvokerRef.current?.focus()); return; }
+    window.location.assign(destination);
   }
   function startPrimary() { if (action.kind === "story") setStoryMode(action.story); else window.location.assign(action.href); }
   function watchStory() { watchInvokerRef.current = document.activeElement as HTMLElement | null; setStoryMode("watch"); }

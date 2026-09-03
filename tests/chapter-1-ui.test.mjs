@@ -147,10 +147,37 @@ test("the Chapter 0 opening narrates eight beats and hands off on the night lane
   const cinematic = await readFile(new URL("app/ChapterZeroCinematic.tsx", root), "utf8");
   const home = await readFile(new URL("app/page.tsx", root), "utf8");
   assert.doesNotMatch(cinematic, /cinematic-entry|ArrowLeft|ArrowRight/);
-  assert.match(home, /entry=cinematic/);
+  // The hand-off destination moved into title-action.ts and is asserted there.
+  const { storyDestination } = await import(new URL("app/title-action.ts", root).href);
+  assert.match(storyDestination("enter"), /entry=cinematic/);
   assert.match(dictionaries.en.chapter0.attribution, /Jaiminiya Ashvamedha Parva/);
   // CC-BY assets must stay credited on the title screen.
   assert.match(home, /Tri-Tachyon/);
+});
+
+test("the title screen never sends a returning player past the narration", async () => {
+  const { titleAction, storyDestination } = await import(new URL("app/title-action.ts", root).href);
+
+  // The owner's bug: a completed chapter offered Replay, and Replay jumped
+  // straight into the game, so the eight-beat opening was never seen again.
+  const completed = { storyIntroComplete: true, progressToken: "tok", progressSummary: { chapterComplete: true } };
+  assert.deepEqual(titleAction(completed), { kind: "story", story: "replay" });
+  assert.equal(storyDestination("replay"), "/game/chapter-1?replay=1&entry=cinematic");
+
+  // A first-time player always gets the story, and can never land in a skip path.
+  assert.deepEqual(titleAction(null), { kind: "story", story: "enter" });
+  assert.deepEqual(titleAction({}), { kind: "story", story: "enter" });
+  assert.deepEqual(titleAction({ progressToken: "tok", progressSummary: null }), { kind: "story", story: "enter" });
+  assert.equal(storyDestination("enter"), "/game/chapter-1?entry=cinematic");
+
+  // Mid-chapter Continue is the only case that resumes straight into the street.
+  assert.deepEqual(
+    titleAction({ storyIntroComplete: true, progressToken: "tok", progressSummary: { chapterComplete: false } }),
+    { kind: "game", href: "/game/chapter-1" },
+  );
+
+  // Watching the story again stays on the title screen instead of starting a run.
+  assert.equal(storyDestination("watch"), null);
 });
 
 test("the served Chapter 1 world layout is emitted from the game source", async () => {
