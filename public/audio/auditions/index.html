@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DWARKA narrator auditions</title>
+    <style>
+      :root { color-scheme: dark; font: 16px/1.4 system-ui, sans-serif; background: #11100f; color: #f5ead7; }
+      body { max-width: 760px; margin: 0 auto; padding: 36px 20px 64px; }
+      h1 { margin: 0 0 8px; font: 600 28px/1.1 Georgia, serif; }
+      p { margin: 0 0 28px; color: #bdb2a2; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 10px 8px; border-bottom: 1px solid #302d29; text-align: left; }
+      th { color: #bdb2a2; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+      td:first-child { width: 42%; text-transform: capitalize; }
+      audio { width: 230px; max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <h1>Narrator voice auditions</h1>
+    <p>The same opening line in English and native-script Hindi.</p>
+    <table>
+      <thead><tr><th>Speaker</th><th>English</th><th>हिन्दी</th></tr></thead>
+      <tbody id="voices"></tbody>
+    </table>
+    <script>
+      const speakers = [
+        "shubh", "aditya", "rahul", "rohan", "amit", "dev", "ratan", "varun", "manan",
+        "sumit", "kabir", "aayan", "ashutosh", "advait", "anand", "tarun", "sunny", "mani",
+        "gokul", "vijay", "mohit", "rehan", "soham", "ritu", "priya", "neha", "pooja",
+        "simran", "kavya", "ishita", "shreya", "roopa", "tanya", "shruti", "suhani",
+        "kavitha", "rupali"
+      ];
+      const tbody = document.querySelector("#voices");
+      for (const speaker of speakers) {
+        const row = document.createElement("tr");
+        const name = document.createElement("td");
+        name.textContent = speaker;
+        row.append(name);
+        for (const [locale, label] of [["en", "Play EN"], ["hi", "Play HI"]]) {
+          const cell = document.createElement("td");
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.preload = "none";
+          audio.src = `./${speaker}-${locale}.ogg`;
+          audio.setAttribute("aria-label", `${speaker} ${label}`);
+          cell.append(audio);
+          row.append(cell);
+        }
+        tbody.append(row);
+      }
+    </script>
+  </body>
+</html>
