@@ -41,10 +41,12 @@ export function safeCameraDistance({
   return allowed;
 }
 
-export function playerWeaponVisibility(aim, playerAnimation) {
+export function playerWeaponVisibility(aim, playerAnimation, result = {}) {
   const bowEquipped =
     aim || ["aim", "fire", "archerWarn"].includes(playerAnimation);
-  return { bowEquipped, swordEquipped: !bowEquipped };
+  result.bowEquipped = bowEquipped;
+  result.swordEquipped = !bowEquipped;
+  return result;
 }
 
 export function desktopPixelRatio(devicePixelRatio) {
@@ -247,6 +249,7 @@ export function installLoop(rt) {
     const { bowEquipped, swordEquipped } = playerWeaponVisibility(
       state.aim,
       playerAnim,
+      state.weaponVisibility,
     );
     if (state.playerEntity.dwarkaBow)
       state.playerEntity.dwarkaBow.enabled = bowEquipped;
@@ -275,8 +278,12 @@ export function installLoop(rt) {
       state.paused || performance.now() < state.hitStopUntil,
     );
     rt.updateBowTargeting(snapshot, dt);
-    const forward = { x: Math.sin(state.yaw), z: -Math.cos(state.yaw) },
-      right = { x: Math.cos(state.yaw), z: Math.sin(state.yaw) };
+    const { forward, right, target, desired, safeDesired } =
+      state.cameraScratch;
+    forward.x = Math.sin(state.yaw);
+    forward.z = -Math.cos(state.yaw);
+    right.x = Math.cos(state.yaw);
+    right.z = Math.sin(state.yaw);
     const aimBlendRate = 1 - Math.exp(-visualDt * (state.aim ? 14 : 10));
     state.aimBlend = pc.math.lerp(
       state.aimBlend,
@@ -284,20 +291,16 @@ export function installLoop(rt) {
       aimBlendRate,
     );
     const targetOffset = pc.math.lerp(0.42, 0.28, state.aimBlend);
-    const target = {
-      x: nextX + right.x * targetOffset,
-      y: playerFloorY + 1.6,
-      z: nextZ + right.z * targetOffset,
-    };
+    target.x = nextX + right.x * targetOffset;
+    target.y = playerFloorY + 1.6;
+    target.z = nextZ + right.z * targetOffset;
     const baseDistance = pc.math.lerp(4.5, 0.78, state.aimBlend);
     const shoulderOffset = pc.math.lerp(0.72, 0.55, state.aimBlend);
     const cameraHeight = pc.math.lerp(1.25, 0.35, state.aimBlend);
     const pitchScale = pc.math.lerp(2.1, 1.25, state.aimBlend);
-    const desired = {
-      x: target.x - forward.x * baseDistance + right.x * shoulderOffset,
-      y: target.y + cameraHeight + Math.sin(state.pitch) * pitchScale,
-      z: target.z - forward.z * baseDistance + right.z * shoulderOffset,
-    };
+    desired.x = target.x - forward.x * baseDistance + right.x * shoulderOffset;
+    desired.y = target.y + cameraHeight + Math.sin(state.pitch) * pitchScale;
+    desired.z = target.z - forward.z * baseDistance + right.z * shoulderOffset;
     const safe = segmentCameraDistance(target, desired);
     state.cameraDistance =
       safe < state.cameraDistance
@@ -315,11 +318,9 @@ export function installLoop(rt) {
           ),
         ),
     );
-    const safeDesired = {
-      x: target.x + (desired.x - target.x) * ratio,
-      y: target.y + (desired.y - target.y) * ratio,
-      z: target.z + (desired.z - target.z) * ratio,
-    };
+    safeDesired.x = target.x + (desired.x - target.x) * ratio;
+    safeDesired.y = target.y + (desired.y - target.y) * ratio;
+    safeDesired.z = target.z + (desired.z - target.z) * ratio;
     if (
       !state.cameraSpring ||
       Math.hypot(
@@ -328,11 +329,17 @@ export function installLoop(rt) {
         state.cameraSpring.z - safeDesired.z,
       ) > 8
     ) {
-      state.cameraSpring = { ...safeDesired };
-      state.cameraSpringVelocity = { x: 0, y: 0, z: 0 };
+      state.cameraSpring ||= { x: 0, y: 0, z: 0 };
+      state.cameraSpring.x = safeDesired.x;
+      state.cameraSpring.y = safeDesired.y;
+      state.cameraSpring.z = safeDesired.z;
+      state.cameraSpringVelocity.x = 0;
+      state.cameraSpringVelocity.y = 0;
+      state.cameraSpringVelocity.z = 0;
     }
-    for (const axis of ["x", "y", "z"])
-      springCameraAxis(axis, safeDesired[axis], visualDt);
+    springCameraAxis("x", safeDesired.x, visualDt);
+    springCameraAxis("y", safeDesired.y, visualDt);
+    springCameraAxis("z", safeDesired.z, visualDt);
     const springDistance = segmentCameraDistance(target, state.cameraSpring);
     const springLength = Math.max(
       0.001,
@@ -470,7 +477,9 @@ export function installLoop(rt) {
         state.impacts.splice(index, 1);
       }
     }
-    if (state.qaVisible) {
+    state.qaHudElapsed += dt;
+    if (state.qaVisible && state.qaHudElapsed >= 0.2) {
+      state.qaHudElapsed = 0;
       const x =
           (state.keys.has("KeyD") ? 1 : 0) - (state.keys.has("KeyA") ? 1 : 0),
         z = (state.keys.has("KeyW") ? 1 : 0) - (state.keys.has("KeyS") ? 1 : 0);

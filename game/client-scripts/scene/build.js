@@ -1,3 +1,5 @@
+import { createObjectPool } from "../runtime/object-pool.js";
+
 export function familyMemberTransforms(phase, anchor, familyStaging = {}) {
   const authored = familyStaging[phase]?.members;
   if (Array.isArray(authored) && authored.length === 2) return authored;
@@ -55,6 +57,33 @@ export function installBuild(rt) {
   const localizedMessage = rt.localizedMessage;
   const clearInput = rt.clearInput;
   const queuePressed = rt.queuePressed;
+
+  const familyPools = [0, 1].map((index) =>
+    createObjectPool({
+      create: () => {
+        const member = createCharacter(
+          `Family ${index + 1}`,
+          mats.family,
+          0.68 + index * 0.08,
+        );
+        member.dwarkaFamilyPoolIndex = index;
+        return member;
+      },
+      activate: (member, transform) => {
+        member.dwarkaFloorY = transform.position[1];
+        member.setPosition(
+          transform.position[0],
+          transform.position[1] + CHARACTER_GROUND_LIFT * member.dwarkaScale,
+          transform.position[2],
+        );
+        member.setEulerAngles(0, transform.yaw, 0);
+        member.enabled = true;
+      },
+      deactivate: (member) => {
+        member.enabled = false;
+      },
+    }),
+  );
 
   function primitive(
     type,
@@ -483,70 +512,46 @@ export function installBuild(rt) {
       if (!entity.dwarkaDynamicDoor) assignStaticModelToBatch(entity);
       state.environmentEntities.push(entity);
       state.streamedEnvironment.set(entity.dwarkaPlacementId, entity);
-      updateEnvironmentVisibility(state.snapshot?.player, entity);
+      if (state.snapshot?.player)
+        updateEnvironmentVisibility(state.snapshot.player, entity);
+      else entity.enabled = false;
     }
     return entity;
   }
 
-  function refreshEnvironmentStreaming(player = state.snapshot?.player) {
-    if (!player) return;
-    const playerFloor = player.y ?? floorHeightAt(player.x, player.z);
-    for (const key of Object.keys(state.modelAssets)) {
-      if (
-        !ENVIRONMENT_PLACEMENTS[key] &&
-        !STREET_HOUSE_MODEL_KEYS.has(key) &&
-        !UPPER_HOUSE_MODEL_KEYS.has(key)
-      )
-        continue;
-      const placements = environmentPlacementsFor(key);
-      for (let index = 0; index < placements.length; index += 1) {
-        const placement = placements[index];
-        const id = `${key}:${index}`;
-        const distance = Math.hypot(
-          placement[0] - player.x,
-          placement[2] - player.z,
-        );
-        const sameLevel = Math.abs(placement[1] - playerFloor) <= 10;
-        const existing = state.streamedEnvironment.get(id);
-        if (!existing && distance <= STREAMING.instantiateRadius && sameLevel)
-          instantiateEnvironmentPlacement(key, placement, index);
-        else if (
-          existing &&
-          (distance > STREAMING.destroyRadius || !sameLevel)
-        ) {
-          state.streamedEnvironment.delete(id);
-          state.environmentEntities = state.environmentEntities.filter(
-            (entity) => entity !== existing,
-          );
-          rt.unregisterDoorEntity(existing);
-          existing.destroy();
-          // Imported diya glows are children of streamed models. Destroying the
-          // model removes the light component, so cached references must be
-          // pruned before the next update/QA sample.
-          state.fireLights = state.fireLights.filter((light) =>
-            Boolean(light?.light),
-          );
-        }
-      }
+  function preloadEnvironmentFor(key) {
+    if (state.preloadedEnvironmentKeys.has(key)) return;
+    if (
+      !ENVIRONMENT_PLACEMENTS[key] &&
+      !STREET_HOUSE_MODEL_KEYS.has(key) &&
+      !UPPER_HOUSE_MODEL_KEYS.has(key)
+    )
+      return;
+    const placements = environmentPlacementsFor(key);
+    for (let index = 0; index < placements.length; index += 1) {
+      const id = `${key}:${index}`;
+      if (!state.streamedEnvironment.has(id))
+        instantiateEnvironmentPlacement(key, placements[index], index);
     }
+    state.preloadedEnvironmentKeys.add(key);
   }
 
-  function placeEnvironmentFor() {
-    refreshEnvironmentStreaming();
+  function refreshEnvironmentStreaming() {
+    // Every imported placement is instantiated while the loading/intro UI is
+    // visible. Traversal only toggles entities, avoiding GLB allocation,
+    // shader compilation, and batch rebuilds on a route boundary.
+    for (const key of Object.keys(state.modelAssets))
+      preloadEnvironmentFor(key);
+  }
+
+  function placeEnvironmentFor(key) {
+    preloadEnvironmentFor(key);
+    if (state.snapshot?.player)
+      updateEnvironmentVisibility(state.snapshot.player);
   }
 
   function updateEnvironmentVisibility(player, onlyEntity = null) {
     if (!player) return;
-    state.fireLights = state.fireLights.filter((light) =>
-      Boolean(light?.light),
-    );
-    state.routeLights = state.routeLights.filter((light) =>
-      Boolean(light?.light),
-    );
-    state.fireEffects = state.fireEffects.filter((effect) =>
-      Boolean(effect?.parent),
-    );
-    if (!onlyEntity) refreshEnvironmentStreaming(player);
     const floorY = player.y ?? floorHeightAt(player.x, player.z);
     for (const entity of onlyEntity
       ? [onlyEntity]
@@ -557,11 +562,7 @@ export function installBuild(rt) {
           STREAMING.environmentRadius && Math.abs(position.y - floorY) <= 4.2;
     }
     if (onlyEntity) return;
-    const routePattern =
-      /packed-earth route|route junction|sandstone drain|sandstone tread|Stair sandstone|Caravan route rug/;
-    for (const entity of state.app.root.find((candidate) =>
-      routePattern.test(candidate.name),
-    )) {
+    for (const entity of state.routeSurfaceEntities) {
       const position = entity.getPosition();
       entity.enabled =
         Math.hypot(position.x - player.x, position.z - player.z) <=
@@ -713,7 +714,11 @@ export function installBuild(rt) {
             return;
           }
           state.modelAssets[key] = asset;
-          if (ENVIRONMENT_PLACEMENTS[key] || STREET_HOUSE_MODEL_KEYS.has(key))
+          if (
+            ENVIRONMENT_PLACEMENTS[key] ||
+            STREET_HOUSE_MODEL_KEYS.has(key) ||
+            UPPER_HOUSE_MODEL_KEYS.has(key)
+          )
             placeEnvironmentFor(key);
           for (const root of state.characterRoots) rt.upgradeCharacter(root);
         },
@@ -930,18 +935,9 @@ export function installBuild(rt) {
   }
 
   function syncPhaseScene(phase) {
-    for (const entity of state.enemyEntities.values()) {
-      state.characterRoots.delete(entity);
-      entity.destroy();
-    }
-    state.enemyEntities.clear();
-    state.enemyHealth.clear();
-    state.enemySnapshotVelocities.clear();
-    for (const warning of state.enemyWarnings.values()) warning.destroy();
-    state.enemyWarnings.clear();
+    rt.releaseAllEnemies();
     for (const entity of state.familyEntities) {
-      state.characterRoots.delete(entity);
-      entity.destroy();
+      familyPools[entity.dwarkaFamilyPoolIndex]?.release(entity);
     }
     state.familyEntities = [];
     state.chitra.enabled = phase === "arrival" || phase === "ending";
@@ -955,18 +951,7 @@ export function installBuild(rt) {
     if (familyTransforms.length) {
       for (let index = 0; index < familyTransforms.length; index += 1) {
         const transform = familyTransforms[index];
-        const member = createCharacter(
-          `Family ${index + 1}`,
-          mats.family,
-          0.68 + index * 0.08,
-        );
-        member.dwarkaFloorY = transform.position[1];
-        member.setPosition(
-          transform.position[0],
-          transform.position[1] + CHARACTER_GROUND_LIFT * member.dwarkaScale,
-          transform.position[2],
-        );
-        member.setEulerAngles(0, transform.yaw, 0);
+        const member = familyPools[index].acquire(transform);
         state.familyEntities.push(member);
       }
     }
@@ -1217,6 +1202,11 @@ export function installBuild(rt) {
     for (const emblem of LANDMARKS.streetEmblems || [])
       rt.createSunEmblem(...emblem);
     rt.createRegionalSkyline();
+    const routePattern =
+      /packed-earth route|route junction|sandstone drain|sandstone tread|Stair sandstone|Caravan route rug/;
+    state.routeSurfaceEntities = state.app.root.find((entity) =>
+      routePattern.test(entity.name),
+    );
     for (const [
       x,
       y,
@@ -1316,6 +1306,8 @@ export function installBuild(rt) {
       CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale,
       14,
     );
+    for (const pool of familyPools) pool.warm(1);
+    rt.prewarmEnemyPools();
     state.camera = new pc.Entity("Right shoulder camera");
     state.camera.addComponent("camera", {
       clearColor: new pc.Color(0.085, 0.075, 0.2),
@@ -1324,6 +1316,7 @@ export function installBuild(rt) {
       farClip: 110,
     });
     state.app.root.addChild(state.camera);
+    rt.prewarmEnemyWarnings();
     rt.prewarmProjectilePool();
     rt.prewarmImpactPool();
     // Native MSAA handles desktop edge quality without a full-frame post pass.
@@ -1345,6 +1338,7 @@ export function installBuild(rt) {
   rt.environmentPlacementsFor = environmentPlacementsFor;
   rt.alignEnvironmentModelToStreet = alignEnvironmentModelToStreet;
   rt.instantiateEnvironmentPlacement = instantiateEnvironmentPlacement;
+  rt.preloadEnvironmentFor = preloadEnvironmentFor;
   rt.refreshEnvironmentStreaming = refreshEnvironmentStreaming;
   rt.placeEnvironmentFor = placeEnvironmentFor;
   rt.updateEnvironmentVisibility = updateEnvironmentVisibility;
@@ -1352,6 +1346,7 @@ export function installBuild(rt) {
   rt.createCameraFrame = createCameraFrame;
   rt.buildSevenRegionRoute = buildSevenRegionRoute;
   rt.createCharacter = createCharacter;
+  rt.familyPoolStats = () => familyPools.map((pool) => pool.stats());
   rt.syncPhaseScene = syncPhaseScene;
   rt.buildScene = buildScene;
 }

@@ -532,102 +532,106 @@ export function installQa(rt) {
           )
         : null,
     characterVisualAudit: () =>
-      [...state.characterRoots].map((root) => {
-        const face = root.dwarkaVisual?.findByName(
-          root.dwarkaModelKey.startsWith("Female")
-            ? "Superhero_Female_Head"
-            : "SuperHero_Male_Head",
-        );
-        const eyes =
-          root.dwarkaVisual?.findByName("Eyes") ||
-          root.dwarkaVisual?.findByName("Face.001");
-        const rigHead = root.dwarkaVisual?.findByName("Head");
-        const leftHand = root.dwarkaVisual?.findByName("hand_l");
-        const rightHand = root.dwarkaVisual?.findByName("hand_r");
-        const bowPosition = root.dwarkaBow?.getPosition();
-        const swordPosition = root.dwarkaSword?.getPosition();
-        const footwear = root.dwarkaVisual
-          ?.findComponents("render")
-          .filter((render) => /Feet/.test(render.entity.name))
-          .flatMap((render) => render.meshInstances || []);
-        const forward = root.forward;
-        const leftPosition = leftHand?.getPosition();
-        const rightPosition = rightHand?.getPosition();
-        const position = (value) =>
-          value
-            ? {
-                x: Number(value.x.toFixed(3)),
-                y: Number(value.y.toFixed(3)),
-                z: Number(value.z.toFixed(3)),
-              }
-            : null;
-        const faceAabb = face?.render?.meshInstances?.[0]?.aabb;
-        return {
-          name: root.name,
-          model: root.dwarkaModelKey,
-          singleSkeleton: Boolean(
-            root.dwarkaVisual?.findByName("Armature") ||
-              root.dwarkaVisual?.findByName("pelvis"),
-          ),
-          hasVisibleFace: Boolean(
-            face?.enabled &&
-              face.render?.enabled &&
-              eyes?.enabled &&
-              eyes.render?.enabled,
-          ),
-          rootPosition: position(root.getPosition()),
-          rootYaw: Number(root.getEulerAngles().y.toFixed(2)),
-          visualFacingYaw: Number(Math.atan2(forward.x, -forward.z).toFixed(3)),
-          footMinimumY: footwear.length
-            ? Number(
-                Math.min(
-                  ...footwear.map(
-                    (instance) =>
-                      instance.aabb.center.y - instance.aabb.halfExtents.y,
-                  ),
-                ).toFixed(3),
-              )
-            : null,
-          headBonePosition: position(rigHead?.getPosition()),
-          faceBoundsCenter: position(faceAabb?.center),
-          hasRiggedHair: Boolean(
-            root.dwarkaVisual?.findByName("Hair_Buns") ||
-              root.dwarkaVisual?.findByName("Hair_SimpleParted") ||
-              root.dwarkaVisual?.findByName("Hair_Buzzed") ||
-              root.dwarkaVisual?.findByName("Hair_Beard"),
-          ),
-          hasBow: Boolean(root.dwarkaBow),
-          bowEnabled: Boolean(root.dwarkaBow?.enabled),
-          bowLeftHandDistance:
-            leftPosition && bowPosition
-              ? Math.hypot(
-                  bowPosition.x - leftPosition.x,
-                  bowPosition.y - leftPosition.y,
-                  bowPosition.z - leftPosition.z,
+      [...state.characterRoots]
+        .filter((root) => root.enabled)
+        .map((root) => {
+          const face = root.dwarkaVisual?.findByName(
+            root.dwarkaModelKey.startsWith("Female")
+              ? "Superhero_Female_Head"
+              : "SuperHero_Male_Head",
+          );
+          const eyes =
+            root.dwarkaVisual?.findByName("Eyes") ||
+            root.dwarkaVisual?.findByName("Face.001");
+          const rigHead = root.dwarkaVisual?.findByName("Head");
+          const leftHand = root.dwarkaVisual?.findByName("hand_l");
+          const rightHand = root.dwarkaVisual?.findByName("hand_r");
+          const bowPosition = root.dwarkaBow?.getPosition();
+          const swordPosition = root.dwarkaSword?.getPosition();
+          const footwear = root.dwarkaVisual
+            ?.findComponents("render")
+            .filter((render) => /Feet/.test(render.entity.name))
+            .flatMap((render) => render.meshInstances || []);
+          const forward = root.forward;
+          const leftPosition = leftHand?.getPosition();
+          const rightPosition = rightHand?.getPosition();
+          const position = (value) =>
+            value
+              ? {
+                  x: Number(value.x.toFixed(3)),
+                  y: Number(value.y.toFixed(3)),
+                  z: Number(value.z.toFixed(3)),
+                }
+              : null;
+          const faceAabb = face?.render?.meshInstances?.[0]?.aabb;
+          return {
+            name: root.name,
+            model: root.dwarkaModelKey,
+            singleSkeleton: Boolean(
+              root.dwarkaVisual?.findByName("Armature") ||
+                root.dwarkaVisual?.findByName("pelvis"),
+            ),
+            hasVisibleFace: Boolean(
+              face?.enabled &&
+                face.render?.enabled &&
+                eyes?.enabled &&
+                eyes.render?.enabled,
+            ),
+            rootPosition: position(root.getPosition()),
+            rootYaw: Number(root.getEulerAngles().y.toFixed(2)),
+            visualFacingYaw: Number(
+              Math.atan2(forward.x, -forward.z).toFixed(3),
+            ),
+            footMinimumY: footwear.length
+              ? Number(
+                  Math.min(
+                    ...footwear.map(
+                      (instance) =>
+                        instance.aabb.center.y - instance.aabb.halfExtents.y,
+                    ),
+                  ).toFixed(3),
                 )
               : null,
-          bowDrawHandDistance:
-            rightPosition && root.dwarkaBowPullWorld
-              ? Math.hypot(
-                  root.dwarkaBowPullWorld.x - rightPosition.x,
-                  root.dwarkaBowPullWorld.y - rightPosition.y,
-                  root.dwarkaBowPullWorld.z - rightPosition.z,
-                )
-              : null,
-          hasSword: Boolean(root.dwarkaSword),
-          approvedSword: Boolean(root.dwarkaSwordModel),
-          swordGripDistance:
-            rightPosition && swordPosition
-              ? Math.hypot(
-                  swordPosition.x - rightPosition.x,
-                  swordPosition.y - rightPosition.y,
-                  swordPosition.z - rightPosition.z,
-                )
-              : null,
-          animation: root.dwarkaAnimState || null,
-          animationSpeed: root.dwarkaVisual?.anim?.speed ?? null,
-        };
-      }),
+            headBonePosition: position(rigHead?.getPosition()),
+            faceBoundsCenter: position(faceAabb?.center),
+            hasRiggedHair: Boolean(
+              root.dwarkaVisual?.findByName("Hair_Buns") ||
+                root.dwarkaVisual?.findByName("Hair_SimpleParted") ||
+                root.dwarkaVisual?.findByName("Hair_Buzzed") ||
+                root.dwarkaVisual?.findByName("Hair_Beard"),
+            ),
+            hasBow: Boolean(root.dwarkaBow),
+            bowEnabled: Boolean(root.dwarkaBow?.enabled),
+            bowLeftHandDistance:
+              leftPosition && bowPosition
+                ? Math.hypot(
+                    bowPosition.x - leftPosition.x,
+                    bowPosition.y - leftPosition.y,
+                    bowPosition.z - leftPosition.z,
+                  )
+                : null,
+            bowDrawHandDistance:
+              rightPosition && root.dwarkaBowPullWorld
+                ? Math.hypot(
+                    root.dwarkaBowPullWorld.x - rightPosition.x,
+                    root.dwarkaBowPullWorld.y - rightPosition.y,
+                    root.dwarkaBowPullWorld.z - rightPosition.z,
+                  )
+                : null,
+            hasSword: Boolean(root.dwarkaSword),
+            approvedSword: Boolean(root.dwarkaSwordModel),
+            swordGripDistance:
+              rightPosition && swordPosition
+                ? Math.hypot(
+                    swordPosition.x - rightPosition.x,
+                    swordPosition.y - rightPosition.y,
+                    swordPosition.z - rightPosition.z,
+                  )
+                : null,
+            animation: root.dwarkaAnimState || null,
+            animationSpeed: root.dwarkaVisual?.anim?.speed ?? null,
+          };
+        }),
     environmentAlignmentAudit: () =>
       state.environmentEntities.map((entity) => {
         const instances =
@@ -718,6 +722,8 @@ export function installQa(rt) {
       pools: {
         projectiles: rt.projectilePoolStats?.() || null,
         impacts: rt.impactPoolStats?.() || null,
+        enemies: rt.enemyPoolStats?.() || null,
+        families: rt.familyPoolStats?.() || null,
       },
       triangles: state.app.stats?.frame?.triangles ?? null,
       renderScale: state.renderScale,

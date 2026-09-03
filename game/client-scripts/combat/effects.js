@@ -1,8 +1,7 @@
 import { attackWarningGlyph } from "./reticle.js";
 import { createObjectPool } from "../runtime/object-pool.js";
 
-export function separateEnemyVisuals(enemies, minimumDistance = 1.35) {
-  const separated = enemies.map((enemy) => ({ ...enemy }));
+function separateEnemyVisualsInPlace(separated, minimumDistance = 1.35) {
   for (let pass = 0; pass < 6; pass += 1)
     for (let first = 0; first < separated.length; first += 1)
       for (let second = first + 1; second < separated.length; second += 1) {
@@ -27,6 +26,17 @@ export function separateEnemyVisuals(enemies, minimumDistance = 1.35) {
         b.z -= normalZ * correction;
       }
   return separated;
+}
+
+function copySeparatedEnemyVisuals(enemies, target, minimumDistance = 1.35) {
+  target.length = enemies.length;
+  for (let index = 0; index < enemies.length; index += 1)
+    target[index] = Object.assign(target[index] || {}, enemies[index]);
+  return separateEnemyVisualsInPlace(target, minimumDistance);
+}
+
+export function separateEnemyVisuals(enemies, minimumDistance = 1.35) {
+  return copySeparatedEnemyVisuals(enemies, [], minimumDistance);
 }
 
 export function enemyActionAnimation({
@@ -147,6 +157,49 @@ export function installEffects(rt) {
     },
   });
 
+  const enemyKinds = ["skirmisher", "archer", "brute"];
+  const enemyPoolSizes = { skirmisher: 3, archer: 1, brute: 1 };
+  const enemyPools = Object.fromEntries(
+    enemyKinds.map((kind) => [
+      kind,
+      createObjectPool({
+        create: () => {
+          const entity = rt.createCharacter(
+            kind,
+            kind === "archer"
+              ? mats.archer
+              : kind === "brute"
+                ? mats.brute
+                : mats.enemy,
+            kind === "brute" ? 1.22 : 0.92,
+          );
+          entity.dwarkaEnemyKind = kind;
+          ensureEnemyHealthBar(entity);
+          return entity;
+        },
+        activate: (entity) => {
+          entity.enabled = true;
+          entity.dwarkaDeadAt = 0;
+          entity.dwarkaHitUntil = 0;
+          entity.dwarkaImpactUntil = 0;
+          entity.dwarkaWarningActive = false;
+          entity.dwarkaVisualVelocity ||= { x: 0, z: 0 };
+          entity.dwarkaVisualVelocity.x = 0;
+          entity.dwarkaVisualVelocity.z = 0;
+          entity.setLocalScale(1, 1, 1);
+          if (entity.dwarkaHealthBar)
+            entity.dwarkaHealthBar.anchor.enabled = false;
+        },
+        deactivate: (entity) => {
+          entity.enabled = false;
+          entity.setLocalScale(1, 1, 1);
+          if (entity.dwarkaHealthBar)
+            entity.dwarkaHealthBar.anchor.enabled = false;
+        },
+      }),
+    ]),
+  );
+
   function registerFireLight(light, baseIntensity, phase = 0) {
     light.tags.add("fire-light");
     light.dwarkaBaseIntensity = baseIntensity;
@@ -177,6 +230,7 @@ export function installEffects(rt) {
     const flame = new pc.Entity("Kenney animated fire particles");
     flame.addComponent("particlesystem", {
       numParticles: root.dwarkaFireKind === "torch" ? 8 : 18,
+      preWarm: true,
       lifetime: 0.72,
       rate: 0.055,
       emitterShape: pc.EMITTERSHAPE_SPHERE,
@@ -219,6 +273,7 @@ export function installEffects(rt) {
     smoke.tags.add("smoke");
     smoke.addComponent("particlesystem", {
       numParticles: root.dwarkaFireKind === "torch" ? 5 : 12,
+      preWarm: true,
       lifetime: 2.6,
       rate: 0.24,
       emitterShape: pc.EMITTERSHAPE_SPHERE,
@@ -497,6 +552,54 @@ export function installEffects(rt) {
     warning.dwarkaGlyphRoot?.rotateLocal(0, 180, 0);
   }
 
+  function prewarmEnemyPools() {
+    for (const kind of enemyKinds) enemyPools[kind].warm(enemyPoolSizes[kind]);
+  }
+
+  function prewarmEnemyWarnings() {
+    const previousSnapshot = state.snapshot;
+    state.snapshot = { player: { x: 0, y: 0, z: -5 } };
+    const warmupIds = enemyKinds.map((kind, index) => {
+      const id = `warning-warmup-${kind}`;
+      syncEnemyWarning(
+        {
+          id,
+          kind,
+          x: index - 1,
+          y: 0,
+          z: -3,
+          warning: CHAPTER_CONFIG.enemyStats[kind]?.windup || 1,
+        },
+        null,
+      );
+      return id;
+    });
+    state.snapshot = previousSnapshot;
+    state.app.once("postrender", () => {
+      for (const id of warmupIds) {
+        state.enemyWarnings.get(id)?.destroy();
+        state.enemyWarnings.delete(id);
+      }
+    });
+  }
+
+  function releaseEnemy(id, entity) {
+    const warning = state.enemyWarnings.get(id);
+    warning?.destroy();
+    state.enemyWarnings.delete(id);
+    state.enemyEntities.delete(id);
+    state.enemyHealth.delete(id);
+    const pool = enemyPools[entity.dwarkaEnemyKind];
+    if (!pool?.release(entity)) entity.enabled = false;
+  }
+
+  function releaseAllEnemies() {
+    for (const [id, entity] of [...state.enemyEntities])
+      releaseEnemy(id, entity);
+    state.enemySnapshotVelocities.clear();
+    state.targetEnemyId = null;
+  }
+
   function ensureEnemyHealthBar(entity) {
     if (entity.dwarkaHealthBar) return entity.dwarkaHealthBar;
     const anchor = new pc.Entity("Enemy health bar");
@@ -605,7 +708,10 @@ export function installEffects(rt) {
   function bufferedEnemies(snapshot) {
     const visibleEnemies = visibleEnemyStates(snapshot);
     if (state.localMode || state.networkSnapshots.length < 2)
-      return separateEnemyVisuals(visibleEnemies);
+      return copySeparatedEnemyVisuals(
+        visibleEnemies,
+        state.enemyInterpolationBuffer,
+      );
     const targetTime =
       state.interpolationClockMs - CHAPTER_CONFIG.network.enemyInterpolationMs;
     let before = state.networkSnapshots[0];
@@ -619,48 +725,47 @@ export function installEffects(rt) {
       before = state.networkSnapshots[index];
     }
     if (before.snapshot.phase !== after.snapshot.phase)
-      return separateEnemyVisuals(visibleEnemyStates(after.snapshot));
+      return copySeparatedEnemyVisuals(
+        visibleEnemyStates(after.snapshot),
+        state.enemyInterpolationBuffer,
+      );
     const span = Math.max(1, after.receivedAt - before.receivedAt);
     const amount = pc.math.clamp((targetTime - before.receivedAt) / span, 0, 1);
-    const prior = new Map(
-      visibleEnemyStates(before.snapshot).map((enemy) => [enemy.id, enemy]),
-    );
+    const prior = state.enemyPriorById;
+    prior.clear();
+    for (const enemy of visibleEnemyStates(before.snapshot))
+      prior.set(enemy.id, enemy);
     const seconds = span / 1000;
-    const velocities = new Map();
-    const sampled = visibleEnemyStates(after.snapshot).map((enemy) => {
+    const velocities = state.enemySnapshotVelocities;
+    velocities.clear();
+    const sampled = state.enemyInterpolationBuffer;
+    const afterEnemies = visibleEnemyStates(after.snapshot);
+    sampled.length = afterEnemies.length;
+    for (let index = 0; index < afterEnemies.length; index += 1) {
+      const enemy = afterEnemies[index];
       const start = prior.get(enemy.id);
-      if (!start) return enemy;
-      const velocity = {
-        x: (enemy.x - start.x) / seconds,
-        z: (enemy.z - start.z) / seconds,
-      };
+      const output = (sampled[index] ||= {});
+      Object.assign(output, enemy);
+      if (!start) continue;
+      const velocity = velocities.get(enemy.id) || { x: 0, z: 0 };
+      velocity.x = (enemy.x - start.x) / seconds;
+      velocity.z = (enemy.z - start.z) / seconds;
       velocities.set(enemy.id, velocity);
-      return {
-        ...enemy,
-        x: pc.math.lerp(start.x, enemy.x, amount),
-        z: pc.math.lerp(start.z, enemy.z, amount),
-        yaw: interpolateEnemyYaw(start.yaw, enemy.yaw, amount),
-      };
-    });
-    state.enemySnapshotVelocities = velocities;
-    return separateEnemyVisuals(sampled);
+      output.x = pc.math.lerp(start.x, enemy.x, amount);
+      output.z = pc.math.lerp(start.z, enemy.z, amount);
+      output.yaw = interpolateEnemyYaw(start.yaw, enemy.yaw, amount);
+    }
+    return separateEnemyVisualsInPlace(sampled);
   }
 
   function syncEnemies(enemies, dt) {
-    const active = new Set();
+    const active = state.enemyActiveIds;
+    active.clear();
     for (const enemy of enemies || []) {
       active.add(enemy.id);
       let entity = state.enemyEntities.get(enemy.id);
       if (!entity) {
-        entity = rt.createCharacter(
-          enemy.kind,
-          enemy.kind === "archer"
-            ? mats.archer
-            : enemy.kind === "brute"
-              ? mats.brute
-              : mats.enemy,
-          enemy.kind === "brute" ? 1.22 : 0.92,
-        );
+        entity = enemyPools[enemy.kind].acquire();
         entity.dwarkaFloorY = enemy.y ?? floorHeightAt(enemy.x, enemy.z);
         entity.setPosition(
           enemy.x,
@@ -675,25 +780,25 @@ export function installEffects(rt) {
       if (enemy.dead && !entity.dwarkaDeadAt) entity.dwarkaDeadAt = visualNow;
       else if (!enemy.dead) entity.dwarkaDeadAt = 0;
       entity.enabled = !enemy.dead || visualNow - entity.dwarkaDeadAt < 800;
-      const previousPosition = entity.getPosition().clone();
+      const previousPosition = entity.getPosition();
+      const previousX = previousPosition.x;
+      const previousZ = previousPosition.z;
       entity.dwarkaFloorY = enemy.y ?? floorHeightAt(enemy.x, enemy.z);
       entity.setPosition(
         enemy.x,
         entity.dwarkaFloorY + CHARACTER_GROUND_LIFT * entity.dwarkaScale,
         enemy.z,
       );
-      const measuredVelocity =
-        dt > 0.0001
-          ? {
-              x: (enemy.x - previousPosition.x) / dt,
-              z: (enemy.z - previousPosition.z) / dt,
-            }
-          : state.enemySnapshotVelocities.get(enemy.id) || { x: 0, z: 0 };
       const velocity = (entity.dwarkaVisualVelocity ||= { x: 0, z: 0 });
+      const fallbackVelocity = state.enemySnapshotVelocities.get(enemy.id);
+      const measuredX =
+        dt > 0.0001 ? (enemy.x - previousX) / dt : fallbackVelocity?.x || 0;
+      const measuredZ =
+        dt > 0.0001 ? (enemy.z - previousZ) / dt : fallbackVelocity?.z || 0;
       const velocityBlend =
         1 - Math.exp(-Math.min(0.05, Math.max(0, dt)) / 0.12);
-      velocity.x += (measuredVelocity.x - velocity.x) * velocityBlend;
-      velocity.z += (measuredVelocity.z - velocity.z) * velocityBlend;
+      velocity.x += (measuredX - velocity.x) * velocityBlend;
+      velocity.z += (measuredZ - velocity.z) * velocityBlend;
       const visualSpeed = Math.hypot(velocity.x, velocity.z);
       if (enemy.warning > 0) {
         const pulse = 1 + Math.sin(performance.now() * 0.025) * 0.06;
@@ -708,14 +813,14 @@ export function installEffects(rt) {
       syncEnemyHealth(enemy, entity);
       const hitActive = performance.now() < (entity.dwarkaHitUntil || 0);
       const impactActive = performance.now() < (entity.dwarkaImpactUntil || 0);
-      const actionAnimation = enemyActionAnimation({
-        kind: enemy.kind,
-        dead: enemy.dead,
-        hitActive,
-        warningActive,
-        impactActive,
-        visualSpeed,
-      });
+      const animationProbe = (entity.dwarkaAnimationProbe ||= {});
+      animationProbe.kind = enemy.kind;
+      animationProbe.dead = enemy.dead;
+      animationProbe.hitActive = hitActive;
+      animationProbe.warningActive = warningActive;
+      animationProbe.impactActive = impactActive;
+      animationProbe.visualSpeed = visualSpeed;
+      const actionAnimation = enemyActionAnimation(animationProbe);
       rt.setCharacterAnimation(
         entity,
         state.qaAnimationPreviews.get(enemy.kind) || actionAnimation,
@@ -728,15 +833,7 @@ export function installEffects(rt) {
       smoothEnemyYaw(entity, enemy.yaw, dt);
     }
     for (const [id, entity] of state.enemyEntities)
-      if (!active.has(id)) {
-        state.characterRoots.delete(entity);
-        entity.destroy();
-        state.enemyEntities.delete(id);
-        state.enemyHealth.delete(id);
-        const warning = state.enemyWarnings.get(id);
-        warning?.destroy();
-        state.enemyWarnings.delete(id);
-      }
+      if (!active.has(id)) releaseEnemy(id, entity);
   }
 
   rt.registerFireLight = registerFireLight;
@@ -750,6 +847,13 @@ export function installEffects(rt) {
   rt.ensureEnemyHealthBar = ensureEnemyHealthBar;
   rt.spawnImpactBurst = spawnImpactBurst;
   rt.prewarmImpactPool = prewarmImpactPool;
+  rt.prewarmEnemyPools = prewarmEnemyPools;
+  rt.prewarmEnemyWarnings = prewarmEnemyWarnings;
+  rt.releaseAllEnemies = releaseAllEnemies;
+  rt.enemyPoolStats = () =>
+    Object.fromEntries(
+      enemyKinds.map((kind) => [kind, enemyPools[kind].stats()]),
+    );
   rt.releaseImpact = (impact) => impactPool.release(impact);
   rt.impactPoolStats = impactPool.stats;
   rt.syncEnemyHealth = syncEnemyHealth;

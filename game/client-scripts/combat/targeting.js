@@ -100,6 +100,8 @@ export function installTargeting(rt) {
       projectile.trail.enabled = false;
     },
   });
+  const objectiveWorld = new pc.Vec3();
+  const objectiveDirection = new pc.Vec3();
 
   function spawnArrow() {
     if (!state.playerEntity || !state.snapshot?.player) return;
@@ -366,11 +368,11 @@ export function installTargeting(rt) {
       height = canvas.clientHeight || window.innerHeight;
     const centreX = width / 2,
       centreY = height / 2;
-    const world = new pc.Vec3(...state.objectiveTarget);
-    const projected = state.camera.camera.worldToScreen(world);
+    objectiveWorld.set(...state.objectiveTarget);
+    const projected = state.camera.camera.worldToScreen(objectiveWorld);
     const cameraPosition = state.camera.getPosition();
-    const direction = world.clone().sub(cameraPosition);
-    const inFront = state.camera.forward.dot(direction) > 0;
+    objectiveDirection.copy(objectiveWorld).sub(cameraPosition);
+    const inFront = state.camera.forward.dot(objectiveDirection) > 0;
     let x = (projected.x * width) / Math.max(1, canvas.width),
       y = (projected.y * height) / Math.max(1, canvas.height);
     const minX = 58,
