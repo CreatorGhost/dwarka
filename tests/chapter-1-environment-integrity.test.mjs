@@ -8,6 +8,7 @@ import {
   AGED_TRIM_MODELS,
   environmentGroundCorrection,
 } from "../../game/client-scripts/scene/build.js";
+import { inspectImportedDoorOpenings } from "../tools/env-revamp-geometry.mjs";
 
 const sourceLayoutUrl = new URL("../../game/client-scripts/world-layout.json", import.meta.url);
 
@@ -142,7 +143,7 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
 
   assert.equal(revamp.mode, "arrival-candidate");
   assert.equal(revamp.collisionContract, "visual-only");
-  assert.equal(revamp.visibilityRadius, 60);
+  assert.equal(revamp.visibilityRadius, 42);
   assert.equal(layout.colliders.length, 19);
   assert.deepEqual(revamp.preservedSystems, [
     "colliders",
@@ -187,12 +188,12 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
     }
   }
 
-  assert.equal(byteCount, 1_728_880);
-  assert.equal(uniqueTriangles, 19_573);
-  assert.equal(primitiveSlots, 35);
+  assert.equal(byteCount, 2_491_736);
+  assert.equal(uniqueTriangles, 30_429);
+  assert.equal(primitiveSlots, 58);
 
   const arrivalPlacements = REVAMP_ENVIRONMENT_MODELS.flatMap((key) => layout.placements[key]);
-  assert.equal(arrivalPlacements.length, 18);
+  assert.equal(arrivalPlacements.length, 34);
   const trianglesByModel = new Map();
   for (const key of REVAMP_ENVIRONMENT_MODELS) {
     const asset = await readFile(
@@ -211,10 +212,14 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
     (sum, key) => sum + trianglesByModel.get(key) * layout.placements[key].length,
     0,
   );
-  assert.equal(instancedTriangles, 57_141);
+  assert.equal(instancedTriangles, 88_707);
   assert.ok(
-    arrivalPlacements.every(([x, y, z]) => Math.abs(x) >= 10 && y === 0 && z >= -26),
-    "the candidate must dress the arrival perimeter without entering its walkable spine",
+    layout.placements.RevampTentA.every(([x, y]) => Math.abs(x) >= 8.5 && y === 0) &&
+      layout.placements.RevampTentB.every(([x, y]) => Math.abs(x) >= 8.5 && y === 0) &&
+      layout.placements.RevampFortificationGate.every(
+        ([x, y]) => Math.abs(x) >= 11.5 && y === -0.5,
+      ),
+    "pack dressing must remain outside the central route and keep its authored ground offsets",
   );
 });
 
@@ -222,6 +227,10 @@ test("all authored doors retain a rendered opening and bounded collider pairing"
   const layout = await readSourceLayout();
   const buildSource = await readFile(
     new URL("../../game/client-scripts/scene/build.js", import.meta.url),
+    "utf8",
+  );
+  const qaSource = await readFile(
+    new URL("../../game/client-scripts/runtime/qa.js", import.meta.url),
     "utf8",
   );
   assert.equal(layout.doors.length, 9);
@@ -246,12 +255,42 @@ test("all authored doors retain a rendered opening and bounded collider pairing"
     const centreZ = (collider.minZ + collider.maxZ) / 2;
     assert.ok(Math.hypot(centreX - door.position[0], centreZ - door.position[2]) <= 0.12);
   }
-  assert.match(buildSource, /createDoorPortal\(entity, \[x, y, z\], yaw\)/);
+  assert.doesNotMatch(buildSource, /createDoorPortal/);
   const cullBlock = buildSource.slice(
     buildSource.indexOf("ENVIRONMENT_REVAMP.mode !== \"arrival-candidate\""),
     buildSource.indexOf("function styleRevampEnvironment"),
   );
   assert.doesNotMatch(cullBlock, /"Door_4_Flat"/);
+  assert.match(qaSource, /result\.authored === 9/);
+  assert.match(qaSource, /result\.openable === 2/);
+  assert.match(qaSource, /positionError <= 0\.12/);
+  assert.match(qaSource, /yawError <= 1\.5/);
+  assert.match(qaSource, /colliderError <= 0\.12/);
+
+  const geometry = await inspectImportedDoorOpenings();
+  const measured = geometry.pairs.filter(({ passed }) => passed);
+  assert.deepEqual(
+    measured.map(({ id }) => id),
+    ["street-door-west-23", "street-door-east-15"],
+  );
+  for (const opening of measured) {
+    assert.equal(opening.house, "RevampFortificationGate");
+    assert.ok(opening.measuredOpeningWidth >= 1.16);
+    assert.ok(opening.measuredOpeningHeight >= 2.3);
+    assert.equal(opening.playerDiameter, 1.1);
+    assert.ok(opening.sweptLateralClearance >= 0.03);
+    assert.ok(opening.samplingUncertainty <= 0.02);
+    assert.ok(opening.facadeDepth >= 0.09);
+    assert.ok(opening.planeOffset <= 0.02);
+    assert.ok(opening.closedDoorApproachVisualClearance >= 0);
+    assert.equal(opening.sideWallHits, 2);
+    assert.equal(opening.headerHit, true);
+  }
+  assert.equal(
+    geometry.pairs.filter(({ passed }) => !passed).length,
+    6,
+    "six farther imported openings remain explicitly unresolved in this arrival-only checkpoint",
+  );
 });
 
 test("the revamp uses budgeted architecture shadows without plaster emissive fill", async () => {
@@ -260,7 +299,7 @@ test("the revamp uses budgeted architecture shadows without plaster emissive fil
     new URL("../../game/client-scripts/scene/build.js", import.meta.url),
     "utf8",
   );
-  assert.equal(layout.environmentRevamp.shadowCastMinZ, 17);
+  assert.equal(layout.environmentRevamp.shadowCastMinZ, 23);
   assert.match(buildSource, /dwarkaArchitectureShadowCaster = castsShadows/);
   assert.doesNotMatch(buildSource, /channel \* 0\.28/);
   assert.match(buildSource, /let emissive = \[0, 0, 0\]/);
