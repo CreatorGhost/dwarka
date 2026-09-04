@@ -8,7 +8,11 @@ RUN npm ci --include=dev --omit=optional && npm cache clean --force
 
 COPY game/server/tsconfig.json ./
 COPY game/server/src ./src
-COPY site/public/playcanvas/chapter-1/world-layout.json /workspace/site/public/playcanvas/chapter-1/world-layout.json
+# The server imports these from outside its own directory:
+#   src/chapter-1/phases.ts, simulation.ts -> ../../../config/chapter-1.json
+#   src/chapter-1/collision.ts             -> ../../../client-scripts/world-layout.json
+COPY game/config /workspace/game/config
+COPY game/client-scripts/world-layout.json /workspace/game/client-scripts/world-layout.json
 
 USER node
 EXPOSE 10000
