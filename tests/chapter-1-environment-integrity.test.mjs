@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { ENVIRONMENT_TONES } from "../../game/client-scripts/scene/materials.js";
+import { MODEL_URLS, REVAMP_ENVIRONMENT_MODELS } from "../../game/client-scripts/scene/assets.js";
 import {
   AGED_TRIM_MODELS,
   environmentGroundCorrection,
@@ -108,10 +109,10 @@ test("architecture and street props use a restrained period palette", async () =
     Math.max(...ENVIRONMENT_TONES.agedTrim) <= 0.2,
     "roof trim must not blow out white under the moon light",
   );
-  assert.deepEqual(
-    [...AGED_TRIM_MODELS].sort(),
-    ["Kenney_roof_flat_square", "Overhang_Plaster_Short"],
-  );
+  assert.deepEqual([...AGED_TRIM_MODELS].sort(), [
+    "Kenney_roof_flat_square",
+    "Overhang_Plaster_Short",
+  ]);
 });
 
 test("ground alignment seats both street-level and elevated models", () => {
@@ -124,4 +125,38 @@ test("ground alignment seats both street-level and elevated models", () => {
       Math.abs(environmentGroundCorrection(minimumY, requestedY, 0.035) + 0.145) < 0.000001,
     );
   assert.equal(environmentGroundCorrection(7, 6, 0.035), 0);
+});
+
+test("the guarded arrival revamp is a visual-only coherent asset slice", async () => {
+  const layout = await readSourceLayout();
+  const revamp = layout.environmentRevamp;
+
+  assert.equal(revamp.mode, "arrival-candidate");
+  assert.equal(revamp.collisionContract, "visual-only");
+  assert.equal(revamp.visibilityRadius, 60);
+  assert.equal(layout.colliders.length, 19);
+  assert.deepEqual(revamp.preservedSystems, [
+    "colliders",
+    "floorRegions",
+    "spawns",
+    "familyStaging",
+    "encounterTriggers",
+  ]);
+  assert.deepEqual(revamp.models, [...REVAMP_ENVIRONMENT_MODELS]);
+
+  for (const key of REVAMP_ENVIRONMENT_MODELS) {
+    assert.match(MODEL_URLS[key], /\.glb$/);
+    assert.ok(layout.placements[key]?.length > 0, `${key} needs an authored placement`);
+    const asset = await readFile(
+      new URL(`../public/playcanvas/chapter-1/${MODEL_URLS[key]}`, import.meta.url),
+    );
+    assert.ok(asset.length > 50_000, `${key} is not a usable GLB`);
+  }
+
+  const arrivalPlacements = REVAMP_ENVIRONMENT_MODELS.flatMap((key) => layout.placements[key]);
+  assert.equal(arrivalPlacements.length, 18);
+  assert.ok(
+    arrivalPlacements.every(([x, y, z]) => Math.abs(x) >= 10 && y === 0 && z >= -26),
+    "the candidate must dress the arrival perimeter without entering its walkable spine",
+  );
 });

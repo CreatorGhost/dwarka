@@ -1,0 +1,192 @@
+{
+  "coldLoads": [
+    {
+      "run": 1,
+      "readyMs": 527,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "renderScale": 1,
+      "fps": 60,
+      "drawCalls": 328,
+      "assets": {
+        "civilian_house_18_a.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_20.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_30_d.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_31_h.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_37_h.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_41_c.glb?v=64ffbe3b0fa6bebb": 200
+      },
+      "runtimeExceptions": 0,
+      "networkFailures": 0
+    },
+    {
+      "run": 2,
+      "readyMs": 417,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "renderScale": 1,
+      "fps": 60,
+      "drawCalls": 328,
+      "assets": {
+        "civilian_house_18_a.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_20.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_30_d.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_31_h.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_37_h.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_41_c.glb?v=64ffbe3b0fa6bebb": 200
+      },
+      "runtimeExceptions": 0,
+      "networkFailures": 0
+    },
+    {
+      "run": 3,
+      "readyMs": 403,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "renderScale": 1,
+      "fps": 60,
+      "drawCalls": 328,
+      "assets": {
+        "civilian_house_18_a.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_20.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_30_d.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_31_h.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_37_h.glb?v=64ffbe3b0fa6bebb": 200,
+        "civilian_house_41_c.glb?v=64ffbe3b0fa6bebb": 200
+      },
+      "runtimeExceptions": 0,
+      "networkFailures": 0
+    }
+  ],
+  "contracts": {
+    "route": {
+      "distance": 186,
+      "waypointCount": 11,
+      "pointsOnFloor": true,
+      "passed": true
+    },
+    "doors": {
+      "authored": 9,
+      "colliders": 9,
+      "openable": 2,
+      "renderedDynamicDoors": [
+        {
+          "id": "doorway-rescue-door",
+          "progress": 0,
+          "enabled": true
+        }
+      ],
+      "passed": true
+    },
+    "rendering": {
+      "aces": true,
+      "antialiasSamples": 2,
+      "taa": false,
+      "bloom": 0.03,
+      "bloomBlurLevel": 4,
+      "ssao": "lighting",
+      "ssaoScale": 0.5,
+      "moonShadows": true,
+      "moonCascades": 1,
+      "moonShadowDistance": 24,
+      "moonShadowMapAllocated": true,
+      "moonShadowRenderViews": 1,
+      "routeShadowSurfaces": 18,
+      "routeShadowReceivers": 18,
+      "passed": true
+    }
+  },
+  "traversal": {
+    "start": {
+      "x": 0,
+      "z": 28,
+      "yaw": 0,
+      "state": "idle"
+    },
+    "walk": {
+      "x": 0,
+      "z": 22.599999999999987,
+      "yaw": 0,
+      "state": "locomotion"
+    },
+    "sprint": {
+      "x": 0,
+      "z": 16.750650000000054,
+      "yaw": 0,
+      "state": "locomotion"
+    },
+    "walkDistance": 5.400000000000013,
+    "sprintDistance": 5.849349999999934,
+    "dodge": {
+      "name": "Vrishaketu",
+      "upgraded": true,
+      "hasAnim": true,
+      "activeState": "dodge",
+      "playing": true
+    },
+    "melee": {
+      "name": "Vrishaketu",
+      "upgraded": true,
+      "hasAnim": true,
+      "activeState": "melee",
+      "playing": true
+    },
+    "aim": {
+      "yaw": 0,
+      "pitch": -0.1,
+      "lookYaw": 0,
+      "lookPitch": -0.1,
+      "visualYaw": 0,
+      "planarSpeed": 0,
+      "aimBlend": 0.9698026165776811,
+      "keys": [],
+      "playing": true,
+      "paused": false,
+      "aim": true,
+      "projectiles": 0,
+      "targetEnemyId": null
+    },
+    "fire": {
+      "yaw": 0,
+      "pitch": -0.1,
+      "lookYaw": 0,
+      "lookPitch": -0.1,
+      "visualYaw": 0,
+      "planarSpeed": 0,
+      "aimBlend": 0.9976767773874088,
+      "keys": [],
+      "playing": true,
+      "paused": false,
+      "aim": true,
+      "projectiles": 1,
+      "targetEnemyId": null
+    },
+    "contact": {
+      "time": 8637.89999999106,
+      "root": {
+        "x": 0,
+        "y": 0.11470457911491394,
+        "z": 11.225650787353516
+      },
+      "left": {
+        "x": -0.05655064433813095,
+        "y": 0.195741668343544,
+        "z": 10.9644193649292
+      },
+      "right": {
+        "x": 0.13247406482696533,
+        "y": 0.19426271319389343,
+        "z": 11.630454063415527
+      },
+      "speed": 0,
+      "animation": "fire",
+      "animationSpeed": 1
+    }
+  }
+}
