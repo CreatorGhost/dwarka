@@ -312,14 +312,12 @@ test("all nine freestanding door colliders are derived from their rendered trans
   assert.equal(DOOR_COLLIDERS.length, 9);
   for (const door of DOORS) {
     const collider = doorColliderFromTransform(door);
-    const expectedWidth =
-      door.entity === "Door_4_Flat"
-        ? worldLayout.doorAssets.Door_4_Flat.width
-        : 3.3;
-    const expectedDepth =
-      door.entity === "Door_4_Flat"
-        ? worldLayout.doorAssets.Door_4_Flat.depth
-        : 0.3;
+    const asset =
+      worldLayout.doorAssets[
+        door.entity as keyof typeof worldLayout.doorAssets
+      ];
+    const expectedWidth = (door.width ?? asset?.width ?? 0) * door.scale;
+    const expectedDepth = (door.depth ?? asset?.depth ?? 0) * door.scale;
     const colliderWidth = collider.maxX - collider.minX;
     const colliderDepth = collider.maxZ - collider.minZ;
     const quarterTurn = Math.abs(door.yaw) % 180 === 90;
@@ -362,7 +360,13 @@ test("rescue doors stay solid throughout their short swing and open after it com
     0.3,
     simulation.openDoorIds,
   );
-  assert.ok(closedMove.x < 9.45, `closed door allowed x=${closedMove.x}`);
+  const rescueDoor = DOORS.find(({ id }) => id === "courtyard-rescue-door");
+  assert.ok(rescueDoor);
+  const rescueCollider = doorColliderFromTransform(rescueDoor);
+  assert.ok(
+    closedMove.x <= rescueCollider.minX - 0.3,
+    `closed door allowed x=${closedMove.x}`,
+  );
 
   for (let tick = 0; tick < 8; tick += 1) simulation.tick(0.05);
   assert.ok(simulation.doorProgress["courtyard-rescue-door"] < 1);
@@ -373,7 +377,10 @@ test("rescue doors stay solid throughout their short swing and open after it com
     0.3,
     simulation.openDoorIds,
   );
-  assert.ok(swingingMove.x < 9.45, `swinging door allowed x=${swingingMove.x}`);
+  assert.ok(
+    swingingMove.x <= rescueCollider.minX - 0.3,
+    `swinging door allowed x=${swingingMove.x}`,
+  );
 
   simulation.tick(0.05);
   assert.equal(simulation.doorProgress["courtyard-rescue-door"], 1);
@@ -947,9 +954,9 @@ test("an active raider commits to the player from 25 metres instead of drifting 
 test("exactly the last-spawned skirmisher threatens the family", () => {
   for (const phase of ["courtyard", "market", "doorway"] as const) {
     const wave = new ChapterSimulation(playerId, phase);
-    const threat = wave.enemies.filter(
-      (enemy) => enemy.kind === "skirmisher",
-    ).at(-1);
+    const threat = wave.enemies
+      .filter((enemy) => enemy.kind === "skirmisher")
+      .at(-1);
     assert.ok(threat);
     assert.ok(
       Math.hypot(threat.x - wave.player.x, threat.z - wave.player.z) > 6,
@@ -990,9 +997,9 @@ test("market player-directed spawns begin with a clear lane", () => {
 
 test("damaging the family threat pulls it back to the player", () => {
   const simulation = new ChapterSimulation(playerId, "courtyard");
-  const threat = simulation.enemies.filter(
-    (enemy) => enemy.kind === "skirmisher",
-  ).at(-1);
+  const threat = simulation.enemies
+    .filter((enemy) => enemy.kind === "skirmisher")
+    .at(-1);
   assert.ok(threat);
   simulation.enemies = [threat];
   simulation.player.x = 22;
@@ -1010,10 +1017,16 @@ test("damaging the family threat pulls it back to the player", () => {
     pressed: ["fire"],
   });
   for (let index = 0; index < 8; index += 1) simulation.tick();
-  assert.ok(threat.health < threat.maxHealth, "arrow did not damage the threat");
+  assert.ok(
+    threat.health < threat.maxHealth,
+    "arrow did not damage the threat",
+  );
   const zAfterHit = threat.z;
   simulation.tick();
-  assert.ok(threat.z > zAfterHit, "damaged threat kept walking toward the family");
+  assert.ok(
+    threat.z > zAfterHit,
+    "damaged threat kept walking toward the family",
+  );
 });
 
 test("an enemy already facing the player in clear range starts its warning immediately when ready", () => {
@@ -1142,7 +1155,10 @@ test("skirmisher circles only after reaching three metres and for at most half a
     z: simulation.player.z - beforeStraightStep.z,
   };
   const cross = Math.abs(step.x * toward.z - step.z * toward.x);
-  assert.ok(cross < 0.001, `skirmisher was still circling after 0.5s (${cross})`);
+  assert.ok(
+    cross < 0.001,
+    `skirmisher was still circling after 0.5s (${cross})`,
+  );
 });
 
 test("a retreating archer never enters a closed authored door collider", () => {

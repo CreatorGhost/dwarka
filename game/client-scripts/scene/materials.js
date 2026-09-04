@@ -1,3 +1,11 @@
+export const ENVIRONMENT_TONES = Object.freeze({
+  houseLime: Object.freeze([0.43, 0.4, 0.34]),
+  houseOchre: Object.freeze([0.44, 0.39, 0.34]),
+  houseRose: Object.freeze([0.42, 0.37, 0.36]),
+  agedTimber: Object.freeze([0.36, 0.22, 0.12]),
+  marketCanopy: Object.freeze([0.4, 0.31, 0.22]),
+});
+
 export function installMaterials(rt) {
   const { state, ui, pc, canvas, mats } = rt;
   const WORLD_BOUNDS = rt.WORLD_BOUNDS;
@@ -200,9 +208,9 @@ export function installMaterials(rt) {
     mats.roadSand = material([0.58, 0.56, 0.52]);
     mats.sideMargin = material([0.42, 0.34, 0.24]);
     mats.kerbSandstone = material([0.32, 0.25, 0.18]);
-    mats.houseLime = material([0.58, 0.54, 0.47]);
-    mats.houseOchre = material([0.51, 0.43, 0.35]);
-    mats.houseRose = material([0.47, 0.39, 0.37]);
+    mats.houseLime = material(ENVIRONMENT_TONES.houseLime);
+    mats.houseOchre = material(ENVIRONMENT_TONES.houseOchre);
+    mats.houseRose = material(ENVIRONMENT_TONES.houseRose);
     mats.buntingPalette = [
       material([0.1, 0.68, 0.72]),
       material([0.72, 0.1, 0.43]),

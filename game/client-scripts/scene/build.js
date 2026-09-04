@@ -1,4 +1,17 @@
 import { createObjectPool } from "../runtime/object-pool.js";
+import { ENVIRONMENT_TONES } from "./materials.js";
+
+export function environmentGroundCorrection(
+  minimumY,
+  requestedY,
+  surfaceLift,
+  maximumCorrection = 0.35,
+) {
+  const correction = requestedY + surfaceLift - minimumY;
+  if (!Number.isFinite(correction) || Math.abs(correction) > maximumCorrection)
+    return 0;
+  return correction;
+}
 
 export function familyMemberTransforms(phase, anchor, familyStaging = {}) {
   const authored = familyStaging[phase]?.members;
@@ -213,11 +226,11 @@ export function installBuild(rt) {
             placements.push([x, 0, centreZ + offset, yaw, 1]);
           if (key === "Door_4_Flat" && isDoor)
             placements.push([
-              side * (9.88 + setback),
+              side * (10.12 + setback),
               0,
               centreZ + offset,
               yaw,
-              1,
+              1.03,
             ]);
           if (tall) {
             const upperWindow = (index + offset) % 2 === 0;
@@ -276,7 +289,7 @@ export function installBuild(rt) {
           )
             placements.push([x, y, z, front.yaw, 1]);
           if (key === "Door_4_Flat" && isDoor) {
-            const [doorX, doorY, doorZ] = position(offset, -0.24);
+            const [doorX, doorY, doorZ] = position(offset, 0);
             placements.push([
               doorX,
               doorY,
@@ -383,7 +396,7 @@ export function installBuild(rt) {
   }
 
   function alignEnvironmentModelToStreet(entity, requestedY) {
-    if (!entity || requestedY > 0.1) return;
+    if (!entity) return;
     const instances =
       entity
         .findComponents?.("render")
@@ -394,8 +407,12 @@ export function installBuild(rt) {
         (instance) => instance.aabb.center.y - instance.aabb.halfExtents.y,
       ),
     );
-    const correction = STREET_SURFACE_Y - minimumY;
-    if (!Number.isFinite(correction) || Math.abs(correction) > 0.35) return;
+    const correction = environmentGroundCorrection(
+      minimumY,
+      requestedY,
+      STREET_SURFACE_Y,
+    );
+    if (correction === 0) return;
     const position = entity.getPosition();
     entity.setPosition(position.x, position.y + correction, position.z);
     entity.dwarkaGroundCorrection = correction;
@@ -450,7 +467,7 @@ export function installBuild(rt) {
       rt.tintEnvironmentEntity(
         entity,
         "aged-timber",
-        new pc.Color(0.26, 0.105, 0.045),
+        new pc.Color(...ENVIRONMENT_TONES.agedTimber),
         0,
         0.12,
       );
@@ -465,12 +482,22 @@ export function installBuild(rt) {
     if (entity && key === "Kenney_stall_green")
       rt.tintEnvironmentEntity(
         entity,
-        "faded-market-canopy",
-        new pc.Color(0.18, 0.34, 0.24),
+        "faded-ochre-market-canopy",
+        new pc.Color(...ENVIRONMENT_TONES.marketCanopy),
         0,
         0.08,
       );
-    if (entity && GROUND_ALIGNED_MODELS.has(key))
+    if (
+      entity &&
+      (GROUND_ALIGNED_MODELS.has(key) ||
+        key.startsWith("Wall_Plaster_") ||
+        [
+          "Door_4_Flat",
+          "Kenney_roof_flat_square",
+          "Balcony_Simple_Straight",
+          "Overhang_Plaster_Short",
+        ].includes(key))
+    )
       alignEnvironmentModelToStreet(entity, y);
     if (entity && key === "Door_4_Flat")
       rt.registerDoorEntity(entity, key, [x, y, z]);
@@ -980,11 +1007,12 @@ export function installBuild(rt) {
         chitraZ,
       );
     } else if (phase === "arrival") {
-      state.chitra.dwarkaFloorY = 0;
+      const [chitraX, chitraY, chitraZ] = LANDMARKS.chitraArrival || [0, 0, 14];
+      state.chitra.dwarkaFloorY = chitraY;
       state.chitra.setPosition(
-        0,
-        CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale,
-        14,
+        chitraX,
+        chitraY + CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale,
+        chitraZ,
       );
     } else {
       state.chitra.dwarkaFloorY = -20;
@@ -1300,11 +1328,12 @@ export function installBuild(rt) {
     state.playerEntity.addChild(playerBounce);
     playerBounce.setLocalPosition(0, 0.62, 0.34);
     state.chitra = createCharacter("Chitra", mats.chitra, 0.73);
-    state.chitra.dwarkaFloorY = 0;
+    const [chitraX, chitraY, chitraZ] = LANDMARKS.chitraArrival || [0, 0, 14];
+    state.chitra.dwarkaFloorY = chitraY;
     state.chitra.setPosition(
-      0,
-      CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale,
-      14,
+      chitraX,
+      chitraY + CHARACTER_GROUND_LIFT * state.chitra.dwarkaScale,
+      chitraZ,
     );
     for (const pool of familyPools) pool.warm(1);
     rt.prewarmEnemyPools();
