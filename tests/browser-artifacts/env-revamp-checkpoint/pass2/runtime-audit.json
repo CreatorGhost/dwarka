@@ -1,0 +1,1620 @@
+{
+  "coldLoads": [
+    {
+      "run": 1,
+      "readyMs": 503,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "renderScale": 1,
+      "fps": 60,
+      "drawCalls": 385,
+      "shadowDrawCalls": 0,
+      "drawCallStats": {
+        "forward": 0,
+        "depth": 0,
+        "shadow": 0,
+        "immediate": 0,
+        "misc": 0,
+        "total": 385,
+        "skinned": 0,
+        "instanced": 0,
+        "removedByInstancing": 0
+      },
+      "batchCount": 148,
+      "batchedModelRenders": 404,
+      "assets": {
+        "civilian_house_18_a.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_20.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_30_d.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_31_h.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_37_h.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_41_c.glb?v=7baf94692fc997c2": 200
+      },
+      "textures": {
+        "painted_plaster_wall_diff_512.webp": 200,
+        "sandstone_cracks_diff_512.webp": 200
+      },
+      "runtimeExceptions": 0,
+      "networkFailures": 0,
+      "httpErrors": []
+    },
+    {
+      "run": 2,
+      "readyMs": 193,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "renderScale": 1,
+      "fps": 60,
+      "drawCalls": 385,
+      "shadowDrawCalls": 0,
+      "drawCallStats": {
+        "forward": 0,
+        "depth": 0,
+        "shadow": 0,
+        "immediate": 0,
+        "misc": 0,
+        "total": 385,
+        "skinned": 0,
+        "instanced": 0,
+        "removedByInstancing": 0
+      },
+      "batchCount": 148,
+      "batchedModelRenders": 404,
+      "assets": {
+        "civilian_house_18_a.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_20.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_30_d.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_31_h.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_37_h.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_41_c.glb?v=7baf94692fc997c2": 200
+      },
+      "textures": {
+        "painted_plaster_wall_diff_512.webp": 200,
+        "sandstone_cracks_diff_512.webp": 200
+      },
+      "runtimeExceptions": 0,
+      "networkFailures": 0,
+      "httpErrors": []
+    },
+    {
+      "run": 3,
+      "readyMs": 394,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "renderScale": 1,
+      "fps": 60,
+      "drawCalls": 385,
+      "shadowDrawCalls": 0,
+      "drawCallStats": {
+        "forward": 0,
+        "depth": 0,
+        "shadow": 0,
+        "immediate": 0,
+        "misc": 0,
+        "total": 385,
+        "skinned": 0,
+        "instanced": 0,
+        "removedByInstancing": 0
+      },
+      "batchCount": 148,
+      "batchedModelRenders": 404,
+      "assets": {
+        "civilian_house_18_a.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_20.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_30_d.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_31_h.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_37_h.glb?v=7baf94692fc997c2": 200,
+        "civilian_house_41_c.glb?v=7baf94692fc997c2": 200
+      },
+      "textures": {
+        "painted_plaster_wall_diff_512.webp": 200,
+        "sandstone_cracks_diff_512.webp": 200
+      },
+      "runtimeExceptions": 0,
+      "networkFailures": 0,
+      "httpErrors": []
+    }
+  ],
+  "contracts": {
+    "route": {
+      "distance": 186,
+      "waypointCount": 11,
+      "pointsOnFloor": true,
+      "passed": true
+    },
+    "traversal": {
+      "authoredDistance": 186,
+      "expectedDistance": 200.03,
+      "travelled": 196.95,
+      "minimumY": 0,
+      "maximumY": 6,
+      "maximumFloorError": 0,
+      "segments": [
+        {
+          "index": 1,
+          "detour": null,
+          "expected": 14,
+          "steps": 64,
+          "remaining": 0.133,
+          "reached": true,
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 14.133
+          }
+        },
+        {
+          "index": 2,
+          "detour": "arrival-well-south",
+          "expected": 2.5,
+          "steps": 11,
+          "remaining": 0.25,
+          "reached": true,
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 11.75
+          }
+        },
+        {
+          "index": 3,
+          "detour": "arrival-well-south",
+          "expected": 22,
+          "steps": 101,
+          "remaining": 0.118,
+          "reached": true,
+          "position": {
+            "x": 21.882,
+            "y": 0,
+            "z": 11.501
+          }
+        },
+        {
+          "index": 4,
+          "detour": null,
+          "expected": 2.5,
+          "steps": 11,
+          "remaining": 0.118,
+          "reached": true,
+          "position": {
+            "x": 21.994,
+            "y": 0,
+            "z": 13.882
+          }
+        },
+        {
+          "index": 5,
+          "detour": null,
+          "expected": 16,
+          "steps": 72,
+          "remaining": 0.282,
+          "reached": true,
+          "position": {
+            "x": 22,
+            "y": 0,
+            "z": -1.718
+          }
+        },
+        {
+          "index": 6,
+          "detour": "courtyard-door-south",
+          "expected": 1.2,
+          "steps": 6,
+          "remaining": 0.182,
+          "reached": true,
+          "position": {
+            "x": 22,
+            "y": 0,
+            "z": -3.018
+          }
+        },
+        {
+          "index": 7,
+          "detour": "courtyard-door-south",
+          "expected": 18,
+          "steps": 82,
+          "remaining": 0.234,
+          "reached": true,
+          "position": {
+            "x": 4.234,
+            "y": 0,
+            "z": -3.198
+          }
+        },
+        {
+          "index": 8,
+          "detour": null,
+          "expected": 1.2,
+          "steps": 5,
+          "remaining": 0.137,
+          "reached": true,
+          "position": {
+            "x": 4.026,
+            "y": 0,
+            "z": -2.134
+          }
+        },
+        {
+          "index": 9,
+          "detour": null,
+          "expected": 14,
+          "steps": 63,
+          "remaining": 0.216,
+          "reached": true,
+          "position": {
+            "x": 4,
+            "y": 0,
+            "z": -15.784
+          }
+        },
+        {
+          "index": 10,
+          "detour": "market-frontage-north",
+          "expected": 16.53,
+          "steps": 75,
+          "remaining": 0.269,
+          "reached": true,
+          "position": {
+            "x": -12.231,
+            "y": 6,
+            "z": -15.013
+          }
+        },
+        {
+          "index": 11,
+          "detour": "market-frontage-north",
+          "expected": 7.5,
+          "steps": 35,
+          "remaining": 0.185,
+          "reached": true,
+          "position": {
+            "x": -19.815,
+            "y": 6,
+            "z": -15
+          }
+        },
+        {
+          "index": 12,
+          "detour": null,
+          "expected": 1,
+          "steps": 4,
+          "remaining": 0.15,
+          "reached": true,
+          "position": {
+            "x": -19.973,
+            "y": 6,
+            "z": -15.852
+          }
+        },
+        {
+          "index": 13,
+          "detour": null,
+          "expected": 16,
+          "steps": 74,
+          "remaining": 0.114,
+          "reached": true,
+          "position": {
+            "x": -20,
+            "y": 6,
+            "z": -31.886
+          }
+        },
+        {
+          "index": 14,
+          "detour": "gate-frontage-north",
+          "expected": 1.5,
+          "steps": 6,
+          "remaining": 0.086,
+          "reached": true,
+          "position": {
+            "x": -20,
+            "y": 6,
+            "z": -30.586
+          }
+        },
+        {
+          "index": 15,
+          "detour": "gate-frontage-north",
+          "expected": 32,
+          "steps": 147,
+          "remaining": 0.15,
+          "reached": true,
+          "position": {
+            "x": 11.85,
+            "y": 6,
+            "z": -30.5
+          }
+        },
+        {
+          "index": 16,
+          "detour": null,
+          "expected": 1.5,
+          "steps": 6,
+          "remaining": 0.207,
+          "reached": true,
+          "position": {
+            "x": 11.979,
+            "y": 6,
+            "z": -31.794
+          }
+        },
+        {
+          "index": 17,
+          "detour": null,
+          "expected": 18,
+          "steps": 83,
+          "remaining": 0.223,
+          "reached": true,
+          "position": {
+            "x": 12,
+            "y": 6,
+            "z": -49.777
+          }
+        },
+        {
+          "index": 18,
+          "detour": "torana-north",
+          "expected": 1.3,
+          "steps": 4,
+          "remaining": 0.211,
+          "reached": true,
+          "position": {
+            "x": 12,
+            "y": 6,
+            "z": -48.911
+          }
+        },
+        {
+          "index": 19,
+          "detour": "torana-north",
+          "expected": 12,
+          "steps": 55,
+          "remaining": 0.085,
+          "reached": true,
+          "position": {
+            "x": 0.085,
+            "y": 6,
+            "z": -48.701
+          }
+        },
+        {
+          "index": 20,
+          "detour": null,
+          "expected": 1.3,
+          "steps": 5,
+          "remaining": 0.218,
+          "reached": true,
+          "position": {
+            "x": 0.014,
+            "y": 6,
+            "z": -49.783
+          }
+        }
+      ],
+      "passed": true
+    },
+    "doors": {
+      "authored": 9,
+      "colliders": 9,
+      "openable": 2,
+      "rendered": 9,
+      "pairs": [
+        {
+          "id": "street-door-west-23",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door west 23",
+          "portal": "Recessed portal street-door-west-23",
+          "enabled": true,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "street-door-east-15",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door east 15",
+          "portal": "Recessed portal street-door-east-15",
+          "enabled": true,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "street-door-west-7",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door west 7",
+          "portal": "Recessed portal street-door-west-7",
+          "enabled": false,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "courtyard-rescue-door",
+          "dynamic": true,
+          "renderer": "Door_4_Flat",
+          "collider": "Courtyard rescue door",
+          "portal": "Recessed portal courtyard-rescue-door",
+          "enabled": false,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "street-door-west-minus-9",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door west minus 9",
+          "portal": "Recessed portal street-door-west-minus-9",
+          "enabled": false,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "street-door-east-minus-17",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door east minus 17",
+          "portal": "Recessed portal street-door-east-minus-17",
+          "enabled": false,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "street-door-west-minus-25",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door west minus 25",
+          "portal": "Recessed portal street-door-west-minus-25",
+          "enabled": false,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "street-door-east-minus-33",
+          "dynamic": false,
+          "renderer": "Door_4_Flat",
+          "collider": "Street door east minus 33",
+          "portal": "Recessed portal street-door-east-minus-33",
+          "enabled": false,
+          "visibleMeshCount": 2,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        },
+        {
+          "id": "doorway-rescue-door",
+          "dynamic": true,
+          "renderer": "Distant palace door",
+          "collider": "Doorway rescue door",
+          "portal": null,
+          "enabled": true,
+          "visibleMeshCount": 1,
+          "positionError": 0,
+          "yawError": 0,
+          "colliderError": 0,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "rendering": {
+      "aces": true,
+      "antialiasSamples": 2,
+      "taa": false,
+      "bloom": 0.03,
+      "bloomBlurLevel": 4,
+      "ssao": "lighting",
+      "ssaoScale": 0.5,
+      "moonShadows": true,
+      "moonCascades": 1,
+      "moonShadowDistance": 24,
+      "moonShadowMapAllocated": true,
+      "moonShadowRenderViews": 1,
+      "routeShadowSurfaces": 18,
+      "routeShadowReceivers": 18,
+      "passed": true
+    }
+  },
+  "regionPass": [
+    {
+      "vista": "arrival",
+      "before": {
+        "phase": "arrival",
+        "player": {
+          "x": 0,
+          "y": 0,
+          "z": 28
+        },
+        "floorY": 0,
+        "floorError": 0,
+        "cameraDistance": 3.954652707973558,
+        "objective": "Return to the quarter",
+        "objectiveDetail": "Find Chitra and press E · 14 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 0,
+        "familyActive": false,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "arrival",
+          "player": {
+            "x": 0,
+            "y": 0,
+            "z": 25.975
+          },
+          "floorY": 0,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Return to the quarter",
+          "objectiveDetail": "Find Chitra and press E · 12 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 0,
+          "familyActive": false,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 393,
+          "batchCount": 154,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.025
+    },
+    {
+      "vista": "well-square",
+      "before": {
+        "phase": "arrival",
+        "player": {
+          "x": 4,
+          "y": 0,
+          "z": 20
+        },
+        "floorY": 0,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "Return to the quarter",
+        "objectiveDetail": "Find Chitra and press E · 7 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 0,
+        "familyActive": false,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "arrival",
+          "player": {
+            "x": 4,
+            "y": 0,
+            "z": 17.975
+          },
+          "floorY": 0,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Return to the quarter",
+          "objectiveDetail": "Find Chitra and press E · 6 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 0,
+          "familyActive": false,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 375,
+          "batchCount": 160,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.025
+    },
+    {
+      "vista": "courtyard-fight",
+      "before": {
+        "phase": "courtyard",
+        "player": {
+          "x": 22,
+          "y": 0,
+          "z": 12
+        },
+        "floorY": 0,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "Protect the courtyard family",
+        "objectiveDetail": "Defeat 2 skirmishers and 1 archer · 3 remaining · 14 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 3,
+        "familyActive": true,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "courtyard",
+          "player": {
+            "x": 22,
+            "y": 0,
+            "z": 9.975
+          },
+          "floorY": 0,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Protect the courtyard family",
+          "objectiveDetail": "Defeat 2 skirmishers and 1 archer · 3 remaining · 12 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 3,
+          "familyActive": true,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 400,
+          "batchCount": 148,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.025
+    },
+    {
+      "vista": "alley-climb",
+      "before": {
+        "phase": "courtyard",
+        "player": {
+          "x": -8,
+          "y": 6,
+          "z": -16
+        },
+        "floorY": 6,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "Protect the courtyard family",
+        "objectiveDetail": "Defeat 2 skirmishers and 1 archer · 3 remaining · 33 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 3,
+        "familyActive": true,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "courtyard",
+          "player": {
+            "x": -5.9,
+            "y": 5,
+            "z": -16.002
+          },
+          "floorY": 5,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Protect the courtyard family",
+          "objectiveDetail": "Defeat 2 skirmishers and 1 archer · 3 remaining · 31 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 3,
+          "familyActive": true,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 276,
+          "batchCount": 51,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.1
+    },
+    {
+      "vista": "market-fight",
+      "before": {
+        "phase": "market",
+        "player": {
+          "x": -20,
+          "y": 6,
+          "z": -26
+        },
+        "floorY": 6,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "Clear the market bend",
+        "objectiveDetail": "Defeat 3 skirmishers and 1 archer · 4 remaining · 6 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 4,
+        "familyActive": true,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "market",
+          "player": {
+            "x": -20,
+            "y": 6,
+            "z": -28.025
+          },
+          "floorY": 6,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Clear the market bend",
+          "objectiveDetail": "Defeat 3 skirmishers and 1 archer · 4 remaining · 4 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 4,
+          "familyActive": true,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 327,
+          "batchCount": 55,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.025
+    },
+    {
+      "vista": "burning-lane",
+      "before": {
+        "phase": "market",
+        "player": {
+          "x": -12,
+          "y": 6,
+          "z": -32
+        },
+        "floorY": 6,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "Clear the market bend",
+        "objectiveDetail": "Defeat 3 skirmishers and 1 archer · 4 remaining · 8 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 4,
+        "familyActive": true,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "market",
+          "player": {
+            "x": -9.975,
+            "y": 6,
+            "z": -32.002
+          },
+          "floorY": 6,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Clear the market bend",
+          "objectiveDetail": "Defeat 3 skirmishers and 1 archer · 4 remaining · 10 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 4,
+          "familyActive": true,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 210,
+          "batchCount": 59,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.025
+    },
+    {
+      "vista": "gate",
+      "before": {
+        "phase": "doorway",
+        "player": {
+          "x": 12,
+          "y": 6,
+          "z": -43
+        },
+        "floorY": 6,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "Reach the charioteers' doorway",
+        "objectiveDetail": "Defeat 2 skirmishers, 1 archer, and 1 brute · 4 remaining · 14 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 4,
+        "familyActive": true,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "doorway",
+          "player": {
+            "x": 12,
+            "y": 6,
+            "z": -45.025
+          },
+          "floorY": 6,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "Reach the charioteers' doorway",
+          "objectiveDetail": "Defeat 2 skirmishers, 1 archer, and 1 brute · 4 remaining · 13 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 4,
+          "familyActive": true,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 318,
+          "batchCount": 67,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 2.025
+    },
+    {
+      "vista": "doorway-ending",
+      "before": {
+        "phase": "ending",
+        "player": {
+          "x": 4,
+          "y": 6,
+          "z": -50
+        },
+        "floorY": 6,
+        "floorError": 0,
+        "cameraDistance": 4.5,
+        "objective": "The paper sun",
+        "objectiveDetail": "Stay with Chitra · 4 m",
+        "objectiveVisible": true,
+        "interactionVisible": false,
+        "encounterActors": 0,
+        "familyActive": false,
+        "doorProgress": [
+          {
+            "id": "doorway-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-23",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-15",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-7",
+            "progress": 0
+          },
+          {
+            "id": "courtyard-rescue-door",
+            "progress": 1
+          },
+          {
+            "id": "street-door-west-minus-9",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-17",
+            "progress": 0
+          },
+          {
+            "id": "street-door-west-minus-25",
+            "progress": 0
+          },
+          {
+            "id": "street-door-east-minus-33",
+            "progress": 0
+          }
+        ]
+      },
+      "after": {
+        "runtime": {
+          "phase": "ending",
+          "player": {
+            "x": 4,
+            "y": 6,
+            "z": -50
+          },
+          "floorY": 6,
+          "floorError": 0,
+          "cameraDistance": 4.5,
+          "objective": "The paper sun",
+          "objectiveDetail": "Stay with Chitra · 4 m",
+          "objectiveVisible": true,
+          "interactionVisible": false,
+          "encounterActors": 0,
+          "familyActive": false,
+          "doorProgress": [
+            {
+              "id": "doorway-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-23",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-15",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-7",
+              "progress": 0
+            },
+            {
+              "id": "courtyard-rescue-door",
+              "progress": 1
+            },
+            {
+              "id": "street-door-west-minus-9",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-17",
+              "progress": 0
+            },
+            {
+              "id": "street-door-west-minus-25",
+              "progress": 0
+            },
+            {
+              "id": "street-door-east-minus-33",
+              "progress": 0
+            }
+          ]
+        },
+        "rendering": {
+          "fps": 60,
+          "renderScale": 1,
+          "drawCalls": 238,
+          "batchCount": 64,
+          "batchedModelRenders": 404
+        }
+      },
+      "movement": 0
+    }
+  ],
+  "finalHttpErrors": [],
+  "traversal": {
+    "start": {
+      "x": 0,
+      "z": 28,
+      "yaw": 0,
+      "state": "idle"
+    },
+    "walk": {
+      "x": 0,
+      "z": 22.60044999999996,
+      "yaw": 0,
+      "state": "locomotion"
+    },
+    "sprint": {
+      "x": 0,
+      "z": 16.642549999999982,
+      "yaw": 0,
+      "state": "locomotion"
+    },
+    "walkDistance": 5.3995500000000405,
+    "sprintDistance": 5.957899999999977,
+    "dodge": {
+      "name": "Vrishaketu",
+      "upgraded": true,
+      "hasAnim": true,
+      "activeState": "dodge",
+      "playing": true
+    },
+    "melee": {
+      "name": "Vrishaketu",
+      "upgraded": true,
+      "hasAnim": true,
+      "activeState": "melee",
+      "playing": true
+    },
+    "aim": {
+      "yaw": 0,
+      "pitch": -0.1,
+      "lookYaw": 0,
+      "lookPitch": -0.1,
+      "visualYaw": 0,
+      "planarSpeed": 0,
+      "aimBlend": 0.9697603106336384,
+      "keys": [],
+      "playing": true,
+      "paused": false,
+      "aim": true,
+      "projectiles": 0,
+      "targetEnemyId": null
+    },
+    "fire": {
+      "yaw": 0,
+      "pitch": -0.1,
+      "lookYaw": 0,
+      "lookPitch": -0.1,
+      "visualYaw": 0,
+      "planarSpeed": 0,
+      "aimBlend": 0.9976800276233705,
+      "keys": [],
+      "playing": true,
+      "paused": false,
+      "aim": true,
+      "projectiles": 1,
+      "targetEnemyId": null
+    },
+    "contact": {
+      "time": 23947.19999998808,
+      "root": {
+        "x": 0,
+        "y": 0.1146630346775055,
+        "z": 11.11755084991455
+      },
+      "left": {
+        "x": -0.05655106529593468,
+        "y": 0.1956992894411087,
+        "z": 10.856324195861816
+      },
+      "right": {
+        "x": 0.13247235119342804,
+        "y": 0.1942194402217865,
+        "z": 11.522357940673828
+      },
+      "speed": 0,
+      "animation": "fire",
+      "animationSpeed": 1
+    }
+  }
+}

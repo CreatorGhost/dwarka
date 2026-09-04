@@ -15,6 +15,15 @@ async function readSourceLayout() {
   return JSON.parse(await readFile(sourceLayoutUrl, "utf8"));
 }
 
+function parseGlb(buffer) {
+  assert.equal(buffer.toString("utf8", 0, 4), "glTF");
+  assert.equal(buffer.readUInt32LE(4), 2);
+  assert.equal(buffer.readUInt32LE(8), buffer.length);
+  const jsonLength = buffer.readUInt32LE(12);
+  assert.equal(buffer.toString("utf8", 16, 20), "JSON");
+  return JSON.parse(buffer.toString("utf8", 20, 20 + jsonLength));
+}
+
 function distanceToCollider([x, , z], collider) {
   const nearestX = Math.max(collider.minX, Math.min(x, collider.maxX));
   const nearestZ = Math.max(collider.minZ, Math.min(z, collider.maxZ));
@@ -144,6 +153,9 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
   ]);
   assert.deepEqual(revamp.models, [...REVAMP_ENVIRONMENT_MODELS]);
 
+  let byteCount = 0;
+  let uniqueTriangles = 0;
+  let primitiveSlots = 0;
   for (const key of REVAMP_ENVIRONMENT_MODELS) {
     assert.match(MODEL_URLS[key], /\.glb$/);
     assert.ok(layout.placements[key]?.length > 0, `${key} needs an authored placement`);
@@ -151,12 +163,105 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
       new URL(`../public/playcanvas/chapter-1/${MODEL_URLS[key]}`, import.meta.url),
     );
     assert.ok(asset.length > 50_000, `${key} is not a usable GLB`);
+    byteCount += asset.length;
+    const gltf = parseGlb(asset);
+    assert.ok(gltf.meshes?.length > 0, `${key} has no mesh`);
+    assert.equal(gltf.images?.length || 0, 0, `${key} unexpectedly embeds images`);
+    for (const mesh of gltf.meshes) {
+      for (const primitive of mesh.primitives) {
+        primitiveSlots += 1;
+        assert.ok(Number.isInteger(primitive.indices), `${key} primitive is not indexed`);
+        assert.ok(Number.isInteger(primitive.attributes?.POSITION), `${key} lacks positions`);
+        assert.ok(Number.isInteger(primitive.attributes?.NORMAL), `${key} lacks normals`);
+        assert.ok(Number.isInteger(primitive.material), `${key} lacks a material reference`);
+        assert.ok(primitive.material < gltf.materials.length, `${key} material index is invalid`);
+        const indices = gltf.accessors[primitive.indices];
+        assert.equal(indices.count % 3, 0, `${key} has a non-triangle index count`);
+        uniqueTriangles += indices.count / 3;
+        const positions = gltf.accessors[primitive.attributes.POSITION];
+        assert.equal(positions.type, "VEC3");
+        assert.ok(Array.isArray(positions.min) && Array.isArray(positions.max));
+        assert.ok(positions.min.every(Number.isFinite));
+        assert.ok(positions.max.every(Number.isFinite));
+      }
+    }
   }
+
+  assert.equal(byteCount, 1_728_880);
+  assert.equal(uniqueTriangles, 19_573);
+  assert.equal(primitiveSlots, 35);
 
   const arrivalPlacements = REVAMP_ENVIRONMENT_MODELS.flatMap((key) => layout.placements[key]);
   assert.equal(arrivalPlacements.length, 18);
+  const trianglesByModel = new Map();
+  for (const key of REVAMP_ENVIRONMENT_MODELS) {
+    const asset = await readFile(
+      new URL(`../public/playcanvas/chapter-1/${MODEL_URLS[key]}`, import.meta.url),
+    );
+    const gltf = parseGlb(asset);
+    trianglesByModel.set(
+      key,
+      gltf.meshes.flatMap(({ primitives }) => primitives).reduce(
+        (sum, primitive) => sum + gltf.accessors[primitive.indices].count / 3,
+        0,
+      ),
+    );
+  }
+  const instancedTriangles = REVAMP_ENVIRONMENT_MODELS.reduce(
+    (sum, key) => sum + trianglesByModel.get(key) * layout.placements[key].length,
+    0,
+  );
+  assert.equal(instancedTriangles, 57_141);
   assert.ok(
     arrivalPlacements.every(([x, y, z]) => Math.abs(x) >= 10 && y === 0 && z >= -26),
     "the candidate must dress the arrival perimeter without entering its walkable spine",
   );
+});
+
+test("all authored doors retain a rendered opening and bounded collider pairing", async () => {
+  const layout = await readSourceLayout();
+  const buildSource = await readFile(
+    new URL("../../game/client-scripts/scene/build.js", import.meta.url),
+    "utf8",
+  );
+  assert.equal(layout.doors.length, 9);
+  assert.equal(new Set(layout.doors.map(({ id }) => id)).size, 9);
+  for (const door of layout.doors) {
+    const asset = layout.doorAssets[door.entity] || {};
+    const width = (door.width ?? asset.width) * door.scale;
+    const depth = (door.depth ?? asset.depth) * door.scale;
+    assert.ok(width > 0 && depth > 0, `${door.id} cannot produce a collider`);
+    const yaw = (door.yaw * Math.PI) / 180;
+    const halfX =
+      (Math.abs(Math.cos(yaw)) * width + Math.abs(Math.sin(yaw)) * depth) / 2;
+    const halfZ =
+      (Math.abs(Math.sin(yaw)) * width + Math.abs(Math.cos(yaw)) * depth) / 2;
+    const collider = {
+      minX: door.position[0] - halfX,
+      maxX: door.position[0] + halfX,
+      minZ: door.position[2] - halfZ,
+      maxZ: door.position[2] + halfZ,
+    };
+    const centreX = (collider.minX + collider.maxX) / 2;
+    const centreZ = (collider.minZ + collider.maxZ) / 2;
+    assert.ok(Math.hypot(centreX - door.position[0], centreZ - door.position[2]) <= 0.12);
+  }
+  assert.match(buildSource, /createDoorPortal\(entity, \[x, y, z\], yaw\)/);
+  const cullBlock = buildSource.slice(
+    buildSource.indexOf("ENVIRONMENT_REVAMP.mode !== \"arrival-candidate\""),
+    buildSource.indexOf("function styleRevampEnvironment"),
+  );
+  assert.doesNotMatch(cullBlock, /"Door_4_Flat"/);
+});
+
+test("the revamp uses budgeted architecture shadows without plaster emissive fill", async () => {
+  const layout = await readSourceLayout();
+  const buildSource = await readFile(
+    new URL("../../game/client-scripts/scene/build.js", import.meta.url),
+    "utf8",
+  );
+  assert.equal(layout.environmentRevamp.shadowCastMinZ, 17);
+  assert.match(buildSource, /dwarkaArchitectureShadowCaster = castsShadows/);
+  assert.doesNotMatch(buildSource, /channel \* 0\.28/);
+  assert.match(buildSource, /let emissive = \[0, 0, 0\]/);
 });

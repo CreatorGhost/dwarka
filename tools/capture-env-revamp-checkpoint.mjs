@@ -13,7 +13,10 @@ if (!names[label]) throw new Error("Unknown environment checkpoint capture label
 const vista = process.argv[3] || "arrival";
 
 const endpoint = "http://127.0.0.1:9333";
-const outputDir = new URL("../tests/browser-artifacts/env-revamp-checkpoint/", import.meta.url);
+const outputDir = new URL(
+  "../tests/browser-artifacts/env-revamp-checkpoint/pass2/",
+  import.meta.url,
+);
 const pageUrl =
   "http://127.0.0.1:3000/playcanvas/chapter-1/index.html?qa=1&ws=ws%3A%2F%2Flocalhost%3A3210";
 
@@ -75,7 +78,22 @@ const invoked = await evaluate(`window.__DWARKA_QA__?.previewVista(${JSON.string
 if (!invoked.result?.value) throw new Error(`Could not invoke ${vista} vista`);
 if (label === "player")
   await evaluate('window.__DWARKA_QA__?.focusCharacter("Vrishaketu", 3.7, 180)');
-if (label === "door") await evaluate("window.__DWARKA_QA__?.setView(-0.42, -0.04)");
+if (label === "door") {
+  await evaluate("window.__DWARKA_QA__?.setView(-1.9, -0.02)");
+  await evaluate(`(() => {
+    const contract = window.__DWARKA_QA__?.doorContractAssertion();
+    const pair = contract?.pairs?.find(({ id }) => id === "street-door-west-23");
+    if (!pair) return false;
+    const badge = document.createElement("div");
+    badge.id = "door-contract-proof";
+    badge.textContent = "Door/collider: " + (pair.passed ? "PASS" : "FAIL") +
+      " · position " + pair.positionError.toFixed(2) + " m" +
+      " · yaw " + pair.yawError.toFixed(1) + "° · 2.15 m opening";
+    badge.style.cssText = "position:fixed;left:24px;bottom:24px;z-index:99999;padding:10px 14px;background:rgba(8,7,6,.86);border:1px solid #d8a145;color:#f6e4bd;font:600 16px/1.2 ui-monospace,monospace;letter-spacing:.02em";
+    document.body.appendChild(badge);
+    return true;
+  })()`);
+}
 if (label === "bow") {
   await evaluate("window.__DWARKA_QA__?.setAim(true)");
   await evaluate('window.__DWARKA_QA__?.previewAnimation("Vrishaketu", "aim")');
