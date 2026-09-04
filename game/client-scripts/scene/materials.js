@@ -202,13 +202,13 @@ export function installMaterials(rt) {
 
   function createMaterials() {
     mats.stone = material([0.34, 0.29, 0.24]);
-    mats.stoneLight = material([0.48, 0.43, 0.4]);
+    mats.stoneLight = material([0.46, 0.33, 0.22]);
     mats.sand = material([0.46, 0.34, 0.29]);
-    mats.sandLight = material([0.58, 0.46, 0.37]);
+    mats.sandLight = material([0.5, 0.36, 0.24]);
     mats.sandDark = material([0.27, 0.27, 0.29]);
-    mats.roadSand = material([0.58, 0.56, 0.52]);
-    mats.sideMargin = material([0.42, 0.34, 0.24]);
-    mats.kerbSandstone = material([0.32, 0.25, 0.18]);
+    mats.roadSand = material([0.42, 0.36, 0.29]);
+    mats.sideMargin = material([0.32, 0.27, 0.21]);
+    mats.kerbSandstone = material([0.26, 0.2, 0.14]);
     mats.houseLime = material(ENVIRONMENT_TONES.houseLime);
     mats.houseOchre = material(ENVIRONMENT_TONES.houseOchre);
     mats.houseRose = material(ENVIRONMENT_TONES.houseRose);

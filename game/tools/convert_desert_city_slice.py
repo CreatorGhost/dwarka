@@ -11,16 +11,23 @@ from pathlib import Path
 import sys
 
 import bpy
+import bmesh
 from mathutils import Matrix
 
 
-HOUSE_FILES = (
+MODEL_FILES = (
     "civilian_house_18_a.FBX",
     "civilian_house_20.FBX",
     "civilian_house_30_d.FBX",
     "civilian_house_31_h.FBX",
     "civilian_house_37_h.FBX",
     "civilian_house_41_c.FBX",
+    "box.FBX",
+    "barrel_group.FBX",
+    "street_oil_light.FBX",
+    "fortification_gate.FBX",
+    "tent_a.FBX",
+    "tent_b.FBX",
 )
 
 
@@ -81,6 +88,44 @@ def style_materials() -> None:
             shader.inputs["Roughness"].default_value = material.roughness
 
 
+def open_fortification_arch(meshes: list[bpy.types.Object]) -> None:
+    """Open the source arch and cap its road-facing buttress projection."""
+    for mesh in meshes:
+        wood_indices = {
+            index
+            for index, slot in enumerate(mesh.material_slots)
+            if slot.material and slot.material.name.lower().startswith("wood")
+        }
+        if not wood_indices:
+            continue
+        editable = bmesh.new()
+        editable.from_mesh(mesh.data)
+        removable = [face for face in editable.faces if face.material_index in wood_indices]
+        bmesh.ops.delete(editable, geom=removable, context="FACES")
+        # The untouched pack gate has deep tower feet that project 0.75 m into
+        # the authored door approach. Flatten only that road-facing depth; the
+        # arch, jambs, parapet and side silhouette remain source geometry.
+        for vertex in editable.verts:
+            if vertex.co.x > 2.62:
+                vertex.co.x = 2.62
+        editable.to_mesh(mesh.data)
+        editable.free()
+        mesh.data.update()
+
+
+def simplify_dense_props(source: Path, meshes: list[bpy.types.Object]) -> None:
+    """Keep small repeated props below the arrival segment's mobile GPU budget."""
+    ratios = {"barrel_group": 0.28}
+    ratio = ratios.get(source.stem.lower())
+    if ratio is None:
+        return
+    for mesh in meshes:
+        bpy.context.view_layer.objects.active = mesh
+        modifier = mesh.modifiers.new(name="WebGL prop decimation", type="DECIMATE")
+        modifier.ratio = ratio
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
 def convert(source: Path, destination: Path) -> None:
     reset_scene()
     bpy.ops.import_scene.fbx(filepath=str(source))
@@ -89,6 +134,9 @@ def convert(source: Path, destination: Path) -> None:
         raise RuntimeError(f"No mesh objects in {source}")
     flatten_mesh_transforms(meshes)
     ground_meshes(meshes)
+    if source.stem.lower() == "fortification_gate":
+        open_fortification_arch(meshes)
+    simplify_dense_props(source, meshes)
     style_materials()
     bpy.ops.object.select_all(action="DESELECT")
     for mesh in meshes:
@@ -114,5 +162,5 @@ if len(arguments) != 2:
 source_directory = Path(arguments[0]).resolve()
 output_directory = Path(arguments[1]).resolve()
 output_directory.mkdir(parents=True, exist_ok=True)
-for filename in HOUSE_FILES:
+for filename in MODEL_FILES:
     convert(source_directory / filename, output_directory / f"{Path(filename).stem.lower()}.glb")

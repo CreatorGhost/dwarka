@@ -196,20 +196,23 @@ export function installDressing(rt) {
     shrineGlow.setPosition(-9.1, 1.25, 2.1);
     rt.registerFireLight(shrineGlow, 0.4, 2.7);
     state.app.root.addChild(shrineGlow);
-    const wellBeam = rt.primitive(
-      "box",
-      "Well timber crossbeam",
-      [5, 2.16, 17],
-      [2.35, 0.16, 0.18],
-      mats.wood,
-    );
-    wellBeam.castShadows = true;
+    if (rt.ENVIRONMENT_REVAMP?.mode !== "arrival-candidate") {
+      const wellBeam = rt.primitive(
+        "box",
+        "Well timber crossbeam",
+        [5, 2.16, 17],
+        [2.35, 0.16, 0.18],
+        mats.wood,
+      );
+      wellBeam.castShadows = true;
+    }
     createBunting(11.5, 5.15, 0);
     createBunting(-8.5, 4.92, 1);
     createBunting(-26.5, 5.12, 2);
   }
 
   function decorateTurnWalls() {
+    if (rt.ENVIRONMENT_REVAMP?.mode === "arrival-candidate") return;
     for (const [z, columns, motifX, textileColor] of [
       [-3.67, [-9.1, -6.5, -3.9, -1.3, 1.2], -5.2, mats.turquoise],
       [-17.87, [-1.15, 1.7, 4.55, 7.4, 9.95], 4.45, mats.magenta],

@@ -366,7 +366,6 @@ export function installQa(rt) {
       const position = record?.entity?.getPosition?.();
       const yaw = record?.entity?.getEulerAngles?.().y;
       const renderers = record?.entity?.findComponents?.("render") || [];
-      const portal = state.app.root.findByName(`Recessed portal ${door.id}`);
       const colliderCenter = collider
         ? {
             x: (collider.minX + collider.maxX) / 2,
@@ -392,14 +391,14 @@ export function installQa(rt) {
         dynamic: Boolean(door.openFromPhase),
         renderer: record?.entity?.name || null,
         collider: collider?.label || null,
-        portal: portal?.name || null,
+        kind: door.openFromPhase ? "openable-gameplay" : "closed-decorative",
         enabled: record?.entity?.enabled ?? false,
         visibleMeshCount,
         positionError: Number(positionError.toFixed(4)),
         yawError: Number(yawError.toFixed(3)),
         colliderError: Number(colliderError.toFixed(4)),
         passed:
-          Boolean(record?.entity && collider && (portal || door.entity !== "Door_4_Flat")) &&
+          Boolean(record?.entity && collider) &&
           visibleMeshCount > 0 &&
           positionError <= 0.12 &&
           yawError <= 1.5 &&

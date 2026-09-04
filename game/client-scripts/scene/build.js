@@ -399,6 +399,15 @@ export function installBuild(rt) {
         : []),
       ...(UPPER_HOUSE_MODEL_KEYS.has(key) ? upperHousePlacementsFor(key) : []),
     ];
+    if (
+      ENVIRONMENT_REVAMP.mode === "arrival-candidate" &&
+      (ENVIRONMENT_REVAMP.legacyOrphanModels || []).includes(key)
+    ) {
+      const legacyCullMinZ = ENVIRONMENT_REVAMP.legacyCullMinZ ?? 8;
+      return placements.filter(
+        ([, y, z]) => y > 1 || z < legacyCullMinZ,
+      );
+    }
     if (key === "Door_4_Flat")
       return placements.filter((placement) =>
         rt.DOORS.some(
@@ -441,14 +450,14 @@ export function installBuild(rt) {
   function styleRevampEnvironment(entity, key, index) {
     if (!entity) return;
     const plasterTones = [
-      [0.48, 0.36, 0.23],
-      [0.43, 0.39, 0.24],
-      [0.46, 0.32, 0.23],
+      [0.44, 0.32, 0.2],
+      [0.42, 0.35, 0.22],
+      [0.43, 0.28, 0.21],
     ];
     const clothTones = [
-      [0.48, 0.12, 0.07],
-      [0.08, 0.27, 0.25],
-      [0.48, 0.3, 0.08],
+      [0.3, 0.08, 0.05],
+      [0.06, 0.18, 0.16],
+      [0.32, 0.19, 0.055],
     ];
     const variant = Math.abs(index + key.length) % plasterTones.length;
     for (const render of entity.findComponents?.("render") || []) {
@@ -463,7 +472,7 @@ export function installBuild(rt) {
         let emissive = [0, 0, 0];
         if (name.includes("wall_1")) {
           role = "aged-trim";
-          color = [0.34, 0.25, 0.17];
+          color = [0.27, 0.18, 0.11];
         } else if (name.includes("wood") || name.includes("roof")) {
           role = "aged-timber";
           color = [0.2, 0.09, 0.035];
@@ -540,49 +549,6 @@ export function installBuild(rt) {
     entity.dwarkaGroundCorrection = correction;
   }
 
-  function createDoorPortal(entity, position, yaw) {
-    const doorId = entity?.dwarkaDoorId;
-    if (!doorId) return null;
-    const root = new pc.Entity(`Recessed portal ${doorId}`);
-    root.dwarkaDoorPortalId = doorId;
-    state.app.root.addChild(root);
-    root.setPosition(...position);
-    root.setEulerAngles(0, yaw, 0);
-    if (entity.dwarkaDynamicDoor) {
-      const recess = primitive(
-        "box",
-        `Dark opening ${doorId}`,
-        [0, 1.08, 0.09],
-        [1.38, 2.18, 0.14],
-        mats.iron,
-        root,
-      );
-      recess.castShadows = false;
-    }
-    for (const side of [-1, 1])
-      primitive(
-        "box",
-        `Stone jamb ${doorId}`,
-        [side * 0.69, 1.19, 0],
-        [0.18, 2.38, 0.34],
-        mats.wood,
-        root,
-      );
-    primitive(
-      "box",
-      `Carved lintel ${doorId}`,
-      [0, 2.37, 0],
-      [1.58, 0.24, 0.38],
-      mats.wood,
-      root,
-    );
-    root.dwarkaPlacementId = `DoorPortal:${doorId}`;
-    assignStaticModelToBatch(root);
-    state.environmentEntities.push(root);
-    state.streamedEnvironment.set(root.dwarkaPlacementId, root);
-    return root;
-  }
-
   function instantiateEnvironmentPlacement(key, placement, index) {
     const [x, y, z, yaw, scale] = placement;
     const entity = instantiateModel(key, key, [x, y, z], scale, yaw);
@@ -615,9 +581,12 @@ export function installBuild(rt) {
         0,
         0.16,
       );
-    if (entity && key.startsWith("RevampHouse"))
+    if (entity && key.startsWith("Revamp"))
       styleRevampEnvironment(entity, key, index);
-    if (entity && key.startsWith("RevampHouse")) {
+    if (
+      entity &&
+      (key.startsWith("RevampHouse") || key === "RevampFortificationGate")
+    ) {
       const castsShadows = z >= (ENVIRONMENT_REVAMP.shadowCastMinZ ?? Infinity);
       entity.dwarkaArchitectureShadowCaster = castsShadows;
       for (const render of entity.findComponents?.("render") || []) {
@@ -690,6 +659,8 @@ export function installBuild(rt) {
       entity &&
       (GROUND_ALIGNED_MODELS.has(key) ||
         key.startsWith("RevampHouse") ||
+        key.startsWith("RevampTent") ||
+        ["RevampCargoBox", "RevampBarrelGroup"].includes(key) ||
         key.startsWith("Wall_Plaster_") ||
         [
           "Door_4_Flat",
@@ -701,7 +672,6 @@ export function installBuild(rt) {
       alignEnvironmentModelToStreet(entity, y);
     if (entity && key === "Door_4_Flat") {
       rt.registerDoorEntity(entity, key, [x, y, z]);
-      createDoorPortal(entity, [x, y, z], yaw);
     }
     if (entity && key === "brass_diya_lantern") {
       entity.findComponents?.("render").forEach((render) => {
@@ -787,7 +757,7 @@ export function installBuild(rt) {
       : state.environmentEntities) {
       const position = entity.getPosition();
       const visibilityRadius =
-        entity.name.startsWith("RevampHouse") || entity.dwarkaRevampTerminus
+        entity.name.startsWith("Revamp") || entity.dwarkaRevampTerminus
         ? (ENVIRONMENT_REVAMP.visibilityRadius ?? 32)
         : STREAMING.environmentRadius;
       entity.enabled =
@@ -847,7 +817,7 @@ export function installBuild(rt) {
           earthAsset.resource.anisotropy = 8;
           mats.roadSand.diffuseMap = earthAsset.resource;
           mats.roadSand.diffuseMapTiling = new pc.Vec2(13, 8);
-          mats.roadSand.diffuse = new pc.Color(0.8, 0.78, 0.73);
+          mats.roadSand.diffuse = new pc.Color(0.42, 0.36, 0.29);
           mats.roadSand.update();
           mats.sandDark.diffuseMap = earthAsset.resource;
           mats.sandDark.diffuseMapTiling = new pc.Vec2(18, 14);
@@ -1369,24 +1339,27 @@ export function installBuild(rt) {
       );
       pebble.castShadows = false;
     }
-    for (const [x, z, color, lean] of [
-      [-7.8, -9.8, mats.turquoise, -7],
-      [7.7, -14.2, mats.magenta, 7],
-      [-7.6, -22.0, mats.gold, -7],
-    ]) {
-      const awning = primitive(
-        "box",
-        "Woven market awning",
-        [x, 3.25, z],
-        [4.3, 0.09, 3.0],
-        color,
-      );
-      awning.setEulerAngles(0, 0, lean);
-      awning.castShadows = false;
+    if (ENVIRONMENT_REVAMP.mode !== "arrival-candidate") {
+      for (const [x, z, color, lean] of [
+        [-7.8, -9.8, mats.turquoise, -7],
+        [7.7, -14.2, mats.magenta, 7],
+        [-7.6, -22.0, mats.gold, -7],
+      ]) {
+        const awning = primitive(
+          "box",
+          "Woven market awning",
+          [x, 3.25, z],
+          [4.3, 0.09, 3.0],
+          color,
+        );
+        awning.setEulerAngles(0, 0, lean);
+        awning.castShadows = false;
+      }
     }
-    for (const [minX, maxX, minZ, maxZ, name, , visual] of WORLD_COLLIDERS) {
+    for (const [minX, maxX, minZ, maxZ, name, id, visual] of WORLD_COLLIDERS) {
       if (
         visual ||
+        rt.DOORS.some((door) => door.id === id) ||
         ["Stall", "Barrels"].includes(name) ||
         /brazier|vase|stairs|awning support/i.test(name)
       )

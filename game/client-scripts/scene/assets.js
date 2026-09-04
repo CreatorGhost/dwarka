@@ -16,6 +16,12 @@ export const REVAMP_ENVIRONMENT_MODELS = Object.freeze([
   "RevampHouse31H",
   "RevampHouse37H",
   "RevampHouse41C",
+  "RevampCargoBox",
+  "RevampBarrelGroup",
+  "RevampOilLight",
+  "RevampFortificationGate",
+  "RevampTentA",
+  "RevampTentB",
 ]);
 
 export const MODEL_URLS = {
@@ -79,4 +85,10 @@ export const MODEL_URLS = {
   RevampHouse31H: "./assets/models/env-revamp/civilian_house_31_h.glb",
   RevampHouse37H: "./assets/models/env-revamp/civilian_house_37_h.glb",
   RevampHouse41C: "./assets/models/env-revamp/civilian_house_41_c.glb",
+  RevampCargoBox: "./assets/models/env-revamp/box.glb",
+  RevampBarrelGroup: "./assets/models/env-revamp/barrel_group.glb",
+  RevampOilLight: "./assets/models/env-revamp/street_oil_light.glb",
+  RevampFortificationGate: "./assets/models/env-revamp/fortification_gate.glb",
+  RevampTentA: "./assets/models/env-revamp/tent_a.glb",
+  RevampTentB: "./assets/models/env-revamp/tent_b.glb",
 };

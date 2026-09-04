@@ -26,7 +26,61 @@ import { installLoop } from "./runtime/loop.js";
 import { installInput } from "./runtime/input.js";
 import { installQa } from "./runtime/qa.js";
 
-void (async () => {
+// FATAL_BOOTSTRAP_HELPER_START
+export function reportFatalBootstrap(
+  error,
+  {
+    documentObject = document,
+    windowObject = window,
+    consoleObject = console,
+  } = {},
+) {
+  consoleObject.error("DWARKA Chapter 1 failed to start", error);
+  const notifyParent = (message) => {
+    if (windowObject.parent === windowObject) return false;
+    try {
+      windowObject.parent.postMessage(message, windowObject.location.origin);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const modal = documentObject.getElementById("modal");
+  const title = documentObject.getElementById("modal-title");
+  const copy = documentObject.getElementById("modal-copy");
+  const primary = documentObject.getElementById("modal-primary");
+  const secondary = documentObject.getElementById("modal-secondary");
+
+  if (modal) {
+    modal.hidden = false;
+    modal.classList.remove("story");
+    modal.setAttribute("aria-describedby", "modal-copy");
+  }
+  if (title) title.textContent = "Chapter could not start";
+  if (copy)
+    copy.textContent = "The game engine did not finish loading. Retry, or return home.";
+  if (primary) {
+    primary.textContent = "Retry chapter";
+    primary.disabled = false;
+    primary.onclick = () => {
+      notifyParent({ type: "dwarka:retrying" });
+      windowObject.location.reload();
+    };
+  }
+  if (secondary) {
+    secondary.textContent = "Return home";
+    secondary.hidden = false;
+    secondary.onclick = () => {
+      if (!notifyParent({ type: "dwarka:return-home" }))
+        windowObject.location.assign("/");
+    };
+  }
+
+  notifyParent({ type: "dwarka:load-error", reason: "bootstrap" });
+}
+// FATAL_BOOTSTRAP_HELPER_END
+
+async function startChapter() {
   "use strict";
   const rt = createRuntime();
   await loadWorld(rt);
@@ -69,4 +123,6 @@ void (async () => {
   void CHARACTER_ANIMATIONS;
   void animationSpeeds;
   void characterStateGraph;
-})();
+}
+
+void startChapter().catch(reportFatalBootstrap);
