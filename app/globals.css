@@ -527,11 +527,12 @@ a { color: inherit; }
 
 /* Cursor parallax: the panel drifts a little against the pointer, so the art
    feels held rather than pasted on. Driven by --parallax-x/y from the client. */
-.cinematic-image-current img,
+.cinematic-frames,
 .cinematic-image-outgoing img {
   translate: calc(var(--parallax-x, 0) * 14px) calc(var(--parallax-y, 0) * 9px);
-  transition: translate 420ms cubic-bezier(.22, 1, .36, 1);
 }
+
+.cinematic-image-outgoing img { transition: translate 420ms cubic-bezier(.22, 1, .36, 1); }
 
 /* ── Glass dialogs ──────────────────────────────────────────────────────────*/
 .credits-dialog > div,
@@ -792,20 +793,32 @@ h1 {
   animation: cinematic-frame-in 1.2s ease forwards;
 }
 
-.cinematic-image-current img {
+/* One continuous camera move per beat, with the storyboard frames cross-fading
+   underneath it, so a beat reads as a moving shot rather than a slideshow. */
+.cinematic-frames {
+  position: absolute;
+  inset: 0;
   animation: cinematic-ken-burns var(--panel-duration, 7000ms) linear forwards;
   transform-origin: center;
 }
+
+.cinematic-frames img {
+  opacity: 0;
+  transition: opacity var(--frame-fade, 400ms) ease;
+}
+
+.cinematic-frames img.is-live { opacity: 1; }
 
 /* Title-quality grade and a deliberate, slower move on the opening frame. */
 .cinematic-image-current.is-hero {
   animation-duration: 2.2s;
 }
 
-.cinematic-image-current.is-hero img {
+.cinematic-image-current.is-hero .cinematic-frames {
   animation: cinematic-hero-move var(--panel-duration, 11000ms) cubic-bezier(.33, 0, .3, 1) forwards;
-  filter: saturate(1.06) contrast(1.05) brightness(1.02);
 }
+
+.cinematic-image-current.is-hero img { filter: saturate(1.06) contrast(1.05) brightness(1.02); }
 
 .cinematic-image-outgoing {
   z-index: 2;
@@ -1119,5 +1132,5 @@ h1 {
   html { scroll-behavior: auto; }
   .title-art img, .title-grain, .cinematic-image-current, .cinematic-image-current img, .cinematic-image-outgoing, .cinematic-caption, .cinematic-title-card, .cinematic-handing, .cinematic-title-card > h2, .title-primary { animation: none; opacity: 1; }
   .ember-field, .cinematic-bloom, .cinematic-open-ring { display: none; }
-  .cinematic-image-current img, .cinematic-image-outgoing img { translate: none; }
+  .cinematic-frames, .cinematic-image-outgoing img { translate: none; animation: none; }
 }

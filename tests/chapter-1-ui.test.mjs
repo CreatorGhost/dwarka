@@ -180,6 +180,38 @@ test("the title screen never sends a returning player past the narration", async
   assert.equal(storyDestination("watch"), null);
 });
 
+test("each narrated beat cycles storyboard frames without rushing them", async () => {
+  const { BEATS, FRAME_INTERVAL_MS } = await import(new URL("app/chapter-zero-beats.ts", root).href);
+  const { framesForBeat, visibleFrameCount } = await import(new URL("app/story-sequence.ts", root).href);
+  const manifest = JSON.parse(await readFile(new URL("public/story-a/sequence.json", root), "utf8"));
+
+  for (const beat of BEATS) {
+    const frames = framesForBeat(manifest, beat.id, beat.image);
+    assert.ok(frames.length >= 1, `${beat.id} has no frames`);
+    for (const frame of frames) await readFile(new URL(`public${frame}`, root));
+    // A frame is only shown if it gets its full interval; short lines show fewer.
+    const shown = visibleFrameCount(frames.length, beat.hold, FRAME_INTERVAL_MS);
+    assert.ok(shown >= 1 && shown <= frames.length);
+    assert.ok(shown * FRAME_INTERVAL_MS <= beat.hold + FRAME_INTERVAL_MS, `${beat.id} rushes its frames`);
+  }
+
+  // The hand-off frame must be last: it matches the game's third-person camera,
+  // so the cut into the street lands on the same composition.
+  const handoff = BEATS.at(-1);
+  const handoffFrames = framesForBeat(manifest, handoff.id, handoff.image);
+  assert.equal(handoffFrames.at(-1), "/story-a/11-lane-mouth.webp");
+
+  // A beat missing from the manifest falls back rather than erroring.
+  assert.deepEqual(framesForBeat({}, "nope", "/story-a/01-battlefield.webp"), ["/story-a/01-battlefield.webp"]);
+  assert.deepEqual(framesForBeat({ beats: { nope: [] } }, "nope", "/story-a/05-ash.webp"), ["/story-a/05-ash.webp"]);
+  assert.equal(visibleFrameCount(1, 500, FRAME_INTERVAL_MS), 1);
+
+  // The camera move runs on the wrapper so it is unbroken across the cycle.
+  const css = await readFile(new URL("app/globals.css", root), "utf8");
+  assert.match(css, /\.cinematic-frames\s*\{[^}]*animation:\s*cinematic-ken-burns/);
+  assert.match(css, /\.cinematic-frames img\.is-live/);
+});
+
 test("the served Chapter 1 world layout is emitted from the game source", async () => {
   const [sourceLayout, servedLayout, sourceI18n, servedI18n] = await Promise.all([
     readFile(new URL("../../game/client-scripts/world-layout.json", import.meta.url)),

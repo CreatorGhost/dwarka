@@ -1,12 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { ChapterDictionary, Locale } from "./game/chapter-1/localization";
 import type { ChapterProfile, ChapterSettings } from "./game/chapter-1/progress";
 import EmberField from "./EmberField";
+import { framesForBeat, loadSequenceManifest, visibleFrameCount } from "./story-sequence";
 import {
   BEATS,
+  FRAME_CROSSFADE_MS,
+  FRAME_INTERVAL_MS,
   MANUSCRIPT,
   BEAT_TAIL_MS,
   CAPTION_FADE_MS,
@@ -85,6 +88,9 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   const [skipConfirm, setSkipConfirm] = useState(false);
   const [voiceNotice, setVoiceNotice] = useState(false);
   const [beatDuration, setBeatDuration] = useState<number>(BEATS[0].hold);
+  const [sequence, setSequence] = useState<{ beats?: Record<string, string[]> }>({});
+  const [frame, setFrame] = useState(0);
+  const [outgoingFrame, setOutgoingFrame] = useState<string | null>(null);
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const ambienceRef = useRef<HTMLAudioElement | null>(null);
   const bedsRef = useRef<(HTMLAudioElement | null)[]>([null, null]);
@@ -101,8 +107,12 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
 
   useEffect(() => { settingsRef.current = profile.settings; }, [profile.settings]);
   useEffect(() => { completeRef.current = onComplete; }, [onComplete]);
+  const framesRef = useRef<string[]>([BEATS[0].image]);
+  const frameRef = useRef(0);
+  const frameTimerRef = useRef<number | null>(null);
   const beatRef = useRef(0);
   useEffect(() => { beatRef.current = beat; }, [beat]);
+  useEffect(() => { frameRef.current = frame; }, [frame]);
 
   const bedVolume = useCallback((settings: ChapterSettings, ducked: boolean) => {
     if (settings.muteAll) return 0;
@@ -197,12 +207,15 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     if (beat < BEATS.length - 1) {
       setVoiceNotice(false);
       setBeatDuration(BEATS[beat + 1].hold);
+      setOutgoingFrame(framesRef.current[frameRef.current] ?? BEATS[beat].image);
+      setFrame(0);
       setOutgoingBeat(beat);
       setBeat((value) => value + 1);
       if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
       outgoingTimerRef.current = window.setTimeout(() => setOutgoingBeat(null), CROSSFADE_MS);
       return;
     }
+    setOutgoingFrame(framesRef.current[frameRef.current] ?? BEATS[beat].image);
     setOutgoingBeat(beat);
     setMode("title");
     if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
@@ -220,12 +233,34 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     });
   }, [beat, bedVolume, mode]);
 
+  // Per the manifest's loading note: eager-load the framing beat and beat 01
+  // only, then stay one beat ahead. Pulling all 24 frames up front would cost
+  // roughly 12 MB before the first picture appears.
   useEffect(() => {
-    [MANUSCRIPT.image, ...BEATS.map((item) => item.image)].forEach((source) => {
+    let cancelled = false;
+    const warm = (sources: string[]) => sources.forEach((source) => { const image = new window.Image(); image.src = source; });
+    warm([MANUSCRIPT.image, BEATS[0].image]);
+    loadSequenceManifest().then((manifest) => {
+      if (cancelled) return;
+      setSequence(manifest);
+      warm(framesForBeat(manifest, BEATS[0].id, BEATS[0].image));
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const frames = useMemo(() => framesForBeat(sequence, BEATS[beat].id, BEATS[beat].image), [beat, sequence]);
+  useEffect(() => { framesRef.current = frames; }, [frames]);
+
+  // Preload the next beat while this one plays, so a cut never pops.
+  useEffect(() => {
+    if (mode !== "panels") return;
+    const next = BEATS[beat + 1];
+    if (!next) return;
+    framesForBeat(sequence, next.id, next.image).forEach((source) => {
       const image = new window.Image();
       image.src = source;
     });
-  }, []);
+  }, [beat, mode, sequence]);
 
   useEffect(() => {
     rootRef.current?.focus();
@@ -368,6 +403,25 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   }, [armFallback, clearFallback, mode]);
 
   useEffect(() => {
+    if (mode !== "panels") return;
+    const shown = visibleFrameCount(frames.length, beatDuration, FRAME_INTERVAL_MS);
+    if (shown <= 1) return;
+    let index = 0;
+    const step = () => {
+      index += 1;
+      setFrame(index);
+      // Stop on the last frame; it holds until the beat itself ends.
+      if (index < shown - 1) frameTimerRef.current = window.setTimeout(step, FRAME_INTERVAL_MS);
+      else frameTimerRef.current = null;
+    };
+    frameTimerRef.current = window.setTimeout(step, FRAME_INTERVAL_MS);
+    return () => {
+      if (frameTimerRef.current !== null) window.clearTimeout(frameTimerRef.current);
+      frameTimerRef.current = null;
+    };
+  }, [beat, beatDuration, frames.length, mode]);
+
+  useEffect(() => {
     if (mode !== "title") return;
     armTitleHold();
     return clearTitleHold;
@@ -384,6 +438,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
         fallback.remaining = Math.max(0, fallback.remaining - (performance.now() - fallback.startedAt));
         fallback.timer = null;
       }
+      if (frameTimerRef.current !== null) { window.clearTimeout(frameTimerRef.current); frameTimerRef.current = null; }
       const titleHold = titleHoldRef.current;
       if (titleHold.active && titleTimerRef.current !== null) {
         window.clearTimeout(titleTimerRef.current);
@@ -493,6 +548,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     "--pan-x": beat % 2 === 0 ? "1.4%" : "-1.4%",
     "--caption-delay": current.hero ? "2400ms" : "1100ms",
     "--caption-fade": `${CAPTION_FADE_MS}ms`,
+    "--frame-fade": `${FRAME_CROSSFADE_MS}ms`,
     "--caption-out": `${Math.max(1_000, beatDuration - BEAT_TAIL_MS + CAPTION_HOLD_AFTER_VOICE_MS)}ms`,
   } as CSSProperties;
 
@@ -506,8 +562,18 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       {mode === "source" ? <div className="cinematic-image cinematic-image-current is-source">
         <Image src={MANUSCRIPT.image} alt="" fill sizes="100vw" priority unoptimized />
       </div> : null}
-      {outgoingBeat !== null ? <div className="cinematic-image cinematic-image-outgoing" aria-hidden="true"><Image src={BEATS[outgoingBeat].image} alt="" fill sizes="100vw" priority unoptimized /></div> : null}
-      {mode === "panels" ? <div className={`cinematic-image cinematic-image-current${current.hero ? " is-hero" : ""}`} key={beat} style={motionStyle}><Image src={current.image} alt={currentCopy.text} fill sizes="100vw" priority unoptimized /></div> : null}
+      {outgoingBeat !== null ? <div className="cinematic-image cinematic-image-outgoing" aria-hidden="true"><Image src={outgoingFrame ?? BEATS[outgoingBeat].image} alt="" fill sizes="100vw" priority unoptimized /></div> : null}
+      {mode === "panels" ? <div className={`cinematic-image cinematic-image-current${current.hero ? " is-hero" : ""}`} key={beat} style={motionStyle}>
+        {/* The Ken Burns move lives on this wrapper, so it runs unbroken across
+            the whole cycle and the frames only cross-fade underneath it. */}
+        <div className="cinematic-frames">
+          {frames.map((source, index) => (
+            <Image key={source} className={index === Math.min(frame, frames.length - 1) ? "is-live" : ""}
+              src={source} alt={index === 0 ? currentCopy.text : ""} aria-hidden={index !== 0}
+              fill sizes="100vw" priority={index === 0} unoptimized />
+          ))}
+        </div>
+      </div> : null}
       <div className="cinematic-shade" aria-hidden="true" />
       <EmberField className="cinematic-embers" />
       {mode === "panels" && profile.settings.captions ? <div className={`cinematic-caption${current.mission ? " is-mission" : ""}`} key={`caption-${beat}`} style={motionStyle}>
