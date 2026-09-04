@@ -42,3 +42,6 @@ yarn-error.log*
 
 # Abandoned Unity WebGL build (archived under ../unity)
 public/unity/
+
+# Static deploy output, rebuilt by npm run build:static
+dist-static/
