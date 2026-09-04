@@ -9,6 +9,15 @@ export function assetUrl(path) {
 
 export const chapterAssetRevision = revision;
 
+export const REVAMP_ENVIRONMENT_MODELS = Object.freeze([
+  "RevampHouse18A",
+  "RevampHouse20",
+  "RevampHouse30D",
+  "RevampHouse31H",
+  "RevampHouse37H",
+  "RevampHouse41C",
+]);
+
 export const MODEL_URLS = {
   Vrishaketu_Composite: "./assets/models/Vrishaketu_Composite.glb",
   Raider_Archer_Composite: "./assets/models/Raider_Archer_Composite.glb",
@@ -64,4 +73,10 @@ export const MODEL_URLS = {
   Bench: "./assets/models/Bench.glb",
   Prop_Crate: "./assets/models/Prop_Crate.glb",
   Prop_WoodenFence_Single: "./assets/models/Prop_WoodenFence_Single.glb",
+  RevampHouse18A: "./assets/models/env-revamp/civilian_house_18_a.glb",
+  RevampHouse20: "./assets/models/env-revamp/civilian_house_20.glb",
+  RevampHouse30D: "./assets/models/env-revamp/civilian_house_30_d.glb",
+  RevampHouse31H: "./assets/models/env-revamp/civilian_house_31_h.glb",
+  RevampHouse37H: "./assets/models/env-revamp/civilian_house_37_h.glb",
+  RevampHouse41C: "./assets/models/env-revamp/civilian_house_41_c.glb",
 };

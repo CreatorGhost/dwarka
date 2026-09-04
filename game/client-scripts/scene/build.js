@@ -37,6 +37,7 @@ export function installBuild(rt) {
   const CHECKPOINT_LIGHTS = rt.CHECKPOINT_LIGHTS;
   const FAMILY_STAGING = rt.FAMILY_STAGING;
   const ENVIRONMENT_PLACEMENTS = rt.ENVIRONMENT_PLACEMENTS;
+  const ENVIRONMENT_REVAMP = rt.ENVIRONMENT_REVAMP;
   const STREET_HOUSE_BAYS = rt.STREET_HOUSE_BAYS;
   const TALL_HOUSE_BAYS = rt.TALL_HOUSE_BAYS;
   const SETBACK_HOUSE_BAYS = rt.SETBACK_HOUSE_BAYS;
@@ -391,13 +392,106 @@ export function installBuild(rt) {
   }
 
   function environmentPlacementsFor(key) {
-    return [
+    const placements = [
       ...(ENVIRONMENT_PLACEMENTS[key] || []),
       ...(STREET_HOUSE_MODEL_KEYS.has(key)
         ? streetHousePlacementsFor(key)
         : []),
       ...(UPPER_HOUSE_MODEL_KEYS.has(key) ? upperHousePlacementsFor(key) : []),
     ];
+    if (
+      ENVIRONMENT_REVAMP.mode !== "arrival-candidate" ||
+      ![
+        "Wall_Plaster_Door_Flat",
+        "Wall_Plaster_Straight",
+        "Wall_Plaster_Window_Wide_Round",
+        "Door_4_Flat",
+        "Kenney_roof_flat_square",
+        "Kenney_column",
+        "Kenney_column_wide",
+        "Kenney_pillar_wood",
+        "Prop_ExteriorBorder_Straight1",
+        "Balcony_Simple_Straight",
+        "Overhang_Plaster_Long",
+        "Overhang_Plaster_Short",
+        "Stairs_Exterior_Platform",
+        "Wall_Arch",
+      ].includes(key)
+    )
+      return placements;
+    const legacyCullMinZ = ENVIRONMENT_REVAMP.legacyCullMinZ ?? 8;
+    return placements.filter((placement) => placement[2] < legacyCullMinZ);
+  }
+
+  function styleRevampEnvironment(entity, key, index) {
+    if (!entity) return;
+    const plasterTones = [
+      [0.64, 0.46, 0.29],
+      [0.58, 0.45, 0.3],
+      [0.6, 0.37, 0.31],
+    ];
+    const clothTones = [
+      [0.48, 0.12, 0.07],
+      [0.08, 0.27, 0.25],
+      [0.48, 0.3, 0.08],
+    ];
+    const variant = Math.abs(index + key.length) % plasterTones.length;
+    for (const render of entity.findComponents?.("render") || []) {
+      for (const instance of render.meshInstances || []) {
+        const source = instance.material;
+        if (!source) continue;
+        const name = String(source.name || "").toLowerCase();
+        let role = "plaster";
+        let color = plasterTones[variant];
+        let metalness = 0;
+        let gloss = 0.12;
+        let emissive = color.map((channel) => channel * 0.28);
+        if (name.includes("wall_1")) {
+          role = "aged-trim";
+          color = [0.46, 0.29, 0.16];
+          emissive = [0.1, 0.06, 0.03];
+        } else if (name.includes("wood") || name.includes("roof")) {
+          role = "aged-timber";
+          color = [0.36, 0.19, 0.08];
+          emissive = [0.065, 0.03, 0.012];
+          gloss = 0.08;
+        } else if (name.includes("window")) {
+          role = "recessed-window";
+          color = [0.025, 0.035, 0.055];
+          emissive = [0.002, 0.003, 0.005];
+          gloss = 0.22;
+        } else if (name.includes("metal")) {
+          role = "dark-metal";
+          color = [0.11, 0.085, 0.065];
+          emissive = [0.004, 0.003, 0.002];
+          metalness = 0.65;
+          gloss = 0.34;
+        } else if (name.includes("cloth")) {
+          role = "faded-cloth";
+          color = clothTones[variant];
+          emissive = color.map((channel) => channel * 0.05);
+          gloss = 0.06;
+        } else if (name.includes("light")) {
+          role = "warm-practical";
+          color = [0.95, 0.38, 0.08];
+          emissive = [0.7, 0.16, 0.025];
+        }
+        const cacheKey = `${source.id}:revamp:${role}:${variant}`;
+        let material = state.environmentMaterials.get(cacheKey);
+        if (!material) {
+          material = source.clone();
+          material.diffuse = new pc.Color(...color);
+          material.useMetalness = true;
+          material.metalness = metalness;
+          material.gloss = gloss;
+          material.emissive = new pc.Color(...emissive);
+          material.emissiveIntensity = role === "warm-practical" ? 0.55 : 1;
+          material.update();
+          state.environmentMaterials.set(cacheKey, material);
+        }
+        instance.material = material;
+      }
+    }
   }
 
   function alignEnvironmentModelToStreet(entity, requestedY) {
@@ -447,6 +541,8 @@ export function installBuild(rt) {
         0,
         0.08,
       );
+    if (entity && key.startsWith("RevampHouse"))
+      styleRevampEnvironment(entity, key, index);
     if (
       entity &&
       [
@@ -499,6 +595,7 @@ export function installBuild(rt) {
     if (
       entity &&
       (GROUND_ALIGNED_MODELS.has(key) ||
+        key.startsWith("RevampHouse") ||
         key.startsWith("Wall_Plaster_") ||
         [
           "Door_4_Flat",
@@ -593,9 +690,12 @@ export function installBuild(rt) {
       ? [onlyEntity]
       : state.environmentEntities) {
       const position = entity.getPosition();
+      const visibilityRadius = entity.name.startsWith("RevampHouse")
+        ? (ENVIRONMENT_REVAMP.visibilityRadius ?? 32)
+        : STREAMING.environmentRadius;
       entity.enabled =
         Math.hypot(position.x - player.x, position.z - player.z) <=
-          STREAMING.environmentRadius && Math.abs(position.y - floorY) <= 4.2;
+          visibilityRadius && Math.abs(position.y - floorY) <= 4.2;
     }
     if (onlyEntity) return;
     for (const entity of state.routeSurfaceEntities) {

@@ -338,6 +338,45 @@ export function installQa(rt) {
       ui.reconnect.hidden = true;
       return true;
     },
+    playVista: (id) => {
+      if (!qaSessionAllowed()) return false;
+      const vista = QA_VISTAS.find((candidate) => candidate.id === id);
+      if (!vista) return false;
+      const simulation = new ChapterSimulation(
+        "qa-vista-player",
+        vista.phase,
+        false,
+      );
+      simulation.player.x = vista.x;
+      simulation.player.y = vista.y;
+      simulation.player.z = vista.z;
+      simulation.player.yaw = vista.yaw;
+      simulation.setPaused(false);
+      const snapshot = simulation.snapshot();
+      state.qaPreviewActive = true;
+      state.localMode = true;
+      state.sessionAccepted = false;
+      state.localSimulation = simulation;
+      state.snapshot = snapshot;
+      state.predictedPlayer = { ...snapshot.player };
+      state.yaw = state.lookYaw = state.visualYaw = vista.yaw;
+      state.cameraSpring = null;
+      rt.syncPhaseScene(vista.phase);
+      rt.updateEnvironmentVisibility(snapshot.player);
+      rt.updateHud(snapshot);
+      rt.syncEnemies(snapshot.enemies, 0);
+      state.playerEntity.dwarkaFloorY = vista.y;
+      state.playerEntity.setPosition(
+        vista.x,
+        vista.y + CHARACTER_GROUND_LIFT * (state.playerEntity.dwarkaScale || 1),
+        vista.z,
+      );
+      ui.storyPanel.hidden = true;
+      ui.modal.hidden = true;
+      ui.reconnect.hidden = true;
+      rt.enterPlay();
+      return true;
+    },
     previewStory: (phase, index = 0) => {
       if (!qaSessionAllowed()) return false;
       if (phase === "ending") rt.showEnding(Number(index) || 0);
@@ -725,6 +764,55 @@ export function installQa(rt) {
       enabledEnvironmentEntities: state.environmentEntities.filter(
         (entity) => entity.enabled,
       ).length,
+      revampEntities: state.environmentEntities
+        .filter((entity) => entity.name.startsWith("RevampHouse"))
+        .map((entity) => {
+          const instances = entity
+            .findComponents("render")
+            .flatMap((render) => render.meshInstances || []);
+          const position = entity.getPosition();
+          const bounds = instances.reduce(
+            (result, instance) => {
+              const minimum = instance.aabb.getMin();
+              const maximum = instance.aabb.getMax();
+              for (const axis of ["x", "y", "z"]) {
+                result.minimum[axis] = Math.min(result.minimum[axis], minimum[axis]);
+                result.maximum[axis] = Math.max(result.maximum[axis], maximum[axis]);
+              }
+              return result;
+            },
+            {
+              minimum: { x: Infinity, y: Infinity, z: Infinity },
+              maximum: { x: -Infinity, y: -Infinity, z: -Infinity },
+            },
+          );
+          return {
+            name: entity.name,
+            enabled: entity.enabled,
+            position: [position.x, position.y, position.z],
+            bounds: [
+              [bounds.minimum.x, bounds.minimum.y, bounds.minimum.z],
+              [bounds.maximum.x, bounds.maximum.y, bounds.maximum.z],
+            ],
+            materials: instances.map((instance) => ({
+              name: instance.material?.name,
+              diffuse: instance.material?.diffuse
+                ? [
+                    instance.material.diffuse.r,
+                    instance.material.diffuse.g,
+                    instance.material.diffuse.b,
+                  ]
+                : null,
+              emissive: instance.material?.emissive
+                ? [
+                    instance.material.emissive.r,
+                    instance.material.emissive.g,
+                    instance.material.emissive.b,
+                  ]
+                : null,
+            })),
+          };
+        }),
       drawCalls: state.app.stats?.drawCalls?.total ?? null,
       shadowDrawCalls: state.app.stats?.drawCalls?.shadow ?? null,
       moonShadowMapAllocated: Boolean(

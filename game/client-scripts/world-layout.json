@@ -258,9 +258,34 @@
     "fireLightRadius": 12,
     "routeLightRadius": 18
   },
+  "environmentRevamp": {
+    "mode": "arrival-candidate",
+    "collisionContract": "visual-only",
+    "legacyCullMinZ": -36,
+    "visibilityRadius": 60,
+    "preservedSystems": [
+      "colliders",
+      "floorRegions",
+      "spawns",
+      "familyStaging",
+      "encounterTriggers"
+    ],
+    "models": [
+      "RevampHouse18A",
+      "RevampHouse20",
+      "RevampHouse30D",
+      "RevampHouse31H",
+      "RevampHouse37H",
+      "RevampHouse41C"
+    ]
+  },
   "checkpointLights": [
     { "phase": "arrival", "x": -4.8, "y": 1.9, "z": 25, "intensity": 0.75 },
     { "phase": "arrival", "x": 4.8, "y": 1.9, "z": 20, "intensity": 0.75 },
+    { "phase": "arrival", "x": -7, "y": 2.4, "z": 14, "intensity": 0.38 },
+    { "phase": "arrival", "x": 7, "y": 2.4, "z": 6, "intensity": 0.38 },
+    { "phase": "arrival", "x": -7, "y": 2.4, "z": -2, "intensity": 0.34 },
+    { "phase": "arrival", "x": 7, "y": 2.4, "z": -10, "intensity": 0.34 },
     { "phase": "courtyard", "x": 18, "y": 1.9, "z": 10, "intensity": 0.75 },
     { "phase": "courtyard", "x": 25, "y": 1.9, "z": 7, "intensity": 0.75 },
     { "phase": "market", "x": -23, "y": 7.9, "z": -24, "intensity": 0.24 },
@@ -1004,6 +1029,36 @@
     }
   ],
   "placements": {
+    "RevampHouse18A": [
+      [13.05, 0, -7.1, -82, 0.68]
+    ],
+    "RevampHouse20": [
+      [12.95, 0, 17.54, -82, 0.68],
+      [-12.95, 0, 5.5, 82, 0.68],
+      [-12.95, 0, -13.5, 82, 0.68],
+      [12.95, 0, -12.5, -82, 0.68]
+    ],
+    "RevampHouse37H": [
+      [13.01, 0, 22.56, -82, 0.68],
+      [-13.01, 0, 0.1, 82, 0.68],
+      [-13.01, 0, -18.9, 82, 0.68],
+      [13.01, 0, -17.9, -82, 0.68]
+    ],
+    "RevampHouse41C": [
+      [-13.83, 0, 28.6, 82, 0.68],
+      [13.83, 0, 28.6, -82, 0.68]
+    ],
+    "RevampHouse31H": [
+      [-13.49, 0, 22.44, 82, 0.68],
+      [13.49, 0, 0.15, -82, 0.68],
+      [-13.49, 0, -6.5, 82, 0.68],
+      [-13.49, 0, -25.7, 82, 0.68],
+      [13.49, 0, -24.7, -82, 0.68]
+    ],
+    "RevampHouse30D": [
+      [-15.1, 0, 13.35, 82, 0.68],
+      [15.1, 0, 9.55, -82, 0.68]
+    ],
     "Wall_Plaster_Straight": [
       [-9, 0, -3.82, 0, 1],
       [-7, 0, -3.82, 0, 1],

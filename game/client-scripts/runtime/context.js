@@ -364,6 +364,7 @@ export async function loadWorld(rt) {
   rt.FAMILY_STAGING = Object.freeze(WORLD_LAYOUT.familyStaging || {});
   rt.QA_VISTAS = Object.freeze(WORLD_LAYOUT.qaVistas || []);
   rt.ENVIRONMENT_PLACEMENTS = Object.freeze(WORLD_LAYOUT.placements);
+  rt.ENVIRONMENT_REVAMP = Object.freeze(WORLD_LAYOUT.environmentRevamp || {});
   rt.DOORS = DOORS;
   rt.STREET_HOUSE_BAYS = Object.freeze(WORLD_LAYOUT.streetHouseBays || []);
   rt.TALL_HOUSE_BAYS = Object.freeze(WORLD_LAYOUT.tallHouseBays || []);
