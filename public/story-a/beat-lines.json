@@ -1,0 +1,42 @@
+[
+  {
+    "beatId": "01-battlefield",
+    "lineId": "ch0-panel-01-battlefield",
+    "englishText": "Karna stood for his last day beneath a sun dimmed by dust. Around him, the field had forgotten the difference between victory and grief."
+  },
+  {
+    "beatId": "02-karna-looses",
+    "lineId": "ch0-panel-02-last-stand",
+    "englishText": "His arrows crossed the field like light through a storm. Skill could still shape the moment, though it could no longer change its end."
+  },
+  {
+    "beatId": "03-wheel-sinks",
+    "lineId": "ch0-panel-03-wheel",
+    "englishText": "Then the chariot wheel sank into the earth. Old curses, old choices, and the weight of fate closed around him."
+  },
+  {
+    "beatId": "04-karna-lifts",
+    "lineId": "ch0-panel-04-pause-owed",
+    "englishText": "Karna set down his bow and lifted the wheel. He asked for the pause owed to an unarmed warrior."
+  },
+  {
+    "beatId": "05-ash",
+    "lineId": "ch0-panel-05-what-remained",
+    "englishText": "The story cuts to ash. His surviving son inherited a name, a wound, and a war he did not choose."
+  },
+  {
+    "beatId": "06-kunti-reveals",
+    "lineId": "ch1-kunti-revelation",
+    "englishText": "After the war, the secret was spoken. Karna had been my first son. Vrishaketu entered the house of the men who killed his father."
+  },
+  {
+    "beatId": "07-raid",
+    "lineId": "ch1-raid-begins",
+    "englishText": "The army had gone with the royal sacrifice. Raiders entered the unguarded charioteers' quarter."
+  },
+  {
+    "beatId": "11-lane-mouth",
+    "lineId": "ch1-opening-mission",
+    "englishText": "The army rode out with the royal horse. No guard is left in this quarter tonight. Raiders are in the lanes, taking children. These people sheltered Karna's son when no one else would. So tonight I stand for them. Up the lane to the courtyard, before the raiders reach it."
+  }
+]

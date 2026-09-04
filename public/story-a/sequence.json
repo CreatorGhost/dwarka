@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "generation": {
+    "provider": "OpenAI",
+    "model": "gpt-image-2",
+    "quality": "high",
+    "size": "2048x1152"
+  },
+  "loading": {
+    "eagerBeats": [
+      "01-battlefield"
+    ],
+    "lookaheadBeats": 1,
+    "note": "Eagerly preload only beat 01. While each beat is playing, preload all frames for the next beat; keep later beats lazy."
+  },
+  "beats": {
+    "01-battlefield": [
+      "/story-a/01-battlefield.webp",
+      "/story-a/01-battlefield-b.webp",
+      "/story-a/01-battlefield-c.webp"
+    ],
+    "02-karna-looses": [
+      "/story-a/02-karna-looses.webp",
+      "/story-a/02-karna-looses-b.webp",
+      "/story-a/02-karna-looses-c.webp"
+    ],
+    "03-wheel-sinks": [
+      "/story-a/03-wheel-sinks.webp",
+      "/story-a/03-wheel-sinks-b.webp",
+      "/story-a/03-wheel-sinks-c.webp"
+    ],
+    "04-karna-lifts": [
+      "/story-a/04-karna-lifts.webp",
+      "/story-a/04-karna-lifts-b.webp",
+      "/story-a/04-karna-lifts-c.webp"
+    ],
+    "05-ash": [
+      "/story-a/05-ash.webp",
+      "/story-a/05-ash-b.webp",
+      "/story-a/05-ash-c.webp"
+    ],
+    "06-kunti-reveals": [
+      "/story-a/06-kunti-reveals.webp",
+      "/story-a/06-kunti-reveals-b.webp",
+      "/story-a/06-kunti-reveals-c.webp"
+    ],
+    "07-raid": [
+      "/story-a/07-raid.webp",
+      "/story-a/07-raid-b.webp",
+      "/story-a/07-raid-c.webp"
+    ],
+    "11-lane-mouth": [
+      "/story-a/11-lane-mouth-b.webp",
+      "/story-a/11-lane-mouth-c.webp",
+      "/story-a/11-lane-mouth.webp"
+    ]
+  }
+}
