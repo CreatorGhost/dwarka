@@ -1,13 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { siteOrigin } from "../site-url";
 import styles from "./page.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
-  const host = requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const image = `${protocol}://${host}/story-a/01-battlefield.webp`;
+  const origin = siteOrigin(requestHeaders);
+  const image = `${origin}/story-a/01-battlefield.webp`;
   const title = "Vrishaketu | The Last Arrow of the Sun";
   const description = "Read the complete 32-panel chapter for Story A, with every objective, enemy encounter, and story turn explained.";
 

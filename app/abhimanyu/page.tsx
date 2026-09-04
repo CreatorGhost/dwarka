@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { siteOrigin } from "../site-url";
 import styles from "./page.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
-  const host = requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const image = `${protocol}://${host}/story-d/01-womb.webp`;
+  const origin = siteOrigin(requestHeaders);
+  const image = `${origin}/story-d/01-womb.webp`;
   const title = "Abhimanyu | The Seventh Gate";
   const description = "Read Story D as one complete tragic chapter and see why it remains a reference option rather than the recommended build.";
   return {
@@ -225,7 +225,7 @@ export default function AbhimanyuPage() {
       {scenes.map((scene) => (
         <article className={styles.scene} key={scene.n}>
           <figure className={styles.art}>
-            <Image src={`/story-d/${scene.art}`} alt={scene.alt} width={scene.w} height={scene.h} />
+            <Image src={`/story-d/${scene.art}`} alt={scene.alt} width={scene.w} height={scene.h} unoptimized />
           </figure>
           <div>
             <p className={styles.act}>{scene.act}</p>

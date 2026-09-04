@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { siteOrigin } from "../site-url";
 import styles from "./page.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
-  const host = requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const image = `${protocol}://${host}/story-c/01-the-duel.webp`;
+  const origin = siteOrigin(requestHeaders);
+  const image = `${origin}/story-c/01-the-duel.webp`;
   const title = "Babhruvahana | The Gem Beneath the World";
   const description = "Read Story C as one complete playable chapter, from the fatal duel in Manipur to the race for the Naga life-gem.";
   return {
@@ -185,7 +185,7 @@ export default function Babhruvahana() {
         {scenes.map((s) => (
           <li className={styles.scene} key={s.n}>
             <figure className={styles.art}>
-              <Image src={s.img} alt={s.alt} width={1536} height={1024} priority={s.n === "01"} />
+              <Image src={s.img} alt={s.alt} width={1536} height={1024} priority={s.n === "01"} unoptimized />
             </figure>
             <div className={styles.body}>
               <p className={styles.meta}>

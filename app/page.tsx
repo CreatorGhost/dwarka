@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ChapterZeroCinematic from "./ChapterZeroCinematic";
 import EmberField from "./EmberField";
 import { storyDestination, titleAction } from "./title-action";
+import { warmGameServer } from "./warmup";
 import { dictionaries, languageNames, locales, type ChapterDictionary, type Locale } from "./game/chapter-1/localization";
 import { CHANNEL_NAME, readProfile, resetProgress, saveProfile, updateSettings, type ChapterProfile, type ChapterSettings } from "./game/chapter-1/progress";
 
@@ -69,6 +70,9 @@ export default function Home() {
   const watchInvokerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    // Wake the free-tier game server now, so its cold start overlaps the account
+    // beat and the narration instead of the player's first step in the street.
+    warmGameServer();
     // Browser storage is the external source for this client-only profile.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfile(readProfile());

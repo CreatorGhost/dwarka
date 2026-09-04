@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
+import { siteOrigin } from "./site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +16,8 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
-  const host = requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const image = `${protocol}://${host}/brand/title-key-art.jpeg`;
+  const origin = siteOrigin(requestHeaders);
+  const image = `${origin}/brand/title-key-art.jpeg`;
   const title = "DWARKA: The Lost City";
   const description = "Enter a Mahabharata-era action game about Vrishaketu, the surviving son of Karna.";
 

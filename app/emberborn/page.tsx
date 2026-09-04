@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { siteOrigin } from "../site-url";
 import styles from "./page.module.css";
 
 type Scene = {
@@ -162,9 +163,8 @@ const briefing = [
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
-  const host = requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const image = `${protocol}://${host}/story-b/01-fifteen-days.webp`;
+  const origin = siteOrigin(requestHeaders);
+  const image = `${origin}/story-b/01-fifteen-days.webp`;
   const title = "Emberborn | The Forest That Was Burned";
   const description = "Read Story B as one complete playable chapter, from the burning of Khandava to the fight over its last ember.";
   return {
@@ -217,6 +217,7 @@ export default function Emberborn() {
                 width={1536}
                 height={1024}
                 sizes="(max-width: 900px) 100vw, 900px"
+                unoptimized
               />
             </figure>
             <dl className={styles.beats}>
