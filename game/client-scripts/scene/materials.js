@@ -1,7 +1,8 @@
 export const ENVIRONMENT_TONES = Object.freeze({
-  houseLime: Object.freeze([0.43, 0.4, 0.34]),
-  houseOchre: Object.freeze([0.44, 0.39, 0.34]),
-  houseRose: Object.freeze([0.42, 0.37, 0.36]),
+  houseLime: Object.freeze([0.31, 0.29, 0.25]),
+  houseOchre: Object.freeze([0.32, 0.28, 0.25]),
+  houseRose: Object.freeze([0.3, 0.26, 0.25]),
+  agedTrim: Object.freeze([0.18, 0.16, 0.14]),
   agedTimber: Object.freeze([0.36, 0.22, 0.12]),
   marketCanopy: Object.freeze([0.4, 0.31, 0.22]),
 });

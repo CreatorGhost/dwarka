@@ -1,6 +1,11 @@
 import { createObjectPool } from "../runtime/object-pool.js";
 import { ENVIRONMENT_TONES } from "./materials.js";
 
+export const AGED_TRIM_MODELS = Object.freeze([
+  "Kenney_roof_flat_square",
+  "Overhang_Plaster_Short",
+]);
+
 export function environmentGroundCorrection(
   minimumY,
   requestedY,
@@ -424,11 +429,7 @@ export function installBuild(rt) {
     if (
       entity &&
       (key.startsWith("Wall_Plaster_") ||
-        [
-          "Kenney_roof_flat_square",
-          "Balcony_Simple_Straight",
-          "Overhang_Plaster_Short",
-        ].includes(key))
+        key === "Balcony_Simple_Straight")
     ) {
       if (y >= 6 && z < -55.5)
         rt.tintEnvironmentEntity(
@@ -438,6 +439,14 @@ export function installBuild(rt) {
         );
       else rt.tintStreetHouse(entity, [x, y, z]);
     }
+    if (entity && AGED_TRIM_MODELS.includes(key))
+      rt.tintEnvironmentEntity(
+        entity,
+        "aged-plaster-trim",
+        new pc.Color(...ENVIRONMENT_TONES.agedTrim),
+        0,
+        0.08,
+      );
     if (
       entity &&
       [
