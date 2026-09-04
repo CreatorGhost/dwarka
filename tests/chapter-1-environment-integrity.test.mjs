@@ -3,7 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { ENVIRONMENT_TONES } from "../../game/client-scripts/scene/materials.js";
-import { environmentGroundCorrection } from "../../game/client-scripts/scene/build.js";
+import {
+  AGED_TRIM_MODELS,
+  environmentGroundCorrection,
+} from "../../game/client-scripts/scene/build.js";
 
 const sourceLayoutUrl = new URL("../../game/client-scripts/world-layout.json", import.meta.url);
 
@@ -88,7 +91,7 @@ test("architecture and street props use a restrained period palette", async () =
     const color = ENVIRONMENT_TONES[name];
     const maximum = Math.max(...color);
     const minimum = Math.min(...color);
-    assert.ok(maximum <= 0.48, `${name} is too bright`);
+    assert.ok(maximum <= 0.34, `${name} is too bright`);
     assert.ok((maximum - minimum) / maximum <= 0.25, `${name} is too saturated`);
   }
   assert.equal(layout.placements.Bench, undefined);
@@ -100,6 +103,14 @@ test("architecture and street props use a restrained period palette", async () =
   assert.ok(
     ENVIRONMENT_TONES.marketCanopy[0] >= ENVIRONMENT_TONES.marketCanopy[1],
     "market canopy must not read as a modern green bench",
+  );
+  assert.ok(
+    Math.max(...ENVIRONMENT_TONES.agedTrim) <= 0.2,
+    "roof trim must not blow out white under the moon light",
+  );
+  assert.deepEqual(
+    [...AGED_TRIM_MODELS].sort(),
+    ["Kenney_roof_flat_square", "Overhang_Plaster_Short"],
   );
 });
 
