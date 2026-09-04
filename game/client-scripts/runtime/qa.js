@@ -198,27 +198,227 @@ export function installQa(rt) {
     return result;
   }
 
+  function routeTraversalAudit() {
+    if (!qaSessionAllowed()) return null;
+    const simulation = new ChapterSimulation("qa-route-traversal", "arrival", true);
+    simulation.setPaused(false);
+    const traversalWaypoints = ROUTE_WAYPOINTS.flatMap((point, index) => {
+      if (index === 2)
+        return [
+          { x: 0, y: 0, z: 11.5, detour: "arrival-well-south" },
+          { x: 22, y: 0, z: 11.5, detour: "arrival-well-south" },
+          point,
+        ];
+      if (index === 4)
+        return [
+          { x: 22, y: 0, z: -3.2, detour: "courtyard-door-south" },
+          { x: 4, y: 0, z: -3.2, detour: "courtyard-door-south" },
+          point,
+        ];
+      if (index === 6)
+        return [
+          { x: -12.5, y: 6, z: -15, detour: "market-frontage-north" },
+          { x: -20, y: 6, z: -15, detour: "market-frontage-north" },
+          point,
+        ];
+      if (index === 8)
+        return [
+          { x: -20, y: 6, z: -30.5, detour: "gate-frontage-north" },
+          { x: 12, y: 6, z: -30.5, detour: "gate-frontage-north" },
+          point,
+        ];
+      if (index === 10)
+        return [
+          { x: 12, y: 6, z: -48.7, detour: "torana-north" },
+          { x: 0, y: 6, z: -48.7, detour: "torana-north" },
+          point,
+        ];
+      return [point];
+    });
+    const start = traversalWaypoints[0];
+    simulation.player.x = start.x;
+    simulation.player.y = start.y;
+    simulation.player.z = start.z;
+    let sequence = 0;
+    let travelled = 0;
+    let minimumY = start.y;
+    let maximumY = start.y;
+    let maximumFloorError = 0;
+    const segments = [];
+    for (let index = 1; index < traversalWaypoints.length; index += 1) {
+      const target = traversalWaypoints[index];
+      const expected = Math.hypot(
+        target.x - traversalWaypoints[index - 1].x,
+        target.z - traversalWaypoints[index - 1].z,
+      );
+      let steps = 0;
+      let stalledFrames = 0;
+      while (
+        Math.hypot(target.x - simulation.player.x, target.z - simulation.player.z) >
+          0.3 &&
+        steps < Math.max(240, Math.ceil(expected * 45))
+      ) {
+        const dx = target.x - simulation.player.x;
+        const dz = target.z - simulation.player.z;
+        const distance = Math.max(0.0001, Math.hypot(dx, dz));
+        const beforeX = simulation.player.x;
+        const beforeZ = simulation.player.z;
+        simulation.acceptInput({
+          type: "input",
+          seq: ++sequence,
+          move: [dx / distance, -dz / distance],
+          aimYaw: 0,
+          aimPitch: 0,
+          held: ["sprint"],
+          pressed: [],
+        });
+        simulation.tick(1 / 30);
+        const moved = Math.hypot(
+          simulation.player.x - beforeX,
+          simulation.player.z - beforeZ,
+        );
+        travelled += moved;
+        stalledFrames = moved < 0.001 ? stalledFrames + 1 : 0;
+        minimumY = Math.min(minimumY, simulation.player.y);
+        maximumY = Math.max(maximumY, simulation.player.y);
+        maximumFloorError = Math.max(
+          maximumFloorError,
+          Math.abs(
+            simulation.player.y -
+              floorHeightAt(simulation.player.x, simulation.player.z),
+          ),
+        );
+        steps += 1;
+        if (stalledFrames > 60) break;
+      }
+      const remaining = Math.hypot(
+        target.x - simulation.player.x,
+        target.z - simulation.player.z,
+      );
+      segments.push({
+        index,
+        detour: target.detour || null,
+        expected: Number(expected.toFixed(3)),
+        steps,
+        remaining: Number(remaining.toFixed(3)),
+        reached: remaining <= 0.3,
+        position: {
+          x: Number(simulation.player.x.toFixed(3)),
+          y: Number(simulation.player.y.toFixed(3)),
+          z: Number(simulation.player.z.toFixed(3)),
+        },
+      });
+      if (remaining > 0.3) break;
+    }
+    const result = {
+      authoredDistance: Number(
+        ROUTE_WAYPOINTS.slice(1)
+          .reduce((sum, point, index) => {
+            const previous = ROUTE_WAYPOINTS[index];
+            return sum + Math.hypot(point.x - previous.x, point.z - previous.z);
+          }, 0)
+          .toFixed(3),
+      ),
+      expectedDistance: Number(
+        segments.reduce((sum, segment) => sum + segment.expected, 0).toFixed(3),
+      ),
+      travelled: Number(travelled.toFixed(3)),
+      minimumY: Number(minimumY.toFixed(3)),
+      maximumY: Number(maximumY.toFixed(3)),
+      maximumFloorError: Number(maximumFloorError.toFixed(4)),
+      segments,
+      passed:
+        segments.length === traversalWaypoints.length - 1 &&
+        segments.every(({ reached }) => reached) &&
+        minimumY >= 0 &&
+        maximumFloorError <= 0.05,
+    };
+    if (!result.passed)
+      console.error("DWARKA route traversal audit failed", result);
+    return result;
+  }
+
   function doorContractAssertion() {
     if (!qaSessionAllowed()) return null;
     const doorIds = new Set(rt.DOORS.map(({ id }) => id));
-    const colliderIds = new Set(WORLD_COLLIDERS.map(([, , , , , id]) => id));
-    const renderedDynamicDoors = [...state.doorEntities.entries()].map(
-      ([id, record]) => ({
+    const colliders = new Map(
+      WORLD_COLLIDERS.map(([minX, maxX, minZ, maxZ, label, id]) => [
         id,
-        progress: Number(record.progress.toFixed(3)),
-        enabled: record.entity.enabled,
-      }),
+        { minX, maxX, minZ, maxZ, label },
+      ]),
     );
+    const angleError = (a, b) =>
+      Math.abs((((a - b + 180) % 360) + 360) % 360 - 180);
+    const pairs = rt.DOORS.map((door) => {
+      const record = state.doorEntities.get(door.id);
+      const collider = colliders.get(door.id);
+      const pose = rt.doorVisualPose
+        ? rt.doorVisualPose(
+            door,
+            record?.progress || 0,
+            rt.WORLD_LAYOUT.doorAssets || {},
+          )
+        : {
+            x: door.position[0],
+            z: door.position[2],
+            yaw: door.yaw || 0,
+          };
+      const position = record?.entity?.getPosition?.();
+      const yaw = record?.entity?.getEulerAngles?.().y;
+      const renderers = record?.entity?.findComponents?.("render") || [];
+      const portal = state.app.root.findByName(`Recessed portal ${door.id}`);
+      const colliderCenter = collider
+        ? {
+            x: (collider.minX + collider.maxX) / 2,
+            z: (collider.minZ + collider.maxZ) / 2,
+          }
+        : null;
+      const positionError = position
+        ? Math.hypot(position.x - pose.x, position.z - pose.z)
+        : Infinity;
+      const yawError = Number.isFinite(yaw) ? angleError(yaw, pose.yaw) : Infinity;
+      const colliderError = colliderCenter
+        ? Math.hypot(
+            colliderCenter.x - door.position[0],
+            colliderCenter.z - door.position[2],
+          )
+        : Infinity;
+      const visibleMeshCount = renderers.reduce(
+        (total, renderer) => total + (renderer.meshInstances?.length || 0),
+        0,
+      );
+      return {
+        id: door.id,
+        dynamic: Boolean(door.openFromPhase),
+        renderer: record?.entity?.name || null,
+        collider: collider?.label || null,
+        portal: portal?.name || null,
+        enabled: record?.entity?.enabled ?? false,
+        visibleMeshCount,
+        positionError: Number(positionError.toFixed(4)),
+        yawError: Number(yawError.toFixed(3)),
+        colliderError: Number(colliderError.toFixed(4)),
+        passed:
+          Boolean(record?.entity && collider && (portal || door.entity !== "Door_4_Flat")) &&
+          visibleMeshCount > 0 &&
+          positionError <= 0.12 &&
+          yawError <= 1.5 &&
+          colliderError <= 0.12,
+      };
+    });
     const result = {
       authored: doorIds.size,
-      colliders: [...doorIds].filter((id) => colliderIds.has(id)).length,
+      colliders: [...doorIds].filter((id) => colliders.has(id)).length,
       openable: rt.DOORS.filter(({ openFromPhase }) => openFromPhase).length,
-      renderedDynamicDoors,
+      rendered: pairs.filter(({ renderer }) => renderer).length,
+      pairs,
     };
     result.passed =
       result.authored === 9 &&
       result.colliders === result.authored &&
-      result.openable === 2;
+      result.openable === 2 &&
+      result.rendered === result.authored &&
+      pairs.every(({ passed }) => passed);
     if (!result.passed)
       console.error("DWARKA door contract assertion failed", result);
     return result;
@@ -245,6 +445,7 @@ export function installQa(rt) {
     warmLightCoverageAssertion,
     captureFrameDataUrl,
     routeContractAssertion,
+    routeTraversalAudit,
     doorContractAssertion,
     previewCheckpoint: (phase) => {
       if (!qaSessionAllowed() || !CHAPTER_CONFIG.checkpoints[phase])
@@ -764,6 +965,9 @@ export function installQa(rt) {
       enabledEnvironmentEntities: state.environmentEntities.filter(
         (entity) => entity.enabled,
       ).length,
+      architectureShadowCasters: state.environmentEntities.filter(
+        (entity) => entity.dwarkaArchitectureShadowCaster,
+      ).length,
       revampEntities: state.environmentEntities
         .filter((entity) => entity.name.startsWith("RevampHouse"))
         .map((entity) => {
@@ -964,6 +1168,36 @@ export function installQa(rt) {
       reconnectScheduled: Boolean(state.reconnectTimer),
       socketState: state.socket?.readyState ?? null,
     }),
+    routeRuntimeSummary: () => {
+      const player = state.predictedPlayer || state.snapshot?.player;
+      const floorY = player ? floorHeightAt(player.x, player.z) : null;
+      return {
+        phase: state.snapshot?.phase || null,
+        player: player
+          ? {
+              x: Number(player.x.toFixed(3)),
+              y: Number(player.y.toFixed(3)),
+              z: Number(player.z.toFixed(3)),
+            }
+          : null,
+        floorY,
+        floorError:
+          player && Number.isFinite(floorY)
+            ? Number(Math.abs(player.y - floorY).toFixed(4))
+            : null,
+        cameraDistance: state.cameraDistance,
+        objective: ui.objective?.textContent || "",
+        objectiveDetail: ui.detail?.textContent || "",
+        objectiveVisible: !ui.hud?.hidden,
+        interactionVisible: !ui.interaction?.hidden,
+        encounterActors: state.snapshot?.enemies?.length || 0,
+        familyActive: Boolean(state.snapshot?.family?.active),
+        doorProgress: [...state.doorEntities].map(([id, record]) => ({
+          id,
+          progress: Number(record.progress.toFixed(3)),
+        })),
+      };
+    },
     disconnectForQa: () => {
       if (!qaSessionAllowed() || state.socket?.readyState !== WebSocket.OPEN)
         return false;

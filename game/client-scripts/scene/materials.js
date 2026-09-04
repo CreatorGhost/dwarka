@@ -213,9 +213,9 @@ export function installMaterials(rt) {
     mats.houseOchre = material(ENVIRONMENT_TONES.houseOchre);
     mats.houseRose = material(ENVIRONMENT_TONES.houseRose);
     mats.buntingPalette = [
-      material([0.1, 0.68, 0.72]),
-      material([0.72, 0.1, 0.43]),
-      material([0.94, 0.62, 0.12]),
+      material([0.1, 0.34, 0.36]),
+      material([0.42, 0.08, 0.2]),
+      material([0.58, 0.34, 0.07]),
     ];
     for (const cloth of mats.buntingPalette) {
       cloth.cull = pc.CULLFACE_NONE;

@@ -40,13 +40,13 @@ export function installDoors(rt) {
     if (!door) return false;
     entity.dwarkaDoorId = door.id;
     entity.dwarkaDynamicDoor = Boolean(door.openFromPhase);
-    if (!door.openFromPhase) return true;
     state.doorEntities.set(door.id, {
       door,
       entity,
       progress: 0,
       opening: false,
     });
+    if (!door.openFromPhase) return true;
     const snapshotState = state.snapshot?.doors?.find(
       ({ id }) => id === door.id,
     );
@@ -96,4 +96,5 @@ export function installDoors(rt) {
   rt.registerDoorEntity = registerDoorEntity;
   rt.unregisterDoorEntity = unregisterDoorEntity;
   rt.updateDoorPresentation = updateDoorPresentation;
+  rt.doorVisualPose = doorVisualPose;
 }

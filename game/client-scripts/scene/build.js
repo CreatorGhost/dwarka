@@ -399,13 +399,24 @@ export function installBuild(rt) {
         : []),
       ...(UPPER_HOUSE_MODEL_KEYS.has(key) ? upperHousePlacementsFor(key) : []),
     ];
+    if (key === "Door_4_Flat")
+      return placements.filter((placement) =>
+        rt.DOORS.some(
+          (door) =>
+            door.entity === key &&
+            Math.hypot(
+              door.position[0] - placement[0],
+              door.position[1] - placement[1],
+              door.position[2] - placement[2],
+            ) < 0.08,
+        ),
+      );
     if (
       ENVIRONMENT_REVAMP.mode !== "arrival-candidate" ||
       ![
         "Wall_Plaster_Door_Flat",
         "Wall_Plaster_Straight",
         "Wall_Plaster_Window_Wide_Round",
-        "Door_4_Flat",
         "Kenney_roof_flat_square",
         "Kenney_column",
         "Kenney_column_wide",
@@ -420,15 +431,19 @@ export function installBuild(rt) {
     )
       return placements;
     const legacyCullMinZ = ENVIRONMENT_REVAMP.legacyCullMinZ ?? 8;
-    return placements.filter((placement) => placement[2] < legacyCullMinZ);
+    return placements.filter(
+      (placement) =>
+        placement[2] < legacyCullMinZ ||
+        (key === "Wall_Arch" && placement[1] === 0),
+    );
   }
 
   function styleRevampEnvironment(entity, key, index) {
     if (!entity) return;
     const plasterTones = [
-      [0.64, 0.46, 0.29],
-      [0.58, 0.45, 0.3],
-      [0.6, 0.37, 0.31],
+      [0.48, 0.36, 0.23],
+      [0.43, 0.39, 0.24],
+      [0.46, 0.32, 0.23],
     ];
     const clothTones = [
       [0.48, 0.12, 0.07],
@@ -445,15 +460,13 @@ export function installBuild(rt) {
         let color = plasterTones[variant];
         let metalness = 0;
         let gloss = 0.12;
-        let emissive = color.map((channel) => channel * 0.28);
+        let emissive = [0, 0, 0];
         if (name.includes("wall_1")) {
           role = "aged-trim";
-          color = [0.46, 0.29, 0.16];
-          emissive = [0.1, 0.06, 0.03];
+          color = [0.34, 0.25, 0.17];
         } else if (name.includes("wood") || name.includes("roof")) {
           role = "aged-timber";
-          color = [0.36, 0.19, 0.08];
-          emissive = [0.065, 0.03, 0.012];
+          color = [0.2, 0.09, 0.035];
           gloss = 0.08;
         } else if (name.includes("window")) {
           role = "recessed-window";
@@ -469,7 +482,6 @@ export function installBuild(rt) {
         } else if (name.includes("cloth")) {
           role = "faded-cloth";
           color = clothTones[variant];
-          emissive = color.map((channel) => channel * 0.05);
           gloss = 0.06;
         } else if (name.includes("light")) {
           role = "warm-practical";
@@ -486,6 +498,17 @@ export function installBuild(rt) {
           material.gloss = gloss;
           material.emissive = new pc.Color(...emissive);
           material.emissiveIntensity = role === "warm-practical" ? 0.55 : 1;
+          material.dwarkaRevampRole = role;
+          if (
+            state.revampFacadeTexture &&
+            ["plaster", "aged-trim"].includes(role)
+          ) {
+            material.diffuseMap = state.revampFacadeTexture;
+            material.diffuseMapTiling = new pc.Vec2(
+              role === "aged-trim" ? 2.8 : 1.8,
+              role === "aged-trim" ? 2.8 : 1.8,
+            );
+          }
           material.update();
           state.environmentMaterials.set(cacheKey, material);
         }
@@ -517,6 +540,49 @@ export function installBuild(rt) {
     entity.dwarkaGroundCorrection = correction;
   }
 
+  function createDoorPortal(entity, position, yaw) {
+    const doorId = entity?.dwarkaDoorId;
+    if (!doorId) return null;
+    const root = new pc.Entity(`Recessed portal ${doorId}`);
+    root.dwarkaDoorPortalId = doorId;
+    state.app.root.addChild(root);
+    root.setPosition(...position);
+    root.setEulerAngles(0, yaw, 0);
+    if (entity.dwarkaDynamicDoor) {
+      const recess = primitive(
+        "box",
+        `Dark opening ${doorId}`,
+        [0, 1.08, 0.09],
+        [1.38, 2.18, 0.14],
+        mats.iron,
+        root,
+      );
+      recess.castShadows = false;
+    }
+    for (const side of [-1, 1])
+      primitive(
+        "box",
+        `Stone jamb ${doorId}`,
+        [side * 0.69, 1.19, 0],
+        [0.18, 2.38, 0.34],
+        mats.wood,
+        root,
+      );
+    primitive(
+      "box",
+      `Carved lintel ${doorId}`,
+      [0, 2.37, 0],
+      [1.58, 0.24, 0.38],
+      mats.wood,
+      root,
+    );
+    root.dwarkaPlacementId = `DoorPortal:${doorId}`;
+    assignStaticModelToBatch(root);
+    state.environmentEntities.push(root);
+    state.streamedEnvironment.set(root.dwarkaPlacementId, root);
+    return root;
+  }
+
   function instantiateEnvironmentPlacement(key, placement, index) {
     const [x, y, z, yaw, scale] = placement;
     const entity = instantiateModel(key, key, [x, y, z], scale, yaw);
@@ -541,8 +607,26 @@ export function installBuild(rt) {
         0,
         0.08,
       );
+    if (entity && key === "Door_4_Flat")
+      rt.tintEnvironmentEntity(
+        entity,
+        "aged-carved-door",
+        new pc.Color(0.2, 0.09, 0.035),
+        0,
+        0.16,
+      );
     if (entity && key.startsWith("RevampHouse"))
       styleRevampEnvironment(entity, key, index);
+    if (entity && key.startsWith("RevampHouse")) {
+      const castsShadows = z >= (ENVIRONMENT_REVAMP.shadowCastMinZ ?? Infinity);
+      entity.dwarkaArchitectureShadowCaster = castsShadows;
+      for (const render of entity.findComponents?.("render") || []) {
+        render.castShadows = castsShadows;
+        render.receiveShadows = true;
+      }
+    }
+    if (entity && key === "Wall_Arch" && y === 0)
+      entity.dwarkaRevampTerminus = true;
     if (
       entity &&
       [
@@ -592,6 +676,16 @@ export function installBuild(rt) {
         0,
         0.08,
       );
+    if (entity && ["Banner_1_Cloth", "Banner_2_Cloth"].includes(key))
+      rt.tintEnvironmentEntity(
+        entity,
+        key === "Banner_1_Cloth" ? "faded-madder-cloth" : "faded-ochre-cloth",
+        key === "Banner_1_Cloth"
+          ? new pc.Color(0.3, 0.08, 0.09)
+          : new pc.Color(0.38, 0.22, 0.07),
+        0,
+        0.05,
+      );
     if (
       entity &&
       (GROUND_ALIGNED_MODELS.has(key) ||
@@ -605,8 +699,10 @@ export function installBuild(rt) {
         ].includes(key))
     )
       alignEnvironmentModelToStreet(entity, y);
-    if (entity && key === "Door_4_Flat")
+    if (entity && key === "Door_4_Flat") {
       rt.registerDoorEntity(entity, key, [x, y, z]);
+      createDoorPortal(entity, [x, y, z], yaw);
+    }
     if (entity && key === "brass_diya_lantern") {
       entity.findComponents?.("render").forEach((render) => {
         for (const instance of render.meshInstances || []) {
@@ -690,7 +786,8 @@ export function installBuild(rt) {
       ? [onlyEntity]
       : state.environmentEntities) {
       const position = entity.getPosition();
-      const visibilityRadius = entity.name.startsWith("RevampHouse")
+      const visibilityRadius =
+        entity.name.startsWith("RevampHouse") || entity.dwarkaRevampTerminus
         ? (ENVIRONMENT_REVAMP.visibilityRadius ?? 32)
         : STREAMING.environmentRadius;
       entity.enabled =
@@ -795,7 +892,7 @@ export function installBuild(rt) {
         }
       },
     );
-    for (const [url, materials, tiling] of [
+    for (const [url, materials, tiling, revampRole] of [
       [
         "./assets/textures/painted_plaster_wall_diff_512.webp",
         [
@@ -809,21 +906,42 @@ export function installBuild(rt) {
           mats.houseRose,
         ],
         2.5,
+        "facade",
       ],
       [
         "./assets/textures/sandstone_cracks_diff_512.webp",
         [mats.stone, mats.sideMargin, mats.kerbSandstone],
         3.5,
+        "trim",
       ],
     ])
       state.app.assets.loadFromUrl(assetUrl(url), "texture", (error, asset) => {
         if (error || !asset?.resource) return;
         asset.resource.addressU = asset.resource.addressV = pc.ADDRESS_REPEAT;
         asset.resource.anisotropy = 8;
+        if (revampRole === "facade") state.revampFacadeTexture = asset.resource;
         for (const facade of materials) {
           facade.diffuseMap = asset.resource;
           facade.diffuseMapTiling = new pc.Vec2(tiling, tiling);
           facade.update();
+        }
+        for (const material of state.environmentMaterials.values()) {
+          if (
+            material.dwarkaRevampRole === "plaster" &&
+            revampRole === "facade"
+          ) {
+            material.diffuseMap = asset.resource;
+            material.diffuseMapTiling = new pc.Vec2(1.8, 1.8);
+            material.update();
+          }
+          if (
+            material.dwarkaRevampRole === "aged-trim" &&
+            revampRole === "trim"
+          ) {
+            material.diffuseMap = asset.resource;
+            material.diffuseMapTiling = new pc.Vec2(2.8, 2.8);
+            material.update();
+          }
         }
       });
     for (const [kind, url] of [
