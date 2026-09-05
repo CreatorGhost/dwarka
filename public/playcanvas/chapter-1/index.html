@@ -28,6 +28,7 @@
         <div class="hud-actions">
           <button id="captions-toggle" type="button" aria-pressed="true">CC On</button>
           <button id="mute-toggle" type="button" aria-pressed="false">Sound On</button>
+          <button id="screenshot-button" type="button" aria-keyshortcuts="P" title="Save a screenshot and pause (P)" data-i18n="screenshot">Screenshot · P</button>
           <button id="pause-button" type="button">Pause</button>
         </div>
       </header>
@@ -52,6 +53,11 @@
           <p class="modal-kicker" data-i18n="chapterKicker">CHAPTER 1</p>
           <h1 id="modal-title">The Boy with the Paper Sun</h1>
           <p id="modal-copy">A playable night in Karna's quarter.</p>
+          <div id="screenshot-actions" hidden>
+            <button id="pause-screenshot" type="button" aria-keyshortcuts="P" data-i18n="screenshot" hidden>Screenshot · P</button>
+            <a id="screenshot-download" data-i18n="screenshotDownload" download hidden>Save PNG</a>
+            <p id="screenshot-status" class="pointer-note" role="status" hidden></p>
+          </div>
           <div id="story-panel" hidden>
             <img id="story-image" alt="" />
             <div><b id="story-speaker"></b><p id="story-text"></p></div>
@@ -61,7 +67,7 @@
               <p class="blueprint-label" data-i18n="moveLabel">MOVE RELATIVE TO CAMERA</p>
               <div class="key-map" aria-label="W above A S D"><kbd>W</kbd><span></span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div>
               <p data-i18n="moveHelp">Approach, retreat, and strafe. The mouse turns the camera.</p>
-              <div class="utility-keys"><span><kbd>Shift</kbd><b data-i18n="sprint">Sprint</b></span><span><kbd>Space</kbd><b data-i18n="dodge">Dodge</b></span><span><kbd>E</kbd><b data-i18n="interact">Interact</b></span><span><kbd>Esc</kbd><b data-i18n="pause">Pause</b></span></div>
+              <div class="utility-keys"><span><kbd>Shift</kbd><b data-i18n="sprint">Sprint</b></span><span><kbd>Space</kbd><b data-i18n="dodge">Dodge</b></span><span><kbd>E</kbd><b data-i18n="interact">Interact</b></span><span><kbd>Esc</kbd><b data-i18n="pause">Pause</b></span><span><kbd>P</kbd><b data-i18n="screenshotLabel">Screenshot</b></span></div>
             </div>
             <div class="control-cluster mouse-cluster">
               <p class="blueprint-label" data-i18n="combatLabel">ONE MOUSE · TWO CONTEXTS</p>

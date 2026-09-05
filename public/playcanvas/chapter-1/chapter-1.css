@@ -154,3 +154,7 @@
 }
 
 #settings-panel fieldset { border-color: rgba(var(--ember), .28); }
+
+/* Screenshot actions stay accessible alongside the paused scene. */
+#screenshot-download{align-self:center;color:var(--gold);padding:10px 14px;pointer-events:auto}
+.hud-actions{flex-wrap:wrap;max-width:340px}
