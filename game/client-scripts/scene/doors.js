@@ -18,6 +18,12 @@ export function doorVisualPose(door, progress, assetDimensions = {}) {
   };
 }
 
+function authoritativeDoorProgress(doorState) {
+  if (doorState?.open === true) return 1;
+  const progress = Number(doorState?.progress);
+  return Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
+}
+
 export function installDoors(rt) {
   const { state } = rt;
   const doors = rt.DOORS;
@@ -50,10 +56,11 @@ export function installDoors(rt) {
     const snapshotState = state.snapshot?.doors?.find(
       ({ id }) => id === door.id,
     );
-    if (snapshotState?.open) {
+    if (snapshotState) {
       const record = state.doorEntities.get(door.id);
-      record.progress = 1;
-      const pose = doorVisualPose(door, 1, assets);
+      record.progress = authoritativeDoorProgress(snapshotState);
+      record.opening = record.progress > 0 && record.progress < 1;
+      const pose = doorVisualPose(door, record.progress, assets);
       entity.setPosition(pose.x, entity.getPosition().y, pose.z);
       entity.setEulerAngles(0, pose.yaw, 0);
     }
@@ -67,7 +74,7 @@ export function installDoors(rt) {
       state.doorEntities.delete(entity.dwarkaDoorId);
   }
 
-  function updateDoorPresentation(snapshot, dt) {
+  function updateDoorPresentation(snapshot) {
     const doorStates = new Map(
       (snapshot?.doors || []).map((door) => [door.id, door]),
     );
@@ -77,15 +84,8 @@ export function installDoors(rt) {
         continue;
       }
       const authoritative = doorStates.get(id);
-      if ((authoritative?.progress || 0) > 0) record.opening = true;
-      if (authoritative?.open) record.progress = 1;
-      else if (record.opening) {
-        const duration = Math.max(0.1, record.door.visualSwingSeconds || 0.32);
-        record.progress = Math.min(
-          1,
-          record.progress + Math.max(0, dt) / duration,
-        );
-      }
+      record.progress = authoritativeDoorProgress(authoritative);
+      record.opening = record.progress > 0 && record.progress < 1;
       const pose = doorVisualPose(record.door, record.progress, assets);
       const currentY = record.entity.getPosition().y;
       record.entity.setPosition(pose.x, currentY, pose.z);

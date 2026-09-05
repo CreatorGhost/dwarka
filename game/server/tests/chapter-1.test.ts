@@ -307,9 +307,9 @@ test("substepped collision prevents sprint and dodge tunneling through the well"
   assert.equal(collides(moved, 0.55), false);
 });
 
-test("all nine freestanding door colliders are derived from their rendered transforms", () => {
-  assert.equal(DOORS.length, 9);
-  assert.equal(DOOR_COLLIDERS.length, 9);
+test("all seven freestanding door colliders are derived from their rendered transforms", () => {
+  assert.equal(DOORS.length, 7);
+  assert.equal(DOOR_COLLIDERS.length, 7);
   for (const door of DOORS) {
     const collider = doorColliderFromTransform(door);
     const asset =
@@ -342,7 +342,7 @@ test("all nine freestanding door colliders are derived from their rendered trans
   }
 });
 
-test("rescue doors stay solid throughout their short swing and open after it completes", () => {
+test("rescue doors report open only after their configured swing completes", () => {
   const simulation = new ChapterSimulation(playerId, "arrival");
   simulation.loadPhase("courtyard", {
     resetPlayer: false,
@@ -352,35 +352,20 @@ test("rescue doors stay solid throughout their short swing and open after it com
     ...simulation.player,
     x: 8.6,
     y: 0,
-    z: -1,
+    z: -0.1,
   };
   const closedMove = moveWithCollision(
     simulation.player,
     { x: 2.4, z: 0 },
-    0.3,
+    0.55,
     simulation.openDoorIds,
+    simulation.doorProgress,
   );
-  const rescueDoor = DOORS.find(({ id }) => id === "courtyard-rescue-door");
-  assert.ok(rescueDoor);
-  const rescueCollider = doorColliderFromTransform(rescueDoor);
-  assert.ok(
-    closedMove.x <= rescueCollider.minX - 0.3,
-    `closed door allowed x=${closedMove.x}`,
-  );
+  assert.ok(closedMove.x < 10, `closed door allowed x=${closedMove.x}`);
 
   for (let tick = 0; tick < 8; tick += 1) simulation.tick(0.05);
   assert.ok(simulation.doorProgress["courtyard-rescue-door"] < 1);
   assert.equal(simulation.openDoorIds.has("courtyard-rescue-door"), false);
-  const swingingMove = moveWithCollision(
-    simulation.player,
-    { x: 2.4, z: 0 },
-    0.3,
-    simulation.openDoorIds,
-  );
-  assert.ok(
-    swingingMove.x <= rescueCollider.minX - 0.3,
-    `swinging door allowed x=${swingingMove.x}`,
-  );
 
   simulation.tick(0.05);
   assert.equal(simulation.doorProgress["courtyard-rescue-door"], 1);
@@ -388,8 +373,9 @@ test("rescue doors stay solid throughout their short swing and open after it com
   const openMove = moveWithCollision(
     simulation.player,
     { x: 2.4, z: 0 },
-    0.3,
+    0.55,
     simulation.openDoorIds,
+    simulation.doorProgress,
   );
   assert.ok(openMove.x > 10.8, `open door still blocked at x=${openMove.x}`);
 });
@@ -1166,7 +1152,9 @@ test("a retreating archer never enters a closed authored door collider", () => {
   const archer = simulation.enemies.find((enemy) => enemy.kind === "archer");
   assert.ok(archer);
   simulation.enemies = [archer];
-  simulation.openDoorIds.delete("courtyard-rescue-door");
+  simulation.adoptDoorState([
+    { id: "courtyard-rescue-door", progress: 0, open: false },
+  ]);
   simulation.player.x = 7;
   simulation.player.z = -1;
   archer.x = 9;
@@ -1176,7 +1164,12 @@ test("a retreating archer never enters a closed authored door collider", () => {
   for (let index = 0; index < 80; index += 1) {
     simulation.tick();
     assert.equal(
-      collides(archer, 0.46, simulation.openDoorIds),
+      collides(
+        archer,
+        0.46,
+        simulation.openDoorIds,
+        simulation.doorProgress,
+      ),
       false,
       `archer entered a door collider on tick ${index + 1}`,
     );

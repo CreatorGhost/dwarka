@@ -4,12 +4,123 @@ import {
   visibleArrowEuler,
 } from "./reticle.js";
 import { createObjectPool } from "../runtime/object-pool.js";
+import {
+  DOORS,
+  doorColliderAtProgress,
+  segmentBlocked as targetLineBlocked,
+} from "../../server/src/chapter-1/collision.ts";
 
 export function angleDifference(target, current) {
   return Math.atan2(Math.sin(target - current), Math.cos(target - current));
 }
 
-export { segmentBlocked as targetLineBlocked } from "../sim/shared.ts";
+export function selectBowTarget({
+  origin,
+  yaw,
+  pitch,
+  enemies,
+  blocked = () => false,
+}) {
+  const forward = { x: Math.sin(yaw), z: -Math.cos(yaw) };
+  let target = null;
+  let bestScore = Number.POSITIVE_INFINITY;
+  for (const enemy of enemies || []) {
+    if (enemy.dead) continue;
+    const dx = enemy.x - origin.x;
+    const dz = enemy.z - origin.z;
+    const distance = Math.hypot(dx, dz);
+    const dot = distance > 0 ? (dx * forward.x + dz * forward.z) / distance : 1;
+    const arrowHeight = 1.42 + Math.tan(pitch) * distance;
+    const heightError = Math.abs(arrowHeight - 1.1);
+    if (
+      distance > 22 ||
+      dot <= 0.83 ||
+      heightError > 0.85 ||
+      blocked(enemy)
+    )
+      continue;
+    const angularError = Math.acos(Math.max(-1, Math.min(1, dot)));
+    const score = angularError * 5 + heightError * 0.42 + distance * 0.006;
+    if (score < bestScore) {
+      bestScore = score;
+      target = { ...enemy, distance, dot, heightError, score };
+    }
+  }
+  return target;
+}
+
+export function openDoorIdsForSnapshot(snapshot) {
+  return new Set(
+    (snapshot?.doors || []).filter(({ open }) => open).map(({ id }) => id),
+  );
+}
+
+export function doorProgressForSnapshot(snapshot) {
+  return Object.fromEntries(
+    (snapshot?.doors || []).map((door) => {
+      const progress = door.open ? 1 : Number(door.progress);
+      return [
+        door.id,
+        Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0,
+      ];
+    }),
+  );
+}
+
+export function collidersForSnapshot(colliders, snapshot) {
+  const doorStates = new Map(
+    (snapshot?.doors || []).map((door) => [door.id, door]),
+  );
+  if (doorStates.size === 0) return colliders;
+  const doors = new Map(DOORS.map((door) => [door.id, door]));
+  return colliders.map((collider) => {
+    const id = Array.isArray(collider) ? collider[5] : collider.id;
+    const state = doorStates.get(id);
+    const door = doors.get(id);
+    if (!state || !door) return collider;
+    const progress = state.open ? 1 : state.progress;
+    const box = doorColliderAtProgress(door, progress);
+    if (!Array.isArray(collider)) return { ...collider, ...box };
+    return [
+      box.minX,
+      box.maxX,
+      box.minZ,
+      box.maxZ,
+      collider[4],
+      collider[5],
+      collider[6],
+    ];
+  });
+}
+
+export function visibleProjectileDistance({
+  start,
+  direction,
+  maxDistance = 22,
+  bounds,
+  colliders,
+}) {
+  for (let step = 0.15; step <= maxDistance; step += 0.15) {
+    const x = start.x + direction.x * step;
+    const z = start.z + direction.z * step;
+    const blocked =
+      x < bounds.minX + 0.15 ||
+      x > bounds.maxX - 0.15 ||
+      z < bounds.minZ + 0.15 ||
+      z > bounds.maxZ - 0.15 ||
+      colliders.some(
+        ([minX, maxX, minZ, maxZ]) =>
+          x > minX - 0.05 &&
+          x < maxX + 0.05 &&
+          z > minZ - 0.05 &&
+          z < maxZ + 0.05,
+      );
+    if (blocked) return Math.max(0.2, step - 0.15);
+  }
+  return maxDistance;
+}
+
+export { targetLineBlocked };
 
 export function installTargeting(rt) {
   const { state, ui, pc, canvas, mats } = rt;
@@ -118,27 +229,12 @@ export function installTargeting(rt) {
       y: (player.y ?? floorHeightAt(player.x, player.z)) + 1.42,
       z: player.z + right.z * 0.28 + forward.z * 0.38,
     };
-    let distance = 22;
-    for (let step = 0.15; step <= 22; step += 0.15) {
-      const x = start.x + forward.x * step,
-        z = start.z + forward.z * step;
-      const blocked =
-        x < WORLD_BOUNDS.minX + 0.15 ||
-        x > WORLD_BOUNDS.maxX - 0.15 ||
-        z < WORLD_BOUNDS.minZ + 0.15 ||
-        z > WORLD_BOUNDS.maxZ - 0.15 ||
-        WORLD_COLLIDERS.some(
-          ([minX, maxX, minZ, maxZ]) =>
-            x > minX - 0.05 &&
-            x < maxX + 0.05 &&
-            z > minZ - 0.05 &&
-            z < maxZ + 0.05,
-        );
-      if (blocked) {
-        distance = Math.max(0.2, step - 0.15);
-        break;
-      }
-    }
+    const distance = visibleProjectileDistance({
+      start,
+      direction: forward,
+      bounds: WORLD_BOUNDS,
+      colliders: collidersForSnapshot(WORLD_COLLIDERS, state.snapshot),
+    });
     state.projectiles.push(
       projectilePool.acquire({
         previous: start,
@@ -247,35 +343,16 @@ export function installTargeting(rt) {
       return;
     }
     const origin = state.predictedPlayer || snapshot.player;
-    const forward = { x: Math.sin(state.yaw), z: -Math.cos(state.yaw) };
-    const candidates = [];
-    for (const enemy of snapshot.enemies || []) {
-      if (enemy.dead) continue;
-      const dx = enemy.x - origin.x,
-        dz = enemy.z - origin.z,
-        distance = Math.hypot(dx, dz);
-      if (distance <= 0.01 || distance > 22) continue;
-      const dot = (dx * forward.x + dz * forward.z) / distance;
-      const arrowHeight = 1.42 + Math.tan(state.pitch) * distance;
-      const heightError = Math.abs(arrowHeight - 1.1);
-      if (dot <= 0.83 || heightError > 0.85 || segmentBlocked(origin, enemy))
-        continue;
-      const angularError = Math.acos(pc.math.clamp(dot, -1, 1));
-      const score = angularError * 5 + heightError * 0.42 + distance * 0.006;
-      candidates.push({ ...enemy, distance, dot, heightError, score });
-    }
-    candidates.sort(
-      (a, b) =>
-        a.score - b.score ||
-        a.distance - b.distance ||
-        String(a.id).localeCompare(String(b.id)),
-    );
-    const previous = candidates.find(
-      (candidate) => candidate.id === state.targetEnemyId,
-    );
-    let target = candidates[0] || null;
-    if (previous && (!target || previous.score <= target.score + 0.22))
-      target = previous;
+    const openDoorIds = openDoorIdsForSnapshot(snapshot);
+    const doorProgress = doorProgressForSnapshot(snapshot);
+    const target = selectBowTarget({
+      origin,
+      yaw: state.yaw,
+      pitch: state.pitch,
+      enemies: snapshot.enemies,
+      blocked: (enemy) =>
+        segmentBlocked(origin, enemy, openDoorIds, doorProgress),
+    });
     if (!target) {
       state.targetEnemyId = null;
       setTargetRim(null);

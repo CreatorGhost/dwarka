@@ -25,7 +25,7 @@
     "doorway": {
       "members": [
         { "position": [-0.75, 6, -49.2], "yaw": 160 },
-        { "position": [0.75, 6, -49.2], "yaw": -160 }
+        { "position": [0.82, 6, -49.2], "yaw": -160 }
       ]
     },
     "ending": {
@@ -72,15 +72,15 @@
     },
     {
       "id": "arrival-lane",
-      "minX": -6,
-      "maxX": 6,
+      "minX": -10.4,
+      "maxX": 10.34,
       "minZ": 14,
       "maxZ": 32,
       "y": 0
     },
     {
       "id": "well-square",
-      "minX": -6,
+      "minX": -10.4,
       "maxX": 24,
       "minZ": 8,
       "maxZ": 20,
@@ -260,7 +260,7 @@
   },
   "environmentRevamp": {
     "mode": "arrival-candidate",
-    "collisionContract": "visual-only",
+    "collisionContract": "visual-only except the route-flanking houses listed in colliders with a Revamp visual",
     "legacyCullMinZ": -36,
     "visibilityRadius": 42,
     "shadowCastMinZ": 23,
@@ -317,6 +317,14 @@
       "y": 0,
       "z": 20,
       "yaw": 0
+    },
+    {
+      "id": "well-square-crossing",
+      "phase": "arrival",
+      "x": 0,
+      "y": 0,
+      "z": 14,
+      "yaw": 1.57
     },
     {
       "id": "courtyard-fight",
@@ -795,74 +803,56 @@
     {
       "id": "upper-market-stall",
       "label": "Market stall",
-      "minX": -25.8,
-      "maxX": -22.6,
-      "minZ": -29.5,
-      "maxZ": -26.5,
+      "minX": -24.7,
+      "maxX": -23.7,
+      "minZ": -28.5,
+      "maxZ": -27.5,
       "visual": "Kenney_stall_green"
     },
     {
       "id": "gate-rath",
       "label": "Rath body",
-      "minX": 14.9,
-      "maxX": 17.3,
-      "minZ": -48.2,
-      "maxZ": -45.8,
+      "minX": 15.4953,
+      "maxX": 16.7047,
+      "minZ": -47.7628,
+      "maxZ": -46.2372,
       "visual": "Kenney_cart"
     },
     {
       "id": "torana-left",
       "label": "Torana post",
-      "minX": -2.0,
-      "maxX": -1.35,
-      "minZ": -51.3,
-      "maxZ": -50.2,
+      "minX": 0.0,
+      "maxX": 0.0641,
+      "minZ": -51.0,
+      "maxZ": -50.8333,
       "visual": "Wall_Arch"
     },
     {
       "id": "torana-right",
       "label": "Torana post",
-      "minX": 1.35,
-      "maxX": 2.0,
-      "minZ": -51.3,
-      "maxZ": -50.2,
+      "minX": 0.0,
+      "maxX": 0.0641,
+      "minZ": -49.1667,
+      "maxZ": -49.0,
       "visual": "Wall_Arch"
     },
     {
       "id": "gate-torana-left",
       "label": "Gate torana west post",
-      "minX": 10.35,
-      "maxX": 10.9,
-      "minZ": -51.3,
-      "maxZ": -50.2,
+      "minX": 11.0,
+      "maxX": 11.1667,
+      "minZ": -50.8,
+      "maxZ": -50.7359,
       "visual": "Wall_Arch"
     },
     {
       "id": "gate-torana-right",
       "label": "Gate torana east post",
-      "minX": 13.1,
-      "maxX": 13.65,
-      "minZ": -51.3,
-      "maxZ": -50.2,
+      "minX": 12.8333,
+      "maxX": 13.0,
+      "minZ": -50.8,
+      "maxZ": -50.7359,
       "visual": "Wall_Arch"
-    },
-    {
-      "id": "courtyard-l-turn-return",
-      "label": "Courtyard L-turn return wall",
-      "minX": 16.05,
-      "maxX": 18.4,
-      "minZ": 3.25,
-      "maxZ": 3.95,
-      "visual": "Wall_Plaster_Straight"
-    },
-    {
-      "id": "market-l-turn-return",
-      "label": "Market L-turn return wall",
-      "minX": -15.95,
-      "maxX": -15.3,
-      "minZ": -25.5,
-      "maxZ": -22.5,
-      "visual": "Wall_Plaster_Straight"
     },
     {
       "id": "gate-l-turn-return",
@@ -871,42 +861,6 @@
       "maxX": 6.7,
       "minZ": -43.8,
       "maxZ": -40.0,
-      "visual": "Wall_Plaster_Straight"
-    },
-    {
-      "id": "market-west-house-front",
-      "label": "Market west house frontage",
-      "minX": -26.35,
-      "maxX": -25.65,
-      "minZ": -36.0,
-      "maxZ": -16.0,
-      "visual": "Wall_Plaster_Straight"
-    },
-    {
-      "id": "market-east-house-front",
-      "label": "Market east house frontage",
-      "minX": -14.35,
-      "maxX": -13.65,
-      "minZ": -28.0,
-      "maxZ": -16.0,
-      "visual": "Wall_Plaster_Straight"
-    },
-    {
-      "id": "burning-north-house-front",
-      "label": "Burning lane north house frontage",
-      "minX": -18.0,
-      "maxX": -16.55,
-      "minZ": -26.35,
-      "maxZ": -25.65,
-      "visual": "Wall_Plaster_Straight"
-    },
-    {
-      "id": "burning-north-house-front-east",
-      "label": "Burning lane north house frontage east",
-      "minX": -15.45,
-      "maxX": 14.0,
-      "minZ": -26.35,
-      "maxZ": -25.65,
       "visual": "Wall_Plaster_Straight"
     },
     {
@@ -924,7 +878,7 @@
       "minX": 5.65,
       "maxX": 6.35,
       "minZ": -44.0,
-      "maxZ": -32.0,
+      "maxZ": -36.0,
       "visual": "Wall_Plaster_Straight"
     },
     {
@@ -933,7 +887,7 @@
       "minX": 17.65,
       "maxX": 18.35,
       "minZ": -52.0,
-      "maxZ": -32.0,
+      "maxZ": -36.0,
       "visual": "Wall_Plaster_Straight"
     },
     {
@@ -953,6 +907,123 @@
       "minZ": -56.35,
       "maxZ": -55.65,
       "visual": "Wall_Plaster_Straight"
+    },
+    {
+      "id": "revamp-arrival-house-west-south",
+      "label": "Arrival west house frontage south",
+      "minX": -17.484,
+      "maxX": -10.402,
+      "minZ": 8.332,
+      "maxZ": 17.422,
+      "visual": "RevampHouse30D"
+    },
+    {
+      "id": "revamp-arrival-tent-west",
+      "label": "Arrival west tent",
+      "minX": -9.834,
+      "maxX": -7.312,
+      "minZ": 17.098,
+      "maxZ": 19.714,
+      "visual": "RevampTentA"
+    },
+    {
+      "id": "revamp-arrival-rampart-west",
+      "label": "Arrival west rampart",
+      "minX": -14.265,
+      "maxX": -10.017,
+      "minZ": 19.874,
+      "maxZ": 26.126,
+      "visual": "RevampFortificationGate"
+    },
+    {
+      "id": "revamp-arrival-house-west-north",
+      "label": "Arrival west house frontage north",
+      "minX": -17.546,
+      "maxX": -10.107,
+      "minZ": 26.149,
+      "maxZ": 30.998,
+      "visual": "RevampHouse41C"
+    },
+    {
+      "id": "revamp-arrival-house-east-south",
+      "label": "Arrival east house frontage south",
+      "minX": 10.271,
+      "maxX": 15.741,
+      "minZ": 15.262,
+      "maxZ": 20.453,
+      "visual": "RevampHouse20"
+    },
+    {
+      "id": "revamp-arrival-house-east-centre",
+      "label": "Arrival east house frontage centre",
+      "minX": 10.339,
+      "maxX": 15.762,
+      "minZ": 20.13,
+      "maxZ": 24.805,
+      "visual": "RevampHouse37H"
+    },
+    {
+      "id": "revamp-arrival-house-east-north",
+      "label": "Arrival east house frontage north",
+      "minX": 10.114,
+      "maxX": 17.553,
+      "minZ": 26.202,
+      "maxZ": 31.051,
+      "visual": "RevampHouse41C"
+    },
+    {
+      "id": "revamp-square-house-south",
+      "label": "Well square east house frontage",
+      "minX": 10.08,
+      "maxX": 17.16,
+      "minZ": 0.73,
+      "maxZ": 9.82,
+      "visual": "RevampHouse30D"
+    },
+    {
+      "id": "revamp-square-house-north",
+      "label": "Well square north house frontage",
+      "minX": 10.27,
+      "maxX": 15.74,
+      "minZ": 15.26,
+      "maxZ": 20.45,
+      "visual": "RevampHouse20"
+    },
+    {
+      "id": "revamp-square-rampart-east",
+      "label": "Well square east rampart",
+      "minX": 24.99,
+      "maxX": 29.24,
+      "minZ": 11.87,
+      "maxZ": 18.13,
+      "visual": "RevampFortificationGate"
+    },
+    {
+      "id": "revamp-courtyard-house-east",
+      "label": "Courtyard east house frontage",
+      "minX": 9.4,
+      "maxX": 16.72,
+      "minZ": -9.62,
+      "maxZ": -4.49,
+      "visual": "RevampHouse18A"
+    },
+    {
+      "id": "revamp-alley-house-west",
+      "label": "Alley west house frontage",
+      "minX": -7.9,
+      "maxX": -1.1,
+      "minZ": -8.12,
+      "maxZ": -3.9,
+      "visual": "RevampHouse18A"
+    },
+    {
+      "id": "revamp-alley-house-east",
+      "label": "Alley east house frontage",
+      "minX": 10.27,
+      "maxX": 15.74,
+      "minZ": -15.14,
+      "maxZ": -9.95,
+      "visual": "RevampHouse20"
     }
   ],
   "doorAssets": {
@@ -970,14 +1041,6 @@
       "entity": "Door_4_Flat",
       "position": [-10.12, 0, 23],
       "yaw": 90,
-      "scale": 1.03
-    },
-    {
-      "id": "street-door-east-15",
-      "label": "Street door east 15",
-      "entity": "Door_4_Flat",
-      "position": [10.12, 0, 15],
-      "yaw": -90,
       "scale": 1.03
     },
     {
@@ -1024,14 +1087,6 @@
       "scale": 1.03
     },
     {
-      "id": "street-door-east-minus-33",
-      "label": "Street door east minus 33",
-      "entity": "Door_4_Flat",
-      "position": [10.12, 0, -33],
-      "yaw": -90,
-      "scale": 1.03
-    },
-    {
       "id": "doorway-rescue-door",
       "label": "Doorway rescue door",
       "entity": "Distant palace door",
@@ -1053,7 +1108,7 @@
       [-4.5, 0, -5.96, 90, 0.68]
     ],
     "RevampHouse20": [
-      [12.95, 0, 17.54, -82, 0.68],
+      [12.95, 0, 17.9, -82, 0.68],
       [-12.95, 0, 5.5, 82, 0.68],
       [-12.95, 0, -13.5, 82, 0.68],
       [12.95, 0, -12.5, -82, 0.68],
@@ -1070,14 +1125,13 @@
       [13.83, 0, 28.6, -82, 0.68]
     ],
     "RevampHouse31H": [
-      [13.49, 0, 0.15, -82, 0.68],
       [-13.49, 0, -6.5, 82, 0.68],
       [-13.49, 0, -25.7, 82, 0.68],
       [13.49, 0, -24.7, -82, 0.68]
     ],
     "RevampHouse30D": [
       [-15.1, 0, 13.35, 82, 0.68],
-      [15.1, 0, 9.55, -82, 0.68]
+      [14.6, 0, 4.5, -82, 0.68]
     ],
     "RevampCargoBox": [
       [10.2, 0, 28.8, -90, 0.82],
@@ -1098,7 +1152,7 @@
     ],
     "RevampFortificationGate": [
       [-11.523, -0.5, 23, 0, 0.575],
-      [11.523, -0.5, 15, 180, 0.575]
+      [26.5, -0.5, 15, 180, 0.575]
     ],
     "RevampTentA": [
       [-8.55, 0, 18.4, 5, 0.62]

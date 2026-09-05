@@ -1,3 +1,5 @@
+import { collidersForSnapshot } from "../combat/targeting.js";
+
 export function safeCameraDistance({
   target,
   desired,
@@ -101,7 +103,7 @@ export function installLoop(rt) {
       target,
       desired,
       bounds: WORLD_BOUNDS,
-      colliders: WORLD_COLLIDERS,
+      colliders: collidersForSnapshot(WORLD_COLLIDERS, state.snapshot),
       floorAt: floorHeightAt,
     });
   }

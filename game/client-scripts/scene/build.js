@@ -27,6 +27,26 @@ export function familyMemberTransforms(phase, anchor, familyStaging = {}) {
   ];
 }
 
+export function keepArrivalCandidateLegacyPlacement(
+  key,
+  placement,
+  environmentRevamp,
+) {
+  const [x, y, z] = placement;
+  const legacyCullMinZ = environmentRevamp.legacyCullMinZ ?? 8;
+  if (z < legacyCullMinZ) return true;
+  if (key === "Wall_Arch" && y === 0) return true;
+  // The imported arrival set does not replace the low wall along the south
+  // edge of the stair landing. Keep those four modules so the visible route
+  // ends where the authored floor ends instead of at an invisible boundary.
+  return (
+    key === "Wall_Plaster_Straight" &&
+    y === 0 &&
+    x >= 3 &&
+    Math.abs(z + 18.02) < 0.08
+  );
+}
+
 export function installBuild(rt) {
   const { state, ui, pc, canvas, mats } = rt;
   const WORLD_BOUNDS = rt.WORLD_BOUNDS;
@@ -439,11 +459,12 @@ export function installBuild(rt) {
       ].includes(key)
     )
       return placements;
-    const legacyCullMinZ = ENVIRONMENT_REVAMP.legacyCullMinZ ?? 8;
-    return placements.filter(
-      (placement) =>
-        placement[2] < legacyCullMinZ ||
-        (key === "Wall_Arch" && placement[1] === 0),
+    return placements.filter((placement) =>
+      keepArrivalCandidateLegacyPlacement(
+        key,
+        placement,
+        ENVIRONMENT_REVAMP,
+      ),
     );
   }
 

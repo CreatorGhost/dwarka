@@ -62,6 +62,12 @@ export type SimulationEvent =
   | { type: "phase.restarted"; phase: PhaseId; reason: "down" | "family" }
   | { type: "story.ready"; phase: "ending" };
 
+export type DoorState = {
+  id: string;
+  progress: number;
+  open: boolean;
+};
+
 type PendingPlayerAttack = {
   mode: "bow" | "melee";
   targetId: string;
@@ -198,6 +204,7 @@ export function sanitizeInput(
 export class ChapterSimulation {
   readonly sessionId = globalThis.crypto.randomUUID();
   readonly playerId: string;
+  readonly movementOnly: boolean;
   phase: PhaseId;
   phaseEpoch = 1;
   tickNumber = 0;
@@ -241,6 +248,7 @@ export class ChapterSimulation {
     DOORS.map((door) => [door.id, 0]),
   );
   readonly openDoorIds = new Set<string>();
+  private doorsExternallyDriven = false;
   private clientPositionMode = false;
   private enemyBrains = new Map<string, EnemyBrain>();
   private encounterActive = false;
@@ -249,8 +257,9 @@ export class ChapterSimulation {
   constructor(
     playerId: string,
     phase: PhaseId,
-    readonly movementOnly = false,
+    movementOnly = false,
   ) {
+    this.movementOnly = movementOnly;
     this.playerId = playerId;
     this.phase = phase === "complete" ? "complete" : phase;
     this.loadPhase(this.phase);
@@ -384,7 +393,7 @@ export class ChapterSimulation {
     if (
       floor === null ||
       Math.abs(floor - position.y) > 0.08 ||
-      collides(position, 0.55, this.openDoorIds)
+      collides(position, 0.55, this.openDoorIds, this.doorProgress)
     )
       return false;
     const locked =
@@ -445,6 +454,23 @@ export class ChapterSimulation {
         this.doorProgress[door.id] + dt / duration,
       );
       if (this.doorProgress[door.id] >= 1) this.openDoorIds.add(door.id);
+    }
+  }
+
+  adoptDoorState(doors: readonly DoorState[]): void {
+    const doorsById = new Map(doors.map((door) => [door.id, door]));
+    this.doorsExternallyDriven = true;
+    this.openDoorIds.clear();
+    for (const door of DOORS) {
+      const authoritative = doorsById.get(door.id);
+      const open = authoritative?.open === true;
+      const progress = Number(authoritative?.progress);
+      this.doorProgress[door.id] = open
+        ? 1
+        : Number.isFinite(progress)
+          ? Math.max(0, Math.min(1, progress))
+          : 0;
+      if (open) this.openDoorIds.add(door.id);
     }
   }
 
@@ -529,6 +555,7 @@ export class ChapterSimulation {
           },
           0.55,
           this.openDoorIds,
+          this.doorProgress,
         );
         this.player.x = moved.x;
         this.player.y = moved.y ?? this.player.y;
@@ -576,7 +603,12 @@ export class ChapterSimulation {
       const distance = Math.hypot(this.player.x, this.player.z - 14);
       if (
         distance <= 3.2 &&
-        !segmentBlocked(this.player, { x: 0, z: 14 }, this.openDoorIds)
+        !segmentBlocked(
+          this.player,
+          { x: 0, z: 14 },
+          this.openDoorIds,
+          this.doorProgress,
+        )
       ) {
         this.player.state = "interact";
         this.advancePhase();
@@ -606,6 +638,7 @@ export class ChapterSimulation {
         { x: move.x * speed * dt, z: move.z * speed * dt },
         0.55,
         this.openDoorIds,
+        this.doorProgress,
       );
       this.player.x = moved.x;
       this.player.y = moved.y ?? this.player.y;
@@ -643,7 +676,15 @@ export class ChapterSimulation {
             dot > 0.83 &&
             Math.abs(arrowHeightAtTarget - 1.1) <= 0.85
           : distance <= 2.8 && dot > 0.2;
-      if (!eligible || segmentBlocked(this.player, enemy, this.openDoorIds))
+      if (
+        !eligible ||
+        segmentBlocked(
+          this.player,
+          enemy,
+          this.openDoorIds,
+          this.doorProgress,
+        )
+      )
         continue;
       // Mirror the visible target-acquisition score. The server remains
       // authoritative, but a locked bracket must never describe one raider
@@ -697,7 +738,12 @@ export class ChapterSimulation {
       if (
         distance > 2.8 ||
         dot <= 0.2 ||
-        segmentBlocked(origin, target, this.openDoorIds)
+        segmentBlocked(
+          origin,
+          target,
+          this.openDoorIds,
+          this.doorProgress,
+        )
       )
         return;
     }
@@ -827,6 +873,7 @@ export class ChapterSimulation {
       { x: steer.x * step, z: steer.z * step },
       0.46,
       this.openDoorIds,
+      this.doorProgress,
     );
     const progress = Math.hypot(moved.x - enemy.x, moved.z - enemy.z);
     if (desiredMagnitude > 0.0001 && progress < step * 0.2) {
@@ -850,6 +897,7 @@ export class ChapterSimulation {
             },
             0.46,
             this.openDoorIds,
+            this.doorProgress,
           );
           return {
             sign,
@@ -893,6 +941,7 @@ export class ChapterSimulation {
         },
         0.46,
         this.openDoorIds,
+        this.doorProgress,
       );
       if (
         Math.hypot(separated.x - other.x, separated.z - other.z) >
@@ -1070,7 +1119,12 @@ export class ChapterSimulation {
       );
       const attackRange =
         enemy.kind === "archer" ? Math.min(stats.range, 8.5) : stats.range;
-      const blocked = segmentBlocked(enemy, this.player, this.openDoorIds);
+      const blocked = segmentBlocked(
+        enemy,
+        this.player,
+        this.openDoorIds,
+        this.doorProgress,
+      );
       if (warningBeforeTick <= 0) {
         if (enemy.kind === "archer")
           this.moveArcher(enemy, playerDistance, blocked, dt);
@@ -1100,6 +1154,7 @@ export class ChapterSimulation {
           enemy,
           this.player,
           this.openDoorIds,
+          this.doorProgress,
         );
         if (
           distanceAfterMove <= attackRange &&
@@ -1125,7 +1180,12 @@ export class ChapterSimulation {
       if (
         warningFinished &&
         impactDistance <= attackRange + 0.4 &&
-        !segmentBlocked(enemy, this.player, this.openDoorIds) &&
+        !segmentBlocked(
+          enemy,
+          this.player,
+          this.openDoorIds,
+          this.doorProgress,
+        ) &&
         this.enemyPlayerFacingError(enemy) <= ATTACK_IMPACT_ARC &&
         this.player.invulnerable <= 0
       ) {
@@ -1213,7 +1273,7 @@ export class ChapterSimulation {
       return;
     const safeDt = Math.min(0.05, Math.max(0, dt));
     this.tickNumber += 1;
-    this.updateDoors(safeDt);
+    if (!this.doorsExternallyDriven) this.updateDoors(safeDt);
     if (this.player.health === 0 || this.downRemaining > 0) {
       if (this.downRemaining <= 0) this.downRemaining = 0.85;
       this.downRemaining = Math.max(0, this.downRemaining - safeDt);

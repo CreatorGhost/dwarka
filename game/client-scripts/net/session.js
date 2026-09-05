@@ -1,12 +1,68 @@
+function isLoopbackHost(hostname) {
+  const host = hostname
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "")
+    .replace(/\.$/, "");
+  return (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host === "0.0.0.0" ||
+    host.startsWith("127.") ||
+    host === "::" ||
+    host === "::1" ||
+    host === "::ffff:0:0" ||
+    host === "::ffff:0.0.0.0" ||
+    /^::7f[0-9a-f]{2}:/.test(host) ||
+    host.startsWith("::ffff:127.") ||
+    /^::ffff:7f[0-9a-f]{2}:/.test(host)
+  );
+}
+
+export function reconcileMovementDoors(simulation, authoritativeDoors) {
+  if (
+    typeof simulation?.adoptDoorState === "function" &&
+    Array.isArray(authoritativeDoors)
+  ) {
+    simulation.adoptDoorState(authoritativeDoors);
+    return;
+  }
+  if (
+    !simulation?.doorProgress ||
+    !simulation?.openDoorIds ||
+    !Array.isArray(authoritativeDoors)
+  )
+    return;
+  const doorsById = new Map(
+    authoritativeDoors.map((door) => [door.id, door]),
+  );
+  simulation.openDoorIds.clear();
+  for (const id of Object.keys(simulation.doorProgress)) {
+    const authoritative = doorsById.get(id);
+    const open = authoritative?.open === true;
+    const progress = Number(authoritative?.progress);
+    simulation.doorProgress[id] = open
+      ? 1
+      : Number.isFinite(progress)
+        ? Math.max(0, Math.min(1, progress))
+        : 0;
+    if (open) simulation.openDoorIds.add(id);
+  }
+}
+
 export function safeWebSocketEndpoint(value, locationHref) {
   if (!value) return null;
   try {
     const endpoint = new URL(value, locationHref);
-    const local = ["localhost", "127.0.0.1", "[::1]"].includes(endpoint.hostname);
+    const page = new URL(locationHref);
+    const localEndpoint = isLoopbackHost(endpoint.hostname);
+    const localPage = isLoopbackHost(page.hostname);
+    const secureEndpoint = endpoint.protocol === "wss:" && (!localEndpoint || localPage);
+    const localDevelopmentEndpoint = endpoint.protocol === "ws:" && localEndpoint && localPage;
     if (
       endpoint.username ||
       endpoint.password ||
-      (endpoint.protocol !== "wss:" && !(endpoint.protocol === "ws:" && local))
+      endpoint.hash ||
+      (!secureEndpoint && !localDevelopmentEndpoint)
     )
       return null;
     return endpoint.href;
@@ -127,9 +183,7 @@ export function installSession(rt) {
     ui.modalPrimary.disabled = false;
     applySnapshot(simulation.snapshot(), "local");
     rt.showToast(
-      reconnecting
-        ? "Offline play · progress will save when reconnected"
-        : "Offline play · progress is not saved",
+      "Offline play · progress is not saved",
       5,
     );
   }
@@ -178,6 +232,12 @@ export function installSession(rt) {
 
   function tickLocalSimulation(dt) {
     if (!state.localSimulation || state.paused || !state.playing) return;
+    const authoritativeDoors =
+      !state.localMode && Array.isArray(state.snapshot?.doors)
+        ? state.snapshot.doors
+        : null;
+    if (authoritativeDoors)
+      reconcileMovementDoors(state.localSimulation, authoritativeDoors);
     const before = {
       x: state.localSimulation.player.x,
       z: state.localSimulation.player.z,
@@ -218,6 +278,8 @@ export function installSession(rt) {
     const query = new URLSearchParams(location.search);
     const wsUrl = safeWebSocketEndpoint(query.get("ws"), location.href);
     if (!background) {
+      state.reconnectRequiresResume = false;
+      state.reconnectingAuthoritative = false;
       state.reconnectPhase =
         state.requestedAction === "replay" ? null : state.snapshot?.phase || state.reconnectPhase;
       state.snapshot = null;
@@ -245,11 +307,10 @@ export function installSession(rt) {
       scheduleReconnect();
       return;
     }
-    state.socket.addEventListener("open", () => {
-      ui.reconnect.hidden = true;
-      ui.reconnect.classList.remove("failed");
-      state.reconnectAttempts = 0;
-      state.socket.send(
+    const openedSocket = state.socket;
+    openedSocket.addEventListener("open", () => {
+      if (state.socket !== openedSocket) return;
+      openedSocket.send(
         JSON.stringify({
           type: "session.resume",
           playerId: state.profile.anonymousPlayerId,
@@ -259,7 +320,8 @@ export function installSession(rt) {
         }),
       );
     });
-    state.socket.addEventListener("message", (event) => {
+    openedSocket.addEventListener("message", (event) => {
+      if (state.socket !== openedSocket) return;
       let message;
       try {
         message = JSON.parse(event.data);
@@ -268,16 +330,31 @@ export function installSession(rt) {
       }
       handleServer(message);
     });
-    const openedSocket = state.socket;
-    state.socket.addEventListener("close", () => {
-      if (!state.intentionalSockets.has(openedSocket)) scheduleReconnect();
+    openedSocket.addEventListener("close", () => {
+      if (state.socket === openedSocket && !state.intentionalSockets.has(openedSocket))
+        scheduleReconnect(openedSocket);
     });
-    state.socket.addEventListener("error", () => openedSocket.close());
+    openedSocket.addEventListener("error", () => openedSocket.close());
   }
 
-  function scheduleReconnect() {
+  function scheduleReconnect(closedSocket = state.socket) {
+    if (closedSocket && state.socket !== closedSocket) return;
+    const wasAuthoritative = state.sessionAccepted || state.reconnectingAuthoritative;
+    if (state.sessionAccepted) {
+      state.reconnectRequiresResume = state.playing && !state.paused;
+      state.reconnectingAuthoritative = true;
+    }
     state.socket = null;
-    if (!state.localMode) startLocalSession(state.confirmedPhase || requestedLocalPhase(), true);
+    state.sessionAccepted = false;
+    if (wasAuthoritative) {
+      state.playing = false;
+      state.paused = true;
+      clearInput();
+      state.localSimulation?.setPaused(true);
+      rt.setConnectionStatus(rt.t("serverReconnecting"), rt.t("serverReconnectingCopy"));
+    } else if (!state.localMode) {
+      startLocalSession(state.confirmedPhase || requestedLocalPhase(), true);
+    }
     window.clearTimeout(state.reconnectTimer);
     state.reconnectAttempts += 1;
     const delay = Math.min(2_000, 500 * 2 ** Math.min(3, state.reconnectAttempts - 1));
@@ -286,17 +363,27 @@ export function installSession(rt) {
 
   function handleServer(message) {
     if (message.type === "session.accepted") {
-      state.snapVisualOnNextSnapshot = state.localMode;
+      const wasLocal = state.localMode;
+      const wasAuthoritativeReconnect = Boolean(state.reconnectingAuthoritative);
+      const requiresResume =
+        Boolean(state.reconnectRequiresResume) ||
+        (wasLocal && state.playing && !state.paused);
+      state.snapVisualOnNextSnapshot = wasLocal || wasAuthoritativeReconnect;
       state.sessionAccepted = true;
       state.localMode = false;
       state.confirmedPhase = PLAYABLE_PHASES.has(message.phase)
         ? message.phase
         : state.confirmedPhase;
       state.reconnectAttempts = 0;
+      state.reconnectRequiresResume = false;
+      state.reconnectingAuthoritative = false;
       if (state.snapshot?.player && Number.isFinite(state.snapshot.player.yaw))
         state.yaw = state.lookYaw = state.visualYaw = state.snapshot.player.yaw;
+      ui.reconnect.hidden = true;
+      ui.reconnect.classList.remove("failed");
       ui.modalPrimary.disabled = false;
-      rt.sendPause(true);
+      if (requiresResume) rt.showResume(state.confirmedPhase);
+      else rt.sendPause(state.paused || !state.playing);
       if (message.progressToken && message.progressSummary) {
         state.token = message.progressToken;
         rt.sendParent("dwarka:progress", {
@@ -391,6 +478,7 @@ export function installSession(rt) {
         Boolean(snapshot.positionCorrection) || forceVisualSnap,
         true,
       );
+      reconcileMovementDoors(prediction, snapshot.doors);
       state.predictedPlayer = {
         ...snapshot.player,
         ...prediction.player,

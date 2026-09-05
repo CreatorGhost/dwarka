@@ -227,12 +227,6 @@ export function installQa(rt) {
           { x: 12, y: 6, z: -30.5, detour: "gate-frontage-north" },
           point,
         ];
-      if (index === 10)
-        return [
-          { x: 12, y: 6, z: -48.7, detour: "torana-north" },
-          { x: 0, y: 6, z: -48.7, detour: "torana-north" },
-          point,
-        ];
       return [point];
     });
     const start = traversalWaypoints[0];
@@ -413,7 +407,7 @@ export function installQa(rt) {
       pairs,
     };
     result.passed =
-      result.authored === 9 &&
+      result.authored === 7 &&
       result.colliders === result.authored &&
       result.openable === 2 &&
       result.rendered === result.authored &&

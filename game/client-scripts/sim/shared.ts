@@ -2,7 +2,9 @@ export { ChapterSimulation } from "../../server/src/chapter-1/simulation.ts";
 export {
   DOOR_COLLIDERS,
   DOORS,
+  doorColliderAtProgress,
   doorColliderFromTransform,
+  doorPoseAtProgress,
   floorHeightAt as sharedFloorHeightAt,
   segmentBlocked,
 } from "../../server/src/chapter-1/collision.ts";
