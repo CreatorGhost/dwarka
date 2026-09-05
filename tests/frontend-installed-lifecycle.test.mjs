@@ -390,6 +390,7 @@ const ENTRY_IMPORTS = new Map([
   ["./character/animation.js", ["CHARACTER_ANIMATIONS", "animationSpeeds", "characterStateGraph", "installAnimation"]],
   ["./runtime/context.js", ["createRuntime", "loadWorld"]],
   ["./ui/hud.js", ["installHud"]],
+  ["./ui/screenshot.js", ["installScreenshot"]],
   ["./ui/modals.js", ["installModals"]],
   ["./net/handshake.js", ["installHandshake"]],
   ["./scene/materials.js", ["installMaterials"]],

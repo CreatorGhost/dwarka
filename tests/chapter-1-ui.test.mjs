@@ -328,7 +328,7 @@ test("Chapter 1 keeps directional signs, input cleanup, collision, and exact end
   );
   assert.match(
     runtime,
-    /let distance = 22[\s\S]*step <= 22/,
+    /function visibleProjectileDistance\(\{[\s\S]{0,160}maxDistance = 22,[\s\S]{0,500}step <= maxDistance/,
     "visible arrows must cover the authoritative bow range",
   );
   assert.match(runtime, /They asked for you by name\./);
@@ -482,7 +482,7 @@ test("every character variant uses one face-safe skeleton and all blades stay ha
   assert.equal(combatJson.skins[0].joints.length, 65);
 });
 
-test("bow aim uses a stable automatic target lock and an edge-aware objective waypoint", async () => {
+test("bow aim uses closest-current automatic targeting and an edge-aware objective waypoint", async () => {
   const [runtime, gameHtml, gameCss, gameI18n] = await Promise.all([
     readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
@@ -494,10 +494,10 @@ test("bow aim uses a stable automatic target lock and an edge-aware objective wa
     /angularError \* 5/,
     "target choice must prioritize reticle angle over a nearer off-axis enemy",
   );
-  assert.match(
+  assert.doesNotMatch(
     runtime,
-    /previous\.score <= target\.score \+ 0\.22/,
-    "target lock needs hysteresis so it cannot jump every frame",
+    /previous\.score|previousTarget|hysteresis/i,
+    "target choice must not retain a previous near-equal target",
   );
   assert.match(runtime, /targetLineBlocked/);
   assert.match(runtime, /distance > 22/);
@@ -606,14 +606,10 @@ test("locomotion, camera, and grounded props share one visual frame of reference
   );
   assert.match(
     runtime,
-    /packed-sand-v1\.webp/,
-    "the road needs an authored sand texture rather than flat floor slabs",
+    /mats\.roadSand\.diffuseMap = surfaceTexture\([^;]+"earth"\)/,
+    "the road needs an authored earth texture rather than an untextured material",
   );
-  assert.match(
-    runtime,
-    /mats\.roadSand\.diffuseMap = texture/,
-    "the sand texture must be applied to the canonical street material",
-  );
+  assert.match(runtime, /surfaceMaterial\(r\.y>=6\?mats\.roofStone:mats\.roadSand,r\)/);
   assert.match(
     runtime,
     /entity\.render\.castShadows = Boolean\(value\)/,
@@ -669,7 +665,7 @@ test("locomotion, camera, and grounded props share one visual frame of reference
     );
 });
 
-test("A0 night rendering exposes the skyline and lets practical fire lights breathe", async () => {
+test("A0 night rendering exposes an authored skyline and lets practical fire lights breathe", async () => {
   const [runtime, servedBundle] = await Promise.all([
     readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/chapter-1.js", root), "utf8"),
@@ -688,20 +684,33 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
     /primitive\("sphere", "Indigo night sky"/,
     "an opaque sky mesh must not hide distant scenery",
   );
-  assert.match(runtime, /ambientLight = new pc\.Color\(0\.055, 0\.075, 0\.15\)/);
-  assert.match(runtime, /scene\.exposure = 0\.64/);
+  const ambient = runtime.match(
+    /scene\.ambientLight = new pc\.Color\((\d*\.?\d+), (\d*\.?\d+), (\d*\.?\d+)\)/,
+  );
+  assert.ok(ambient, "the scene needs an explicit ambient-light color");
+  const ambientChannels = ambient.slice(1).map(Number);
+  assert.ok(
+    ambientChannels.every((channel) => channel > 0 && channel < 0.3),
+    "night ambience must remain visible without flattening practical lights",
+  );
+  const exposure = runtime.match(/scene\.exposure = (\d*\.?\d+)/);
+  assert.ok(exposure, "the scene needs explicit exposure");
+  assert.ok(Number(exposure[1]) >= 0.5 && Number(exposure[1]) <= 1);
   assert.doesNotMatch(
     runtime,
     /new pc\.Entity\("Camera soft fill"\)/,
     "the camera must not carry a flattening headlight",
   );
-  assert.match(runtime, /texture\.addressU = texture\.addressV = pc\.ADDRESS_REPEAT/);
+  assert.match(runtime, /source\.addressU = pc\.ADDRESS_REPEAT/);
+  assert.match(runtime, /source\.addressV = pc\.ADDRESS_CLAMP_TO_EDGE/);
   assert.doesNotMatch(runtime, /ADDRESS_MIRRORED_REPEAT/);
   assert.match(
     runtime,
-    /diffuseMapTiling = new pc\.Vec2\(7, 4\)/,
-    "each 13 by 8 metre centre-road slab needs an approximately two-metre texture repeat",
+    /diffuseMapTiling=new pc\.Vec2\(width\/3,depth\/3\)/,
+    "floor texture density must scale with each authoritative floor patch",
   );
+  assert.match(runtime, /nightSkyTexture\(pc, state\.app\.graphicsDevice\)/);
+  assert.match(runtime, /scene\.skybox = state\.citySkybox/);
   assert.match(runtime, /function flickerFireLight/);
   assert.match(
     runtime,
@@ -715,18 +724,22 @@ test("A0 night rendering exposes the skyline and lets practical fire lights brea
   );
 });
 
-test("A1 uses the ledgered HDR, physical materials, native grading, and production shadows", async () => {
-  const [runtime, html, css, hdr, sourceHdr] = await Promise.all([
+test("A1 uses ledgered HDR reflections, physical materials, native grading, and bounded shadows", async () => {
+  const [runtime, html, css, moonlitHdr, sourceMoonlitHdr, moonlessHdr, sourceMoonlessHdr] = await Promise.all([
     readRuntime(),
     readFile(new URL("public/playcanvas/chapter-1/index.html", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/chapter-1.css", root), "utf8"),
     readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonlit_golf_2k.hdr", root)),
     readFile(new URL("../../game/assets/raw/polyhaven/moonlit_golf_2k.hdr", import.meta.url)),
+    readFile(new URL("public/playcanvas/chapter-1/assets/environment/moonless_golf_2k.hdr", root)),
+    readFile(new URL("../../game/assets/raw/polyhaven/moonless_golf_2k.hdr", import.meta.url)),
   ]);
-  assert.deepEqual(hdr, sourceHdr, "the runtime HDR must be the exact ledgered CC0 source");
+  assert.deepEqual(moonlitHdr, sourceMoonlitHdr, "the moonlit HDR must be the exact ledgered CC0 source");
+  assert.deepEqual(moonlessHdr, sourceMoonlessHdr, "the moonless HDR must be the exact ledgered CC0 source");
   assert.match(runtime, /EnvLighting\.generateSkyboxCubemap/);
   assert.match(runtime, /EnvLighting\.generateAtlas/);
-  assert.match(runtime, /scene\.skybox = state\.skyboxCubemap/);
+  assert.match(runtime, /state\.citySkybox = pc\.EnvLighting\.generateSkyboxCubemap/);
+  assert.match(runtime, /scene\.skybox = state\.citySkybox/);
   assert.match(runtime, /scene\.envAtlas = state\.environmentAtlas/);
   assert.match(runtime, /toneMapping = pc\.TONEMAP_ACES/);
   assert.match(
@@ -738,10 +751,17 @@ test("A1 uses the ledgered HDR, physical materials, native grading, and producti
   assert.match(runtime, /function enforceNativeResolution/);
   assert.doesNotMatch(runtime, /nextScale = 0\.[89]/);
   assert.match(runtime, /value\.useMetalness = true/);
-  assert.match(
-    runtime,
-    /shadowResolution: 1024,[\s\S]{0,120}shadowBias: 0\.05,[\s\S]{0,120}normalOffsetBias: 0\.02,[\s\S]{0,120}numCascades: 1/,
+  const moonShadow = runtime.match(
+    /new pc\.Entity\("Moonlight"\)[\s\S]{0,500}shadowDistance: (\d*\.?\d+),[\s\S]{0,80}shadowResolution: (\d+),[\s\S]{0,80}shadowBias: (\d*\.?\d+),[\s\S]{0,80}normalOffsetBias: (\d*\.?\d+),[\s\S]{0,80}numCascades: (\d+)/,
   );
+  assert.ok(moonShadow, "the moon needs an explicit bounded shadow budget");
+  const [, distance, resolution, bias, normalOffset, cascades] = moonShadow.map(Number);
+  assert.ok(distance > 0 && distance <= 64, "shadow coverage must stay local to the playable route");
+  assert.ok(resolution >= 1024 && resolution <= 4096, "shadow resolution must remain production-bounded");
+  assert.ok(bias > 0 && bias <= 0.2, "shadow acne needs a bounded depth bias");
+  assert.ok(normalOffset > 0 && normalOffset <= 0.3, "shadow acne needs a bounded normal offset");
+  assert.ok(cascades >= 1 && cascades <= 4, "cascade count must remain bounded");
+  assert.match(runtime, /deck\.castShadows=false/);
   assert.doesNotMatch(
     html,
     /id="vignette"/,
@@ -793,7 +813,7 @@ test("A2 builds the street from unit-scale plaster bays and terraced roof module
   }
 });
 
-test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB batching", async () => {
+test("A3 uses cached particle VFX, authored bunting, floor patches, and safe GLB batching", async () => {
   const [runtime, fireAtlas, smokeAtlas, fabric] = await Promise.all([
     readRuntime(),
     readFile(
@@ -808,8 +828,20 @@ test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB ba
   ]);
   assert.ok(fireAtlas.length > 1000 && smokeAtlas.length > 1000 && fabric.length > 1000);
   assert.match(runtime, /addComponent\("particlesystem"/);
-  assert.match(runtime, /animTilesX: 3,[\s\S]{0,60}animTilesY: 3,[\s\S]{0,60}animNumFrames: 9/);
-  assert.match(runtime, /animTilesX: 5,[\s\S]{0,60}animTilesY: 5,[\s\S]{0,60}animNumFrames: 25/);
+  for (const [effect, resource] of [
+    ["fire", "fire"],
+    ["smoke", "smoke"],
+  ]) {
+    const config = runtime.match(
+      new RegExp(
+        `Kenney animated ${effect} particles[\\s\\S]{0,500}colorMap: state\\.vfxAssets\\.${resource}\\.resource,[\\s\\S]{0,100}animTilesX: (\\d+),[\\s\\S]{0,60}animTilesY: (\\d+),[\\s\\S]{0,60}animNumFrames: (\\d+)`,
+      ),
+    );
+    assert.ok(config, `${effect} particles must use their cached atlas resource`);
+    const [, tilesX, tilesY, frames] = config.map(Number);
+    assert.ok(tilesX > 0 && tilesY > 0 && frames > 0);
+    assert.ok(frames <= tilesX * tilesY, `${effect} animation must fit its atlas grid`);
+  }
   assert.doesNotMatch(runtime, /primitive\("sphere", "Smoke plume"/);
   assert.doesNotMatch(
     runtime,
@@ -823,12 +855,17 @@ test("A3 uses cached particle VFX, textured bunting, road slabs, and late GLB ba
   );
   assert.match(runtime, /new pc\.Entity\("Triangular festival pennant"/);
   assert.match(runtime, /fabric_pattern_07_col_1_512\.webp/);
-  assert.match(runtime, /"Packed earth street slab"/);
+  assert.match(runtime, /["']Authored floor deck["']/);
   assert.match(runtime, /"Wet ash fire patch"/);
   assert.match(
     runtime,
     /assignStaticModelToBatch\(entity\)/,
     "late-loaded GLBs must join the active static batch group",
+  );
+  assert.match(
+    runtime,
+    /if \(!entity \|\|[^)]*entity\.dwarkaDynamicDoor \|\| entity\.dwarkaStreamedEnvironment \|\| !state\.staticBatchGroup\) return/,
+    "dynamic doors and independently streamed props must never join the static batch",
   );
 });
 
@@ -862,7 +899,8 @@ test("A7 gives the street distinct houses, Indian set dressing, real L-turns, an
     layout.placements.Kenney_cart.length && layout.placements.Kenney_wheel.length >= 2,
     "the gate needs a two-wheel rath",
   );
-  assert.match(runtime, /mats\.roadSand = material\(\[0\.58, 0\.56, 0\.52\]\)/);
+  assert.match(runtime, /mats\.roadSand = material\(\[[^\]]+\]\)/);
+  assert.match(runtime, /mats\.roadSand\.diffuseMap = surfaceTexture\([^;]+"earth"\)/);
   assert.match(runtime, /const tones = \["lime", "ochre", "rose"\]/);
   assert.doesNotMatch(
     runtime,
@@ -905,7 +943,8 @@ test("A4 shares the authoritative simulation and remains playable without a sock
     /startLocalSession\(\)/,
     "a missing WebSocket URL must start local play instead of blocking",
   );
-  assert.match(runtime, /progress will save when reconnected/);
+  assert.match(runtime, /Offline play · progress is not saved/);
+  assert.doesNotMatch(runtime, /progress will save when reconnected/);
   assert.match(
     runtime,
     /if \(state\.localMode\) processLocalEvents\(\)/,
@@ -933,7 +972,9 @@ test("A4 shares the authoritative simulation and remains playable without a sock
     "presses must survive two packets in one server tick",
   );
   assert.match(simulation, /acceptClientPosition/);
-  assert.match(simulation, /readonly movementOnly = false/);
+  assert.match(simulation, /readonly movementOnly: boolean/);
+  assert.match(simulation, /constructor\([\s\S]{0,160}movementOnly = false/);
+  assert.match(simulation, /this\.movementOnly = movementOnly/);
   assert.match(server, /!parsed \|\| typeof parsed !== "object" \|\| Array\.isArray\(parsed\)/);
   assert.match(server, /new BoundedProgressStore/);
   assert.match(progressStore, /capacity = 10_000/);

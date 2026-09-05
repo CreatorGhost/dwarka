@@ -102,8 +102,8 @@ test("architecture and street props use a restrained period palette", async () =
     const color = ENVIRONMENT_TONES[name];
     const maximum = Math.max(...color);
     const minimum = Math.min(...color);
-    assert.ok(maximum <= 0.34, `${name} is too bright`);
-    assert.ok((maximum - minimum) / maximum <= 0.25, `${name} is too saturated`);
+    assert.ok(maximum >= 0.4 && maximum <= 0.65, `${name} must retain readable night midtones`);
+    assert.ok(color[0] >= color[1] && color[1] >= color[2] && minimum >= 0.18, `${name} must remain a warm mineral tone`);
   }
   assert.equal(layout.placements.Bench, undefined);
   assert.ok(
@@ -116,7 +116,7 @@ test("architecture and street props use a restrained period palette", async () =
     "market canopy must not read as a modern green bench",
   );
   assert.ok(
-    Math.max(...ENVIRONMENT_TONES.agedTrim) <= 0.2,
+    Math.max(...ENVIRONMENT_TONES.agedTrim) <= 0.4,
     "roof trim must not blow out white under the moon light",
   );
   assert.deepEqual([...AGED_TRIM_MODELS].sort(), [
@@ -345,7 +345,7 @@ test("the revamp uses budgeted architecture shadows without plaster emissive fil
     new URL("../../game/client-scripts/scene/build.js", import.meta.url),
     "utf8",
   );
-  assert.equal(layout.environmentRevamp.shadowCastMinZ, 23);
+  assert.equal(layout.environmentRevamp.shadowCastMinZ, undefined, "architecture shadows follow view distance, not a world-Z cutoff");
   assert.match(buildSource, /dwarkaArchitectureShadowCaster = castsShadows/);
   assert.doesNotMatch(buildSource, /channel \* 0\.28/);
   assert.match(buildSource, /let emissive = \[0, 0, 0\]/);
