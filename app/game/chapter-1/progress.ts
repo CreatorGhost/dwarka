@@ -4,6 +4,75 @@ export const PROFILE_KEY = "dwarka.chapter1.profile.v1";
 export const PREFERENCES_KEY = "dwarka.chapter1.preferences.v1";
 export const CHANNEL_NAME = "dwarka.chapter1.progress";
 
+// PROFILE_STORAGE_HELPERS_START
+type ProfileStorageBackend = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+export function createProfileStorage(backend?: ProfileStorageBackend) {
+  const memory = new Map<string, string>();
+  let durable = Boolean(backend);
+
+  return {
+    getItem(key: string) {
+      if (durable && backend) {
+        try {
+          const value = backend.getItem(key);
+          if (value === null) {
+            memory.delete(key);
+            return null;
+          }
+          memory.set(key, value);
+          return value;
+        } catch {
+          durable = false;
+        }
+      }
+      return memory.get(key) ?? null;
+    },
+    setItem(key: string, value: string) {
+      memory.set(key, value);
+      if (!durable || !backend) return;
+      try {
+        backend.setItem(key, value);
+      } catch {
+        durable = false;
+      }
+    },
+    removeItem(key: string) {
+      memory.delete(key);
+      if (!durable || !backend) return;
+      try {
+        backend.removeItem(key);
+      } catch {
+        durable = false;
+      }
+    },
+    isDurable() {
+      return durable;
+    },
+  };
+}
+// PROFILE_STORAGE_HELPERS_END
+
+const profileStorage = createProfileStorage(
+  typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage,
+);
+
+function announceProfile(message: unknown) {
+  if (typeof globalThis.BroadcastChannel !== "function") return;
+  try {
+    const channel = new BroadcastChannel(CHANNEL_NAME);
+    channel.postMessage(message);
+    channel.close();
+  } catch {
+    // Storage and cross-tab messaging may both be denied in privacy modes. The
+    // in-memory profile still keeps this tab internally consistent.
+  }
+}
+
+export function isProfileStorageDurable() {
+  return profileStorage.isDurable();
+}
+
 export type ChapterPhase = "arrival" | "courtyard" | "market" | "doorway" | "ending" | "complete";
 export type ChapterSettings = {
   locale: Locale;
@@ -71,9 +140,9 @@ function newPlayerId(): string {
 
 export function readProfile(): ChapterProfile {
   let parsed: Partial<ChapterProfile> | null = null;
-  try { parsed = JSON.parse(localStorage.getItem(PROFILE_KEY) ?? "null"); } catch { parsed = null; }
+  try { parsed = JSON.parse(profileStorage.getItem(PROFILE_KEY) ?? "null"); } catch { parsed = null; }
   let preferences: unknown = null;
-  try { preferences = JSON.parse(localStorage.getItem(PREFERENCES_KEY) ?? "null"); } catch { preferences = null; }
+  try { preferences = JSON.parse(profileStorage.getItem(PREFERENCES_KEY) ?? "null"); } catch { preferences = null; }
   if (!parsed || parsed.schemaVersion !== 1 || typeof parsed.anonymousPlayerId !== "string") {
     return { schemaVersion: 1, anonymousPlayerId: newPlayerId(), storyIntroComplete: false, progressToken: null, progressSummary: null, settings: safeSettings(parsed?.settings ?? preferences) };
   }
@@ -89,9 +158,9 @@ export function readProfile(): ChapterProfile {
 }
 
 export function saveProfile(profile: ChapterProfile, announce = true): ChapterProfile {
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-  localStorage.setItem(PREFERENCES_KEY, JSON.stringify(profile.settings));
-  if (announce) { const channel = new BroadcastChannel(CHANNEL_NAME); channel.postMessage({ type: "profile", profile }); channel.close(); }
+  profileStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  profileStorage.setItem(PREFERENCES_KEY, JSON.stringify(profile.settings));
+  if (announce) announceProfile({ type: "profile", profile });
   return profile;
 }
 
@@ -108,9 +177,10 @@ export function updateSettings(current: ChapterProfile, settings: Partial<Chapte
 }
 
 export function resetProgress(current: ChapterProfile): ChapterProfile {
-  localStorage.removeItem(PROFILE_KEY);
-  localStorage.setItem(PREFERENCES_KEY, JSON.stringify(current.settings));
+  try { localStorage.removeItem(PROFILE_KEY); } catch { /* The memory store below remains authoritative. */ }
+  profileStorage.removeItem(PROFILE_KEY);
+  profileStorage.setItem(PREFERENCES_KEY, JSON.stringify(current.settings));
   const reset = { schemaVersion: 1 as const, anonymousPlayerId: newPlayerId(), storyIntroComplete: false, progressToken: null, progressSummary: null, settings: current.settings };
-  const channel = new BroadcastChannel(CHANNEL_NAME); channel.postMessage({ type: "reset", profile: reset }); channel.close();
+  announceProfile({ type: "reset", profile: reset });
   return reset;
 }

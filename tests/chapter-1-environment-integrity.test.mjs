@@ -137,14 +137,17 @@ test("ground alignment seats both street-level and elevated models", () => {
   assert.equal(environmentGroundCorrection(7, 6, 0.035), 0);
 });
 
-test("the guarded arrival revamp is a visual-only coherent asset slice", async () => {
+test("the guarded arrival revamp keeps its explicit collider contract and coherent asset slice", async () => {
   const layout = await readSourceLayout();
   const revamp = layout.environmentRevamp;
 
   assert.equal(revamp.mode, "arrival-candidate");
-  assert.equal(revamp.collisionContract, "visual-only");
+  assert.equal(
+    revamp.collisionContract,
+    "visual-only except the route-flanking houses listed in colliders with a Revamp visual",
+  );
   assert.equal(revamp.visibilityRadius, 42);
-  assert.equal(layout.colliders.length, 19);
+  assert.equal(layout.colliders.length, 26);
   assert.deepEqual(revamp.preservedSystems, [
     "colliders",
     "floorRegions",
@@ -153,6 +156,44 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
     "encounterTriggers",
   ]);
   assert.deepEqual(revamp.models, [...REVAMP_ENVIRONMENT_MODELS]);
+
+  const revampColliders = layout.colliders.filter(({ visual }) =>
+    visual?.startsWith("Revamp"),
+  );
+  assert.equal(revampColliders.length, 13);
+  for (const collider of revampColliders) {
+    assert.ok(
+      revamp.models.includes(collider.visual),
+      `${collider.id} names an undeclared Revamp model`,
+    );
+    assert.ok(
+      layout.placements[collider.visual]?.length > 0,
+      `${collider.id} has no authored ${collider.visual} placement`,
+    );
+  }
+
+  const bounds = layout.worldBounds;
+  assert.ok(bounds.minX < bounds.maxX && bounds.minZ < bounds.maxZ);
+  for (const collider of layout.colliders) {
+    assert.ok(collider.minX < collider.maxX && collider.minZ < collider.maxZ);
+    assert.ok(
+      collider.maxX > bounds.minX &&
+        collider.minX < bounds.maxX &&
+        collider.maxZ > bounds.minZ &&
+        collider.minZ < bounds.maxZ,
+      `${collider.id} does not intersect the authored world bounds`,
+    );
+  }
+  for (const floor of layout.floorRegions) {
+    assert.ok(floor.minX < floor.maxX && floor.minZ < floor.maxZ);
+    assert.ok(
+      floor.minX >= bounds.minX &&
+        floor.maxX <= bounds.maxX &&
+        floor.minZ >= bounds.minZ &&
+        floor.maxZ <= bounds.maxZ,
+      `${floor.id} extends beyond the authored world bounds`,
+    );
+  }
 
   let byteCount = 0;
   let uniqueTriangles = 0;
@@ -193,7 +234,7 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
   assert.equal(primitiveSlots, 58);
 
   const arrivalPlacements = REVAMP_ENVIRONMENT_MODELS.flatMap((key) => layout.placements[key]);
-  assert.equal(arrivalPlacements.length, 34);
+  assert.equal(arrivalPlacements.length, 33);
   const trianglesByModel = new Map();
   for (const key of REVAMP_ENVIRONMENT_MODELS) {
     const asset = await readFile(
@@ -212,7 +253,7 @@ test("the guarded arrival revamp is a visual-only coherent asset slice", async (
     (sum, key) => sum + trianglesByModel.get(key) * layout.placements[key].length,
     0,
   );
-  assert.equal(instancedTriangles, 88_707);
+  assert.equal(instancedTriangles, 86_358);
   assert.ok(
     layout.placements.RevampTentA.every(([x, y]) => Math.abs(x) >= 8.5 && y === 0) &&
       layout.placements.RevampTentB.every(([x, y]) => Math.abs(x) >= 8.5 && y === 0) &&
@@ -233,8 +274,13 @@ test("all authored doors retain a rendered opening and bounded collider pairing"
     new URL("../../game/client-scripts/runtime/qa.js", import.meta.url),
     "utf8",
   );
-  assert.equal(layout.doors.length, 9);
-  assert.equal(new Set(layout.doors.map(({ id }) => id)).size, 9);
+  assert.equal(layout.doors.length, 7);
+  assert.equal(new Set(layout.doors.map(({ id }) => id)).size, 7);
+  assert.equal(
+    layout.doors.some(({ id }) => id === "street-door-east-15"),
+    false,
+    "the detached east-15 door must not regain an invisible collider",
+  );
   for (const door of layout.doors) {
     const asset = layout.doorAssets[door.entity] || {};
     const width = (door.width ?? asset.width) * door.scale;
@@ -261,17 +307,17 @@ test("all authored doors retain a rendered opening and bounded collider pairing"
     buildSource.indexOf("function styleRevampEnvironment"),
   );
   assert.doesNotMatch(cullBlock, /"Door_4_Flat"/);
-  assert.match(qaSource, /result\.authored === 9/);
+  assert.match(qaSource, /result\.authored === 7/);
   assert.match(qaSource, /result\.openable === 2/);
   assert.match(qaSource, /positionError <= 0\.12/);
   assert.match(qaSource, /yawError <= 1\.5/);
   assert.match(qaSource, /colliderError <= 0\.12/);
 
-  const geometry = await inspectImportedDoorOpenings();
+  const geometry = await inspectImportedDoorOpenings({ layout });
   const measured = geometry.pairs.filter(({ passed }) => passed);
   assert.deepEqual(
     measured.map(({ id }) => id),
-    ["street-door-west-23", "street-door-east-15"],
+    ["street-door-west-23"],
   );
   for (const opening of measured) {
     assert.equal(opening.house, "RevampFortificationGate");
@@ -288,8 +334,8 @@ test("all authored doors retain a rendered opening and bounded collider pairing"
   }
   assert.equal(
     geometry.pairs.filter(({ passed }) => !passed).length,
-    6,
-    "six farther imported openings remain explicitly unresolved in this arrival-only checkpoint",
+    5,
+    "five farther imported openings remain explicitly unresolved in this arrival-only checkpoint",
   );
 });
 

@@ -19,7 +19,6 @@ import {
 
 const AMBIENCE_PATH = "/audio/chapter-0/ambience.ogg";
 const MUSIC_PATHS = ["/audio/chapter-0/music-bed.ogg", "/audio/chapter-0/music-raid.ogg"] as const;
-const FALLBACK_DURATION_MS = 7_000;
 const CROSSFADE_MS = 1_200;
 const TITLE_HOLD_MS = 2_600;
 const LEAVE_FADE_MS = 900;
@@ -32,6 +31,105 @@ type VoiceEntry = {
   status: string;
   assets: { codec: string; runtimePath: string }[];
 };
+
+// CINEMATIC_BEHAVIOR_HELPERS_START
+type ResumableTimerClock = {
+  setTimeout: (callback: () => void, delay: number) => unknown;
+  clearTimeout: (handle: unknown) => void;
+};
+
+export function createResumableTimer({
+  clock = {
+    setTimeout: (callback: () => void, delay: number) => globalThis.setTimeout(callback, delay),
+    clearTimeout: (handle: unknown) => globalThis.clearTimeout(handle as ReturnType<typeof setTimeout>),
+  },
+  now = () => performance.now(),
+  onFire,
+}: {
+  clock?: ResumableTimerClock;
+  now?: () => number;
+  onFire: () => void;
+}) {
+  let handle: unknown = null;
+  let remaining = 0;
+  let startedAt = 0;
+  let active = false;
+  let suspended = false;
+
+  const fire = () => {
+    handle = null;
+    remaining = 0;
+    active = false;
+    onFire();
+  };
+  const schedule = () => {
+    if (!active || suspended || handle !== null) return;
+    startedAt = now();
+    handle = clock.setTimeout(fire, Math.max(0, remaining));
+  };
+  const cancel = () => {
+    if (handle !== null) clock.clearTimeout(handle);
+    handle = null;
+    remaining = 0;
+    active = false;
+  };
+
+  return {
+    arm(duration: number) {
+      cancel();
+      remaining = Math.max(0, duration);
+      active = true;
+      schedule();
+    },
+    pause() {
+      suspended = true;
+      if (active && handle !== null) {
+        clock.clearTimeout(handle);
+        handle = null;
+        remaining = Math.max(0, remaining - (now() - startedAt));
+      }
+    },
+    resume() {
+      suspended = false;
+      schedule();
+    },
+    cancel,
+    isActive() {
+      return active;
+    },
+  };
+}
+
+export function createCinematicAdvanceGate(onAdvance: () => void) {
+  let blocked = false;
+  let pending = false;
+  return {
+    request() {
+      if (blocked) {
+        pending = true;
+        return false;
+      }
+      onAdvance();
+      return true;
+    },
+    setBlocked(nextBlocked: boolean) {
+      blocked = nextBlocked;
+      if (!blocked && pending) {
+        pending = false;
+        onAdvance();
+        return true;
+      }
+      return false;
+    },
+    discard() {
+      pending = false;
+    },
+    hasPending() {
+      return pending;
+    },
+  };
+}
+// CINEMATIC_BEHAVIOR_HELPERS_END
 
 const interfaceCopy: Record<Locale, { chapter: string; advance: string; handing: string; sourceEyebrow: string; open: string }> = {
   en: { chapter: "Chapter 1", advance: "skip scene", handing: "Entering the street",  sourceEyebrow: "From the Jaiminiya Ashvamedha Parva", open: "Open the account" },
@@ -96,20 +194,38 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   const bedsRef = useRef<(HTMLAudioElement | null)[]>([null, null]);
   const settingsRef = useRef(profile.settings);
   const outgoingTimerRef = useRef<number | null>(null);
-  const titleTimerRef = useRef<number | null>(null);
-  const titleHoldRef = useRef({ remaining: TITLE_HOLD_MS, startedAt: 0, active: false });
-  const advanceRef = useRef<() => void>(() => undefined);
+  const performAdvanceRef = useRef<() => void>(() => undefined);
+  const frameStepRef = useRef<() => void>(() => undefined);
   const completeRef = useRef(onComplete);
   const advancingRef = useRef(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const skipDialogRef = useRef<HTMLDivElement | null>(null);
-  const fallbackRef = useRef<{ timer: number | null; remaining: number; startedAt: number; active: boolean }>({ timer: null, remaining: FALLBACK_DURATION_MS, startedAt: 0, active: false });
+  const advanceGateRef = useRef<ReturnType<typeof createCinematicAdvanceGate> | null>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof createResumableTimer> | null>(null);
+  const titleTimerRef = useRef<ReturnType<typeof createResumableTimer> | null>(null);
+  const frameTimerRef = useRef<ReturnType<typeof createResumableTimer> | null>(null);
+
+  useEffect(() => {
+    advanceGateRef.current = createCinematicAdvanceGate(() => performAdvanceRef.current());
+    fallbackTimerRef.current = createResumableTimer({ onFire: () => advanceGateRef.current?.request() });
+    titleTimerRef.current = createResumableTimer({ onFire: () => advanceGateRef.current?.request() });
+    frameTimerRef.current = createResumableTimer({ onFire: () => frameStepRef.current() });
+    return () => {
+      advanceGateRef.current?.discard();
+      fallbackTimerRef.current?.cancel();
+      titleTimerRef.current?.cancel();
+      frameTimerRef.current?.cancel();
+      advanceGateRef.current = null;
+      fallbackTimerRef.current = null;
+      titleTimerRef.current = null;
+      frameTimerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => { settingsRef.current = profile.settings; }, [profile.settings]);
   useEffect(() => { completeRef.current = onComplete; }, [onComplete]);
   const framesRef = useRef<string[]>([BEATS[0].image]);
   const frameRef = useRef(0);
-  const frameTimerRef = useRef<number | null>(null);
   const beatRef = useRef(0);
   useEffect(() => { beatRef.current = beat; }, [beat]);
   useEffect(() => { frameRef.current = frame; }, [frame]);
@@ -127,19 +243,12 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   }, [bedVolume]);
 
   const clearFallback = useCallback(() => {
-    if (fallbackRef.current.timer !== null) window.clearTimeout(fallbackRef.current.timer);
-    fallbackRef.current = { timer: null, remaining: FALLBACK_DURATION_MS, startedAt: 0, active: false };
+    fallbackTimerRef.current?.cancel();
   }, []);
 
   const armFallback = useCallback((duration: number) => {
-    clearFallback();
-    fallbackRef.current = { timer: null, remaining: duration, startedAt: performance.now(), active: true };
-    fallbackRef.current.timer = window.setTimeout(() => {
-      fallbackRef.current.active = false;
-      fallbackRef.current.timer = null;
-      advanceRef.current();
-    }, duration);
-  }, [clearFallback]);
+    fallbackTimerRef.current?.arm(duration);
+  }, []);
 
   // Nothing the cinematic owns may survive into the game. Every exit path runs
   // this: the automatic hand-off, Esc-skip-all, unmount, and pagehide.
@@ -158,9 +267,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
   }, []);
 
   const clearTitleHold = useCallback(() => {
-    if (titleTimerRef.current !== null) window.clearTimeout(titleTimerRef.current);
-    titleTimerRef.current = null;
-    titleHoldRef.current = { remaining: TITLE_HOLD_MS, startedAt: 0, active: false };
+    titleTimerRef.current?.cancel();
   }, []);
 
   const leave = useCallback(() => {
@@ -174,24 +281,17 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       completeRef.current();
     }, LEAVE_FADE_MS);
   }, [stopAllAudio]);
-
   const armTitleHold = useCallback((duration = TITLE_HOLD_MS) => {
-    if (titleTimerRef.current !== null) window.clearTimeout(titleTimerRef.current);
-    titleHoldRef.current = { remaining: duration, startedAt: performance.now(), active: true };
-    titleTimerRef.current = window.setTimeout(() => {
-      titleTimerRef.current = null;
-      titleHoldRef.current.active = false;
-      leave();
-    }, duration);
-  }, [leave]);
+    titleTimerRef.current?.arm(duration);
+  }, []);
 
   const openAccount = useCallback(() => {
     clearFallback();
     setMode("panels");
   }, [clearFallback]);
 
-  const advance = useCallback(() => {
-    if (advancingRef.current || skipConfirm || mode === "leaving") return;
+  const performAdvance = useCallback(() => {
+    if (advancingRef.current || mode === "leaving") return;
     if (mode === "source") { openAccount(); return; }
     advancingRef.current = true;
     window.setTimeout(() => { advancingRef.current = false; }, 450);
@@ -220,9 +320,26 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     setMode("title");
     if (outgoingTimerRef.current !== null) window.clearTimeout(outgoingTimerRef.current);
     outgoingTimerRef.current = window.setTimeout(() => setOutgoingBeat(null), CROSSFADE_MS);
-  }, [beat, clearFallback, clearTitleHold, leave, mode, openAccount, skipConfirm]);
+  }, [beat, clearFallback, clearTitleHold, leave, mode, openAccount]);
 
-  useEffect(() => { advanceRef.current = advance; }, [advance]);
+  useEffect(() => { performAdvanceRef.current = performAdvance; }, [performAdvance]);
+
+  const openSkipConfirm = useCallback(() => {
+    advanceGateRef.current?.setBlocked(true);
+    setSkipConfirm(true);
+  }, []);
+
+  const closeSkipConfirm = useCallback(() => {
+    setSkipConfirm(false);
+    advanceGateRef.current?.setBlocked(false);
+  }, []);
+
+  const confirmSkip = useCallback(() => {
+    advanceGateRef.current?.discard();
+    advanceGateRef.current?.setBlocked(false);
+    setSkipConfirm(false);
+    leave();
+  }, [leave]);
 
   // The piano hands over to the darker bed as the raid frame comes up.
   useEffect(() => {
@@ -328,14 +445,13 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     if (mode !== "panels") return;
     const current = BEATS[beat];
     let cancelled = false;
-    let tailTimer: number | null = null;
     // beatDuration is already this beat's authored hold: advance() sets it on the
     // way in, and loadedmetadata below stretches it to the measured line.
     armFallback(current.hold);
 
     const endBeat = () => {
       if (cancelled) return;
-      tailTimer = window.setTimeout(() => advanceRef.current(), BEAT_TAIL_MS);
+      armFallback(BEAT_TAIL_MS);
     };
 
     loadVoiceEntries().then((entries) => {
@@ -389,7 +505,6 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
 
     return () => {
       cancelled = true;
-      if (tailTimer !== null) window.clearTimeout(tailTimer);
       voiceRef.current?.pause();
       voiceRef.current = null;
       clearFallback();
@@ -411,13 +526,13 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       index += 1;
       setFrame(index);
       // Stop on the last frame; it holds until the beat itself ends.
-      if (index < shown - 1) frameTimerRef.current = window.setTimeout(step, FRAME_INTERVAL_MS);
-      else frameTimerRef.current = null;
+      if (index < shown - 1) frameTimerRef.current?.arm(FRAME_INTERVAL_MS);
     };
-    frameTimerRef.current = window.setTimeout(step, FRAME_INTERVAL_MS);
+    frameStepRef.current = step;
+    frameTimerRef.current?.arm(FRAME_INTERVAL_MS);
     return () => {
-      if (frameTimerRef.current !== null) window.clearTimeout(frameTimerRef.current);
-      frameTimerRef.current = null;
+      frameTimerRef.current?.cancel();
+      frameStepRef.current = () => undefined;
     };
   }, [beat, beatDuration, frames.length, mode]);
 
@@ -432,29 +547,18 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       voiceRef.current?.pause();
       ambienceRef.current?.pause();
       bedsRef.current.forEach((bed) => bed?.pause());
-      const fallback = fallbackRef.current;
-      if (fallback.active && fallback.timer !== null) {
-        window.clearTimeout(fallback.timer);
-        fallback.remaining = Math.max(0, fallback.remaining - (performance.now() - fallback.startedAt));
-        fallback.timer = null;
-      }
-      if (frameTimerRef.current !== null) { window.clearTimeout(frameTimerRef.current); frameTimerRef.current = null; }
-      const titleHold = titleHoldRef.current;
-      if (titleHold.active && titleTimerRef.current !== null) {
-        window.clearTimeout(titleTimerRef.current);
-        titleHold.remaining = Math.max(0, titleHold.remaining - (performance.now() - titleHold.startedAt));
-        titleTimerRef.current = null;
-      }
+      fallbackTimerRef.current?.pause();
+      frameTimerRef.current?.pause();
+      titleTimerRef.current?.pause();
     };
     const resume = () => {
       if (document.hidden) return;
       voiceRef.current?.play().catch(() => undefined);
       ambienceRef.current?.play().catch(() => undefined);
       bedsRef.current.forEach((bed) => bed?.play().catch(() => undefined));
-      const fallback = fallbackRef.current;
-      if (fallback.active && fallback.timer === null) armFallback(fallback.remaining);
-      const titleHold = titleHoldRef.current;
-      if (titleHold.active && titleTimerRef.current === null) armTitleHold(titleHold.remaining);
+      fallbackTimerRef.current?.resume();
+      frameTimerRef.current?.resume();
+      titleTimerRef.current?.resume();
     };
     const visibility = () => { if (document.hidden) pause(); else resume(); };
     window.addEventListener("blur", pause);
@@ -465,7 +569,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       window.removeEventListener("focus", resume);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [armFallback, armTitleHold]);
+  }, []);
 
   useEffect(() => {
     if (!skipConfirm) return;
@@ -517,25 +621,25 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       if (skipConfirm) {
         if (event.key === "Escape") {
           event.preventDefault();
-          setSkipConfirm(false);
+          closeSkipConfirm();
         }
         return;
       }
       if (event.key === "Escape") {
         event.preventDefault();
-        setSkipConfirm(true);
+        openSkipConfirm();
       } else if (event.key === " " || event.code === "Space" || event.key === "Enter") {
         // Only the cinematic's own controls may swallow the key; focus left behind
         // on the title screen underneath must not silently break "Space to skip".
         const control = (event.target as HTMLElement | null)?.closest("button, a, input, select, textarea");
         if (control?.closest(".chapter-zero-cinematic")) return;
         event.preventDefault();
-        advanceRef.current();
+        advanceGateRef.current?.request();
       }
     };
     window.addEventListener("keydown", keyboard);
     return () => window.removeEventListener("keydown", keyboard);
-  }, [skipConfirm]);
+  }, [closeSkipConfirm, openSkipConfirm, skipConfirm]);
 
   const current = BEATS[beat];
   const currentCopy = copy.chapter0.panels[beat];
@@ -589,7 +693,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
       <div className="cinematic-utilities">
         <button type="button" aria-pressed={profile.settings.captions} onClick={() => onSaveSetting("captions", !profile.settings.captions)}>{profile.settings.captions ? copy.chapter0.captionsOn : copy.chapter0.captionsOff}</button>
         <button type="button" aria-pressed={storyMuted} onClick={toggleMute}>{storyMuted ? copy.chapter0.unmute : copy.chapter0.mute}</button>
-        <button type="button" onClick={() => setSkipConfirm(true)}>{copy.chapter0.skip}</button>
+        <button type="button" onClick={openSkipConfirm}>{copy.chapter0.skip}</button>
       </div>
     </div>
 
@@ -613,7 +717,7 @@ export default function ChapterZeroCinematic({ copy, locale, profile, chapterTit
     {mode === "panels" ? <p className="cinematic-hint">Space · {ui.advance}<span>Esc · {copy.chapter0.skip}</span></p> : null}
 
     {skipConfirm ? <div ref={skipDialogRef} className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="skip-title">
-      <div><p className="eyebrow">{copy.chapter0.skipLabel}</p><h2 id="skip-title">{copy.chapter0.skipTitle}</h2><p>{copy.chapter0.skipBody}</p><div><button type="button" onClick={() => setSkipConfirm(false)}>{copy.chapter0.cancel}</button><button className="primary" type="button" onClick={() => { setSkipConfirm(false); leave(); }}>{copy.chapter0.skipConfirm}</button></div></div>
+      <div><p className="eyebrow">{copy.chapter0.skipLabel}</p><h2 id="skip-title">{copy.chapter0.skipTitle}</h2><p>{copy.chapter0.skipBody}</p><div><button type="button" onClick={closeSkipConfirm}>{copy.chapter0.cancel}</button><button className="primary" type="button" onClick={confirmSkip}>{copy.chapter0.skipConfirm}</button></div></div>
     </div> : null}
   </div>;
 }

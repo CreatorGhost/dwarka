@@ -263,9 +263,14 @@ export function measureCandidate(door, house) {
   };
 }
 
-export async function inspectImportedDoorOpenings({ root = new URL("../", import.meta.url) } = {}) {
+export async function inspectImportedDoorOpenings({
+  root = new URL("../", import.meta.url),
+  layout: sourceLayout,
+} = {}) {
   const publicRoot = new URL("./public/playcanvas/chapter-1/", root);
-  const layout = JSON.parse(await readFile(new URL("world-layout.json", publicRoot), "utf8"));
+  const layout =
+    sourceLayout ??
+    JSON.parse(await readFile(new URL("world-layout.json", publicRoot), "utf8"));
   const houses = [];
   for (const [key, filename] of Object.entries(HOUSE_FILES)) {
     for (const placement of layout.placements[key] || []) {
@@ -298,7 +303,7 @@ export async function inspectImportedDoorOpenings({ root = new URL("../", import
   return {
     generatedFrom: "committed GLB wall triangles and world placements",
     importedDoors: pairs.length,
-    passed: pairs.length === 8 && pairs.every((pair) => pair.passed),
+    passed: pairs.length === 7 && pairs.every((pair) => pair.passed),
     pairs,
   };
 }
