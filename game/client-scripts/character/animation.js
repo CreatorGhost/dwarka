@@ -298,6 +298,14 @@ export function installAnimation(rt) {
     if (!model) return;
     root.dwarkaUpgraded = true;
     root.dwarkaVisual = model;
+    if (root.name === "skirmisher" || root.name.startsWith("Family")) {
+      for (const render of model.findComponents("render")) for (const instance of render.meshInstances || []) {
+        if (!/peasant|ranger/i.test(instance.material?.name || "")) continue;
+        const cloth=instance.material.clone();
+        cloth.diffuse=new pc.Color(...(root.name === "skirmisher" ? [.55,.16,.12] : [.21,.56,.5]));
+        cloth.update();instance.material=cloth;
+      }
+    }
     for (const render of model.findComponents("render"))
       if (!keepCharacterRenderDetail(root.name, render.entity.name))
         render.enabled = false;

@@ -1,8 +1,9 @@
+import { surfaceTexture, flameTexture, nightSkyTexture } from "./surface-textures.js";
 export const ENVIRONMENT_TONES = Object.freeze({
-  houseLime: Object.freeze([0.31, 0.29, 0.25]),
-  houseOchre: Object.freeze([0.32, 0.28, 0.25]),
-  houseRose: Object.freeze([0.3, 0.26, 0.25]),
-  agedTrim: Object.freeze([0.18, 0.16, 0.14]),
+  houseLime: Object.freeze([0.53, 0.46, 0.35]),
+  houseOchre: Object.freeze([0.51, 0.36, 0.22]),
+  houseRose: Object.freeze([0.48, 0.29, 0.23]),
+  agedTrim: Object.freeze([0.33, 0.28, 0.21]),
   agedTimber: Object.freeze([0.36, 0.22, 0.12]),
   marketCanopy: Object.freeze([0.4, 0.31, 0.22]),
 });
@@ -153,6 +154,10 @@ export function installMaterials(rt) {
   }
 
   function loadImageBasedLighting() {
+    const sky = nightSkyTexture(pc, state.app.graphicsDevice);
+    state.citySkybox = pc.EnvLighting.generateSkyboxCubemap(sky, 128);
+    state.app.scene.skybox = state.citySkybox;
+    sky.destroy();
     state.app.assets.loadFromUrl(
       assetUrl("./assets/environment/moonless_golf_2k.hdr"),
       "texture",
@@ -171,7 +176,10 @@ export function installMaterials(rt) {
           state.skyboxCubemap,
           { size: 512 },
         );
-        state.app.scene.skybox = state.skyboxCubemap;
+        state.skyboxCubemap.destroy();
+        state.skyboxCubemap = null;
+        // Use the HDR for reflections only; authored skyline surrounds the level.
+        state.app.scene.skybox = state.citySkybox;
         state.app.scene.envAtlas = state.environmentAtlas;
         state.app.scene.skyboxIntensity = 0.22;
         state.app.assets.loadFromUrl(
@@ -185,6 +193,7 @@ export function installMaterials(rt) {
               skyAsset.resource,
               512,
             );
+            const previousAtlas = state.environmentAtlas;
             state.environmentAtlas = pc.EnvLighting.generateAtlas(
               state.moonlitSkybox,
               {
@@ -192,7 +201,10 @@ export function installMaterials(rt) {
               },
             );
             state.app.scene.envAtlas = state.environmentAtlas;
-            state.app.scene.skybox = state.moonlitSkybox;
+            state.moonlitSkybox.destroy();
+            state.moonlitSkybox = null;
+            previousAtlas?.destroy();
+            state.app.scene.skybox = state.citySkybox;
             state.app.scene.skyboxIntensity = 0.26;
           },
         );
@@ -206,9 +218,16 @@ export function installMaterials(rt) {
     mats.sand = material([0.46, 0.34, 0.29]);
     mats.sandLight = material([0.5, 0.36, 0.24]);
     mats.sandDark = material([0.27, 0.27, 0.29]);
-    mats.roadSand = material([0.42, 0.36, 0.29]);
+    mats.roadSand = material([0.62, 0.49, 0.34]);
+    mats.roadSand.diffuseMap = surfaceTexture(pc, state.app.graphicsDevice, "earth");
+    mats.roadSand.update();
+    mats.roofStone = material([0.55, 0.49, 0.4]);
+    mats.roofStone.diffuseMap = surfaceTexture(pc, state.app.graphicsDevice, "roof");
+    mats.roofStone.gloss = 0.12;
+    mats.roofStone.update();
+    mats.windowRecess = material([0.085, 0.095, 0.11]);
     mats.sideMargin = material([0.32, 0.27, 0.21]);
-    mats.kerbSandstone = material([0.26, 0.2, 0.14]);
+    mats.kerbSandstone = material([0.49, 0.4, 0.3]);
     mats.houseLime = material(ENVIRONMENT_TONES.houseLime);
     mats.houseOchre = material(ENVIRONMENT_TONES.houseOchre);
     mats.houseRose = material(ENVIRONMENT_TONES.houseRose);
@@ -224,7 +243,9 @@ export function installMaterials(rt) {
     }
     mats.ash = translucentMaterial([0.055, 0.06, 0.085], 0.68);
     mats.rut = translucentMaterial([0.18, 0.14, 0.13], 0.52);
-    mats.wood = material([0.22, 0.1, 0.08]);
+    mats.wood = material([0.36, 0.23, 0.12]);
+    mats.wood.diffuseMap = surfaceTexture(pc, state.app.graphicsDevice, "wood");
+    mats.wood.update();
     mats.bowWood = material([0.42, 0.14, 0.06]);
     mats.bowWood.gloss = 0.42;
     mats.bowWood.update();
@@ -267,8 +288,8 @@ export function installMaterials(rt) {
     mats.hitImpact = translucentMaterial([1, 0.42, 0.16], 0.72);
     mats.healthBack = material([0.1, 0.045, 0.08]);
     mats.healthEnemy = material([0.95, 0.14, 0.1], [1, 0.05, 0.03]);
-    mats.objective = material([0.96, 0.64, 0.1], [1, 0.5, 0.08]);
-    mats.objectiveGlow = translucentMaterial([1, 0.54, 0.12], 0.22);
+    mats.objective = material([0.24, 0.85, 0.82], [0.12, 0.65, 0.72]);
+    mats.objectiveGlow = translucentMaterial([0.2, 0.8, 0.9], 0.14);
     mats.player = material([0.06, 0.34, 0.48]);
     mats.skin = material([0.52, 0.29, 0.18]);
     mats.enemy = material([0.52, 0.07, 0.11]);
@@ -319,6 +340,7 @@ export function installMaterials(rt) {
     mats.steel.update();
   }
 
+  rt.flameTexture = () => flameTexture(pc, state.app.graphicsDevice);
   rt.material = material;
   rt.translucentMaterial = translucentMaterial;
   rt.tintStreetHouse = tintStreetHouse;

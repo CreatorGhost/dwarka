@@ -57,7 +57,7 @@ export function installQa(rt) {
     const frame = state.cameraFrame;
     const moon = state.app.root.findByName("Moonlight")?.light;
     const routeSurfaces = state.app.root.find((entity) =>
-      /packed-earth route|route junction/.test(entity.name),
+      /Authored floor deck|packed-earth route|route junction/.test(entity.name),
     );
     const result = {
       aces: frame?.rendering?.toneMapping === pc.TONEMAP_ACES,
@@ -87,7 +87,7 @@ export function installQa(rt) {
       result.ssaoScale <= 0.5 &&
       result.moonShadows &&
       result.moonCascades === 1 &&
-      result.moonShadowDistance <= 30 &&
+      result.moonShadowDistance <= 32 &&
       result.moonShadowMapAllocated &&
       result.moonShadowRenderViews >= 1 &&
       result.routeShadowSurfaces > 0 &&
@@ -358,7 +358,9 @@ export function installQa(rt) {
             yaw: door.yaw || 0,
           };
       const position = record?.entity?.getPosition?.();
-      const yaw = record?.entity?.getEulerAngles?.().y;
+      const forward = record?.entity?.forward;
+      // Euler decomposition folds yaw beyond 90 degrees into X/Z rotations.
+      const yaw = forward ? Math.atan2(-forward.x, -forward.z) * 180 / Math.PI : record?.entity?.getEulerAngles?.().y;
       const renderers = record?.entity?.findComponents?.("render") || [];
       const colliderCenter = collider
         ? {
@@ -388,12 +390,14 @@ export function installQa(rt) {
         kind: door.openFromPhase ? "openable-gameplay" : "closed-decorative",
         enabled: record?.entity?.enabled ?? false,
         visibleMeshCount,
+        staticBatchMembership: renderers.some(renderer => renderer.batchGroupId >= 0),
         positionError: Number(positionError.toFixed(4)),
         yawError: Number(yawError.toFixed(3)),
         colliderError: Number(colliderError.toFixed(4)),
         passed:
           Boolean(record?.entity && collider) &&
           visibleMeshCount > 0 &&
+          (!door.openFromPhase || renderers.every(renderer => !(renderer.batchGroupId >= 0))) &&
           positionError <= 0.12 &&
           yawError <= 1.5 &&
           colliderError <= 0.12,

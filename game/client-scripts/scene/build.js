@@ -1,3 +1,5 @@
+import { buildCivicDressing } from "./civic-dressing.js";
+import { buildArchitecture, boundsVisible, entityBounds, supportedFloor, adaptStreetHouse } from "./architecture.js";
 import { createObjectPool } from "../runtime/object-pool.js";
 import { ENVIRONMENT_TONES } from "./materials.js";
 
@@ -34,8 +36,9 @@ export function keepArrivalCandidateLegacyPlacement(
 ) {
   const [x, y, z] = placement;
   const legacyCullMinZ = environmentRevamp.legacyCullMinZ ?? 8;
+  // The upper kit is replaced by collider-aligned masonry and supported pavilions.
+  if (y >= 6 || key === "Wall_Arch") return false;
   if (z < legacyCullMinZ) return true;
-  if (key === "Wall_Arch" && y === 0) return true;
   // The imported arrival set does not replace the low wall along the south
   // edge of the stair landing. Keep those four modules so the visible route
   // ends where the authored floor ends instead of at an invisible boundary.
@@ -103,7 +106,7 @@ export function installBuild(rt) {
         const member = createCharacter(
           `Family ${index + 1}`,
           mats.family,
-          0.68 + index * 0.08,
+          0.94 + index * 0.03,
         );
         member.dwarkaFamilyPoolIndex = index;
         return member;
@@ -161,13 +164,13 @@ export function installBuild(rt) {
 
   function batchStaticEnvironment() {
     if (!state.app?.batcher?.addGroup) return;
-    // The route's authored primitives are low-poly; one broad static batch is
-    // substantially cheaper than dozens of material/region batches at 1080p.
-    // Imported dressing and all lights are still distance-culled independently.
+    // Spatial batches keep distant city masses out of near-field shadow bounds.
+    // Permanent architecture shares its lifetime with attached fixtures.
+    // Independently streamed props never join this batch group.
     const group = state.app.batcher.addGroup(
       "Ancient street static scenery",
       false,
-      120,
+      24,
     );
     state.staticBatchGroup = group;
     const excluded = new Set(["Layered fire", "Objective sun marker"]);
@@ -176,6 +179,8 @@ export function installBuild(rt) {
       let isDynamic = false;
       while (node && node !== state.app.root) {
         if (
+          node.dwarkaDynamicDoor ||
+          node.dwarkaStreamedEnvironment ||
           excluded.has(node.name) ||
           node.tags?.has("fire") ||
           node.tags?.has("smoke")
@@ -190,7 +195,7 @@ export function installBuild(rt) {
   }
 
   function assignStaticModelToBatch(entity) {
-    if (!entity || !state.staticBatchGroup) return;
+    if (!entity || entity.dwarkaFacadeRoot || entity.dwarkaDynamicDoor || entity.dwarkaStreamedEnvironment || !state.staticBatchGroup) return;
     for (const render of entity.findComponents?.("render") || []) {
       render.batchGroupId = state.staticBatchGroup.id;
       state.batchedModelRenders += 1;
@@ -216,7 +221,7 @@ export function installBuild(rt) {
     const castsShadows =
       key.endsWith("_Composite") ||
       key === "Sword_Bronze" ||
-      ["Kenney_cart", "Kenney_stall_green", "Wall_Arch"].includes(key);
+      ["Kenney_cart", "Kenney_stall_green", "Wall_Arch", "Barrel", "Crate_Wooden", "Bag", "FarmCrate_Empty", "RevampTentA", "RevampTentB"].includes(key);
     entity.findComponents?.("render").forEach((render) => {
       render.castShadows = castsShadows;
       render.receiveShadows = true;
@@ -412,6 +417,8 @@ export function installBuild(rt) {
   }
 
   function environmentPlacementsFor(key) {
+    // Replaced as complete supported assemblies, rather than independent kit scraps.
+    if (["Lantern_Wall", "Banner_1", "Banner_1_Cloth", "Banner_2_Cloth", "Kenney_tent_canvas", "Rope_1", "Kenney_fountain_round", "Kenney_fountain_center"].includes(key)) return [];
     const placements = [
       ...(ENVIRONMENT_PLACEMENTS[key] || []),
       ...(STREET_HOUSE_MODEL_KEYS.has(key)
@@ -428,6 +435,9 @@ export function installBuild(rt) {
         ([, y, z]) => y > 1 || z < legacyCullMinZ,
       );
     }
+    if (["Kenney_stall_green", "Kenney_cart"].includes(key))
+      return placements.filter(([x,,z]) => WORLD_COLLIDERS.some(c => c[6] === key && x >= c[0] && x <= c[1] && z >= c[2] && z <= c[3]));
+    if (key === "Kenney_wheel") return placements.filter(([,y]) => y >= 6);
     if (key === "Door_4_Flat")
       return placements.filter((placement) =>
         rt.DOORS.some(
@@ -495,8 +505,8 @@ export function installBuild(rt) {
           role = "aged-trim";
           color = [0.27, 0.18, 0.11];
         } else if (name.includes("wood") || name.includes("roof")) {
-          role = "aged-timber";
-          color = [0.2, 0.09, 0.035];
+          role = key.startsWith("RevampHouse") ? "carved-trim" : "aged-timber";
+          color = role === "carved-trim" ? [0.46, 0.36, 0.25] : [0.34, 0.22, 0.13];
           gloss = 0.08;
         } else if (name.includes("window")) {
           role = "recessed-window";
@@ -509,10 +519,13 @@ export function installBuild(rt) {
           emissive = [0.004, 0.003, 0.002];
           metalness = 0.65;
           gloss = 0.34;
-        } else if (name.includes("cloth")) {
+        } else if (name.includes("cloth") || name.includes("tent")) {
           role = "faded-cloth";
           color = clothTones[variant];
           gloss = 0.06;
+        } else if (name.includes("rope")) {
+          role = "woven-rope";
+          color = [0.48, 0.36, 0.2];
         } else if (name.includes("light")) {
           role = "warm-practical";
           color = [0.95, 0.38, 0.08];
@@ -529,9 +542,13 @@ export function installBuild(rt) {
           material.emissive = new pc.Color(...emissive);
           material.emissiveIntensity = role === "warm-practical" ? 0.55 : 1;
           material.dwarkaRevampRole = role;
+          if (role === "aged-timber") {
+            material.diffuseMap = mats.wood.diffuseMap;
+            material.diffuseMapTiling = new pc.Vec2(1, 2);
+          }
           if (
             state.revampFacadeTexture &&
-            ["plaster", "aged-trim"].includes(role)
+            ["plaster", "aged-trim", "carved-trim"].includes(role)
           ) {
             material.diffuseMap = state.revampFacadeTexture;
             material.diffuseMapTiling = new pc.Vec2(
@@ -598,7 +615,7 @@ export function installBuild(rt) {
       rt.tintEnvironmentEntity(
         entity,
         "aged-carved-door",
-        new pc.Color(0.2, 0.09, 0.035),
+        new pc.Color(0.32, 0.18, 0.09),
         0,
         0.16,
       );
@@ -608,7 +625,7 @@ export function installBuild(rt) {
       entity &&
       (key.startsWith("RevampHouse") || key === "RevampFortificationGate")
     ) {
-      const castsShadows = z >= (ENVIRONMENT_REVAMP.shadowCastMinZ ?? Infinity);
+      const castsShadows = true;
       entity.dwarkaArchitectureShadowCaster = castsShadows;
       for (const render of entity.findComponents?.("render") || []) {
         render.castShadows = castsShadows;
@@ -658,6 +675,8 @@ export function installBuild(rt) {
         0,
         0.7,
       );
+    if (entity && ["Kenney_cart", "Kenney_stall_green"].includes(key))
+      entity.setLocalScale(scale, scale * 1.3, scale);
     if (entity && key === "Kenney_stall_green")
       rt.tintEnvironmentEntity(
         entity,
@@ -728,13 +747,17 @@ export function installBuild(rt) {
       }
     }
     if (entity) {
+      entity.dwarkaPermanentArchitecture = /^(RevampHouse|RevampFortification|RevampTent|Wall_|Door_4_Flat)/.test(key);
+      entity.dwarkaStreamedEnvironment = !entity.dwarkaPermanentArchitecture;
+      entity.dwarkaWorldBounds = entityBounds(entity);
+      if (key.startsWith("RevampHouse")) adaptStreetHouse(rt, entity, entity.dwarkaWorldBounds, index);
       entity.dwarkaPlacementId = `${key}:${index}`;
       if (!entity.dwarkaDynamicDoor) assignStaticModelToBatch(entity);
       state.environmentEntities.push(entity);
       state.streamedEnvironment.set(entity.dwarkaPlacementId, entity);
       if (state.snapshot?.player)
         updateEnvironmentVisibility(state.snapshot.player, entity);
-      else entity.enabled = false;
+      else entity.enabled = Boolean(entity.dwarkaPermanentArchitecture);
     }
     return entity;
   }
@@ -781,9 +804,7 @@ export function installBuild(rt) {
         entity.name.startsWith("Revamp") || entity.dwarkaRevampTerminus
         ? (ENVIRONMENT_REVAMP.visibilityRadius ?? 32)
         : STREAMING.environmentRadius;
-      entity.enabled =
-        Math.hypot(position.x - player.x, position.z - player.z) <=
-          visibilityRadius && Math.abs(position.y - floorY) <= 4.2;
+      entity.enabled = entity.dwarkaPermanentArchitecture || boundsVisible(entity.dwarkaDynamicDoor ? entityBounds(entity) : (entity.dwarkaWorldBounds || entityBounds(entity)), { ...player, y: floorY }, visibilityRadius);
     }
     if (onlyEntity) return;
     for (const entity of state.routeSurfaceEntities) {
@@ -813,58 +834,6 @@ export function installBuild(rt) {
   }
 
   function loadApprovedAssets() {
-    const applyPackedSand = (asset) => {
-      if (!asset?.resource) {
-        console.warn(
-          "Packed sand texture failed to load; using the rough matte fallback",
-        );
-        return;
-      }
-      const texture = asset.resource;
-      texture.addressU = texture.addressV = pc.ADDRESS_REPEAT;
-      texture.minFilter = pc.FILTER_LINEAR_MIPMAP_LINEAR;
-      texture.magFilter = pc.FILTER_LINEAR;
-      texture.anisotropy = 8;
-      mats.roadSand.diffuseMap = texture;
-      mats.roadSand.diffuseMapTiling = new pc.Vec2(7, 4);
-      mats.roadSand.update();
-      state.app.assets.loadFromUrl(
-        assetUrl("./assets/textures/brown_mud_dry_diff_512.webp"),
-        "texture",
-        (earthError, earthAsset) => {
-          if (earthError || !earthAsset?.resource) return;
-          earthAsset.resource.addressU = earthAsset.resource.addressV =
-            pc.ADDRESS_REPEAT;
-          earthAsset.resource.anisotropy = 8;
-          mats.roadSand.diffuseMap = earthAsset.resource;
-          mats.roadSand.diffuseMapTiling = new pc.Vec2(13, 8);
-          mats.roadSand.diffuse = new pc.Color(0.42, 0.36, 0.29);
-          mats.roadSand.update();
-          mats.sandDark.diffuseMap = earthAsset.resource;
-          mats.sandDark.diffuseMapTiling = new pc.Vec2(18, 14);
-          mats.sandDark.update();
-        },
-      );
-    };
-    const packedSandAsset = state.app.assets.find(
-      "packed-sand-v1.webp",
-      "texture",
-    );
-    if (packedSandAsset) {
-      packedSandAsset.ready(applyPackedSand);
-      state.app.assets.load(packedSandAsset);
-    } else
-      state.app.assets.loadFromUrl(
-        assetUrl("./assets/textures/packed-sand-v1.webp"),
-        "texture",
-        (error, asset) => {
-          if (error)
-            console.warn(
-              "Packed sand texture failed to load; using the rough matte fallback",
-            );
-          else applyPackedSand(asset);
-        },
-      );
     state.app.assets.loadFromUrl(
       assetUrl("./assets/textures/fabric_pattern_07_col_1_512.webp"),
       "texture",
@@ -875,7 +844,6 @@ export function installBuild(rt) {
           ...mats.buntingPalette,
           mats.magenta,
           mats.turquoise,
-          mats.gold,
         ]) {
           cloth.diffuseMap = asset.resource;
           cloth.diffuseMapTiling = new pc.Vec2(1, 1);
@@ -926,7 +894,7 @@ export function installBuild(rt) {
             material.update();
           }
           if (
-            material.dwarkaRevampRole === "aged-trim" &&
+            ["aged-trim", "carved-trim"].includes(material.dwarkaRevampRole) &&
             revampRole === "trim"
           ) {
             material.diffuseMap = asset.resource;
@@ -935,8 +903,9 @@ export function installBuild(rt) {
           }
         }
       });
+    state.vfxAssets.fire = { resource: rt.flameTexture() };
     for (const [kind, url] of [
-      ["fire", "./assets/textures/kenney-explosion-fire-atlas.webp"],
+
       ["smoke", "./assets/textures/kenney-black-smoke-atlas.webp"],
     ])
       state.app.assets.loadFromUrl(assetUrl(url), "texture", (error, asset) => {
@@ -1024,96 +993,17 @@ export function installBuild(rt) {
     frame.grading.brightness = 1.03;
     frame.grading.contrast = 0.96;
     frame.grading.saturation = 0.94;
-    frame.grading.tint = new pc.Color(0.68, 0.78, 1);
+    frame.grading.tint = new pc.Color(0.93, 0.96, 1);
     frame.update();
     return frame;
   }
 
   function buildSevenRegionRoute() {
-    const roadWidth = SURFACE_DETAILS.roadWidth ?? 7.4;
-    const marginWidth = SURFACE_DETAILS.marginWidth ?? 2.1;
-    const marginOffset = SURFACE_DETAILS.marginOffset ?? 4.75;
-    const kerbOffset = SURFACE_DETAILS.kerbOffset ?? 3.78;
-    for (let index = 0; index < ROUTE_SEGMENTS.length; index += 1) {
-      const segment = ROUTE_SEGMENTS[index];
-      if (segment.stepped) continue;
-      const eastWest = Math.abs(segment.yaw) === 90;
-      const roadScale = eastWest
-        ? [segment.length, 0.08, roadWidth]
-        : [roadWidth, 0.08, segment.length];
-      const road = primitive(
-        "box",
-        `${segment.id} packed-earth route`,
-        [segment.x, segment.y + STREET_SURFACE_Y - 0.04, segment.z],
-        roadScale,
-        mats.roadSand,
-      );
-      road.castShadows = false;
-      road.receiveShadows = true;
-      if (!state.roadEntity) state.roadEntity = road;
-      const lateral = eastWest ? { x: 0, z: 1 } : { x: 1, z: 0 };
-      for (const side of [-1, 1]) {
-        const marginX = segment.x + lateral.x * side * marginOffset;
-        const marginZ = segment.z + lateral.z * side * marginOffset;
-        const marginScale = eastWest
-          ? [segment.length, 0.06, marginWidth]
-          : [marginWidth, 0.06, segment.length];
-        const margin = primitive(
-          "box",
-          `${segment.id} sandstone margin`,
-          [marginX, segment.y + STREET_SURFACE_Y - 0.02, marginZ],
-          marginScale,
-          mats.sideMargin,
-        );
-        margin.castShadows = false;
-        margin.receiveShadows = true;
-        const kerbX = segment.x + lateral.x * side * kerbOffset;
-        const kerbZ = segment.z + lateral.z * side * kerbOffset;
-        const kerbScale = eastWest
-          ? [segment.length, 0.18, 0.22]
-          : [0.22, 0.18, segment.length];
-        const kerb = primitive(
-          "box",
-          `${segment.id} sandstone drain`,
-          [kerbX, segment.y + 0.08, kerbZ],
-          kerbScale,
-          mats.kerbSandstone,
-        );
-        kerb.castShadows = false;
-      }
+    buildArchitecture(rt);
+    for (const [x, , z] of SURFACE_DETAILS.routeBraziers || []) {
+      const support = supportedFloor(FLOOR_REGIONS, x, z, .36, .36);
+      if (support) rt.createBrazier(x, z, support.y);
     }
-    for (const [x, y, z, width, depth] of SURFACE_DETAILS.routeJunctionPads ||
-      []) {
-      const pad = primitive(
-        "box",
-        "Packed-earth route junction",
-        [x, y + STREET_SURFACE_Y + 0.005, z],
-        [width, 0.07, depth],
-        mats.roadSand,
-      );
-      pad.castShadows = false;
-      pad.receiveShadows = true;
-    }
-    for (const [
-      x,
-      y,
-      z,
-      width,
-      height,
-      depth,
-    ] of SURFACE_DETAILS.stairSupports || []) {
-      const support = primitive(
-        "box",
-        "Stair sandstone retaining wall",
-        [x, y, z],
-        [width, height, depth],
-        mats.kerbSandstone,
-      );
-      support.castShadows = true;
-      support.receiveShadows = true;
-    }
-    for (const [x, y, z] of SURFACE_DETAILS.routeBraziers || [])
-      rt.createBrazier(x, z, y);
     for (const [
       x,
       y,
@@ -1259,13 +1149,14 @@ export function installBuild(rt) {
     state.app.scene.lighting.shadowsEnabled = true;
     state.app.scene.lighting.maxLightsPerCell = 8;
     state.app.scene.lighting.shadowAtlasResolution = 1024;
-    state.app.scene.ambientLight = new pc.Color(0.055, 0.075, 0.15);
-    state.app.scene.exposure = 0.64;
+    state.app.scene.ambientLight = new pc.Color(0.13, 0.145, 0.19);
+    state.app.scene.exposure = 0.78;
     state.app.scene.toneMapping = pc.TONEMAP_ACES;
     state.app.scene.gammaCorrection = pc.GAMMA_SRGB;
     state.app.scene.fog.type = pc.FOG_EXP2;
     state.app.scene.fog.color = new pc.Color(0.045, 0.06, 0.14);
-    state.app.scene.fog.density = 0.006;
+    state.app.scene.fog.density = 0.009;
+    state.app.scene.skybox = null;
     rt.createMaterials();
     primitive(
       "box",
@@ -1307,7 +1198,10 @@ export function installBuild(rt) {
           kerb.castShadows = false;
         }
       }
-    for (const [x, y, z, sx, sz, yaw] of SURFACE_DETAILS.ashes || []) {
+    for (const [x, , z, sx, sz, yaw] of SURFACE_DETAILS.ashes || []) {
+      const support = supportedFloor(FLOOR_REGIONS, x, z, sx * .2, sz * .22);
+      if (!support) continue;
+      const y = support.y;
       const ash = primitive(
         "cylinder",
         "Wet ash fire patch",
@@ -1319,7 +1213,10 @@ export function installBuild(rt) {
       ash.castShadows = false;
       ash.receiveShadows = false;
     }
-    for (const [x, y, z, yaw] of SURFACE_DETAILS.ruts || []) {
+    for (const [x, , z, yaw] of SURFACE_DETAILS.ruts || []) {
+      const support = supportedFloor(FLOOR_REGIONS, x, z, .25, 1.8);
+      if (!support) continue;
+      const y = support.y;
       const rut = primitive(
         "plane",
         "Cart rut decal",
@@ -1332,10 +1229,12 @@ export function installBuild(rt) {
       rut.receiveShadows = false;
     }
     for (const [x, y, z, yaw, materialName] of SURFACE_DETAILS.rugs || []) {
+      const support = supportedFloor(FLOOR_REGIONS, x, z, 1.1, 1.1);
+      if (!support) continue;
       const rug = primitive(
         "box",
         "Dyed threshold rug",
-        [x, y + STREET_SURFACE_Y + 0.017, z],
+        [x, support.y + STREET_SURFACE_Y + 0.017, z],
         [1.35, 0.035, 2.15],
         mats[materialName] || mats.magenta,
       );
@@ -1351,10 +1250,12 @@ export function installBuild(rt) {
       [-7.5, -23, 0.08],
       [7.9, -36, 0.07],
     ]) {
+      const support = supportedFloor(FLOOR_REGIONS, x, z, radius, radius);
+      if (!support) continue;
       const pebble = primitive(
         "sphere",
         "Road pebble",
-        [x, STREET_SURFACE_Y + radius * 0.22, z],
+        [x, support.y + STREET_SURFACE_Y + radius * 0.22, z],
         [radius * 1.4, radius * 0.42, radius],
         mats.sandDark,
       );
@@ -1409,7 +1310,6 @@ export function installBuild(rt) {
           `${name} carved cap`,
           [x, 1.78, z],
           [width + 0.16, 0.16, depth + 0.12],
-          mats.gold,
         );
       } else {
         const blockMaterial = name.includes("Stall")
@@ -1439,17 +1339,22 @@ export function installBuild(rt) {
             `${name} gold capital`,
             [x, 2.42, z],
             [width + 0.3, 0.22, depth + 0.3],
-            mats.gold,
-          );
+            );
         }
       }
     }
     rt.decorateTurnWalls();
     rt.createDoorwayLandmark();
-    for (const [x, y, z] of SURFACE_DETAILS.streetBraziers || [])
-      rt.createBrazier(x, z, y);
-    for (const emblem of LANDMARKS.streetEmblems || [])
-      rt.createSunEmblem(...emblem);
+    for (const [x, , z] of SURFACE_DETAILS.streetBraziers || []) {
+      const support = supportedFloor(FLOOR_REGIONS, x, z, .36, .36);
+      if (support) rt.createBrazier(x, z, support.y);
+    }
+    // Place each emblem directly on a permanent, measured arrival frontage.
+    for (const c of WORLD_COLLIDERS.filter(c => c[6]?.startsWith("RevampHouse")).slice(0, 4)) {
+      const west = (c[0] + c[1]) / 2 < 0;
+      rt.createSunEmblem(west ? c[1] + .025 : c[0] - .025, 2.7, (c[2] + c[3]) / 2, west ? 90 : -90);
+    }
+    buildCivicDressing(rt);
     rt.createRegionalSkyline();
     const routePattern =
       /packed-earth route|route junction|sandstone drain|sandstone tread|Stair sandstone|Caravan route rug/;
@@ -1481,10 +1386,10 @@ export function installBuild(rt) {
       color: new pc.Color(0.72, 0.82, 1),
       intensity: 4,
       castShadows: true,
-      shadowDistance: 24,
-      shadowResolution: 1024,
-      shadowBias: 0.05,
-      normalOffsetBias: 0.02,
+      shadowDistance: 32,
+      shadowResolution: 2048,
+      shadowBias: 0.08,
+      normalOffsetBias: 0.12,
       numCascades: 1,
     });
     moon.setEulerAngles(48, -32, 0);
@@ -1560,7 +1465,7 @@ export function installBuild(rt) {
     rt.prewarmEnemyPools();
     state.camera = new pc.Entity("Right shoulder camera");
     state.camera.addComponent("camera", {
-      clearColor: new pc.Color(0.085, 0.075, 0.2),
+      clearColor: new pc.Color(0.008, 0.014, 0.028),
       fov: 63,
       nearClip: 0.08,
       farClip: 110,

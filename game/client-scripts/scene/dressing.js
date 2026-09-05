@@ -43,28 +43,18 @@ export function installDressing(rt) {
   const queuePressed = rt.queuePressed;
 
   function createSunEmblem(x, y, z, facing = 0) {
-    const emblem = rt.primitive(
-      "cylinder",
-      "Gold sun emblem",
-      [x, y, z],
-      [0.34, 0.055, 0.34],
-      mats.gold,
-    );
-    emblem.setEulerAngles(90, facing, 0);
-    for (let ray = 0; ray < 8; ray += 1) {
-      const angle = (ray * Math.PI) / 4;
-      const spoke = rt.primitive(
-        "box",
-        "Sun ray",
-        [x + Math.cos(angle) * 0.48, y + Math.sin(angle) * 0.48, z],
-        [0.26, 0.035, 0.035],
-        mats.gold,
-      );
-      spoke.setEulerAngles(0, facing, ray * 45);
+    const root = new pc.Entity("Mounted sun emblem");
+    state.app.root.addChild(root);root.setPosition(x,y,z);root.setEulerAngles(0,facing,0);
+    const emblem = rt.primitive("cylinder", "Gold sun emblem", [0,0,0], [.34,.055,.34], mats.gold,root);
+    emblem.setLocalEulerAngles(90,0,0);
+    for(let ray=0;ray<8;ray++) {
+      const angle=ray*Math.PI/4;
+      const spoke=rt.primitive("box","Sun ray",[Math.cos(angle)*.3,Math.sin(angle)*.3,0],[.15,.03,.03],mats.gold,root);
+      spoke.setLocalEulerAngles(0,0,ray*45);
     }
   }
 
-  function createBunting(z, height, paletteOffset = 0) {
+  function createBunting(z, height, paletteOffset = 0, left = -9.5, right = 9.5) {
     if (!state.pennantMesh)
       state.pennantMesh = pc.createMesh(
         state.app.graphicsDevice,
@@ -80,7 +70,7 @@ export function installDressing(rt) {
       const progress = index / 12;
       points.push(
         new pc.Vec3(
-          -9.5 + progress * 19,
+          left + progress * (right-left),
           height - Math.sin(progress * Math.PI) * 0.64,
           z,
         ),
@@ -114,8 +104,8 @@ export function installDressing(rt) {
       );
       pennant.addComponent("render", { meshInstances: [instance] });
       state.app.root.addChild(pennant);
-      pennant.setPosition(anchor.x, anchor.y - 0.48, anchor.z);
-      pennant.setLocalScale(0.74, 0.88, 1);
+      pennant.setPosition(anchor.x, anchor.y - 0.23, anchor.z);
+      pennant.setLocalScale(0.46, 0.52, 1);
       pennant.setEulerAngles(0, 0, (index + paletteOffset) % 2 ? 6 : -6);
       pennant.render.castShadows = false;
       pennant.render.receiveShadows = true;
@@ -123,92 +113,12 @@ export function installDressing(rt) {
   }
 
   function createRegionalSkyline() {
-    for (const [x, z, scale, color] of [
-      [-15.8, 18, 1.0, mats.stoneLight],
-      [15.2, 5, 0.82, mats.sand],
-      [-16.4, -12, 0.9, mats.sand],
-      [15.8, -28, 1.08, mats.stoneLight],
-      [-12.8, -45, 1.22, mats.sandLight],
-      [13.4, -47, 0.95, mats.sand],
-    ]) {
-      rt.primitive(
-        "cylinder",
-        "Rooftop shrine drum",
-        [x, 5.4 * scale, z],
-        [1.45 * scale, 0.75 * scale, 1.45 * scale],
-        color,
-      );
-      const dome = rt.primitive(
-        "sphere",
-        "Rooftop shrine dome",
-        [x, 6.0 * scale, z],
-        [1.62 * scale, 0.72 * scale, 1.62 * scale],
-        color,
-      );
-      dome.castShadows = false;
-      rt.primitive(
-        "cylinder",
-        "Rooftop gold finial",
-        [x, 6.86 * scale, z],
-        [0.09 * scale, 0.7 * scale, 0.09 * scale],
-        mats.gold,
-      );
-      rt.primitive(
-        "sphere",
-        "Rooftop finial crown",
-        [x, 7.25 * scale, z],
-        [0.18 * scale, 0.18 * scale, 0.18 * scale],
-        mats.gold,
-      );
-    }
-    const nicheBack = rt.primitive(
-      "box",
-      "Household shrine niche",
-      [-9.76, 1.55, 2.1],
-      [0.08, 1.28, 1.16],
-      mats.indigo,
-    );
-    nicheBack.castShadows = false;
-    for (const [y, z, height, depth] of [
-      [2.22, 2.1, 0.15, 1.42],
-      [0.9, 2.1, 0.15, 1.42],
-      [1.55, 1.45, 1.45, 0.14],
-      [1.55, 2.75, 1.45, 0.14],
-    ]) {
-      const frame = rt.primitive(
-        "box",
-        "Shrine niche sandstone frame",
-        [-9.62, y, z],
-        [0.22, height, depth],
-        mats.stoneLight,
-      );
-      frame.castShadows = false;
-    }
-    createSunEmblem(-9.48, 1.55, 2.1, 90);
-    const shrineGlow = new pc.Entity("Shrine diya glow");
-    shrineGlow.addComponent("light", {
-      type: "omni",
-      color: new pc.Color(1, 0.38, 0.1),
-      intensity: 0.4,
-      range: 4.2,
-      castShadows: false,
-    });
-    shrineGlow.setPosition(-9.1, 1.25, 2.1);
-    rt.registerFireLight(shrineGlow, 0.4, 2.7);
-    state.app.root.addChild(shrineGlow);
-    if (rt.ENVIRONMENT_REVAMP?.mode !== "arrival-candidate") {
-      const wellBeam = rt.primitive(
-        "box",
-        "Well timber crossbeam",
-        [5, 2.16, 17],
-        [2.35, 0.16, 0.18],
-        mats.wood,
-      );
-      wellBeam.castShadows = true;
-    }
-    createBunting(11.5, 5.15, 0);
-    createBunting(-8.5, 4.92, 1);
-    createBunting(-26.5, 5.12, 2);
+    // The only street span is fixed to the two existing arrival facades.
+    // Upper spans anchor to the retained boundary frontages, above the deck.
+    createBunting(16.1, 5.4, 0, -10.45, 10.45);
+    for (const x of [6,18]) rt.primitive('cylinder','Festival cord anchor',[x,9.82,-41],[.09,.8,.09],mats.wood);
+    createBunting(-41, 10.15, 1, 6.0, 18.0);
+
   }
 
   function decorateTurnWalls() {

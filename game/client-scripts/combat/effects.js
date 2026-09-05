@@ -229,18 +229,18 @@ export function installEffects(rt) {
     const size = root.dwarkaFireKind === "torch" ? 0.52 : 1;
     const flame = new pc.Entity("Kenney animated fire particles");
     flame.addComponent("particlesystem", {
-      numParticles: root.dwarkaFireKind === "torch" ? 8 : 18,
+      numParticles: root.dwarkaFireKind === "torch" ? 5 : 8,
       preWarm: true,
       lifetime: 0.72,
       rate: 0.055,
       emitterShape: pc.EMITTERSHAPE_SPHERE,
-      emitterRadius: 0.13 * size,
+      emitterRadius: 0.065 * size,
       colorMap: state.vfxAssets.fire.resource,
-      animTilesX: 3,
-      animTilesY: 3,
-      animNumFrames: 9,
+      animTilesX: 1,
+      animTilesY: 1,
+      animNumFrames: 1,
       animSpeed: 8,
-      animLoop: true,
+      animLoop: false,
       localVelocityGraph: new pc.CurveSet(
         [0, 0, 1, 0],
         [0, 0.55 * size, 1, 1.15 * size],
@@ -250,9 +250,9 @@ export function installEffects(rt) {
         0,
         0.22 * size,
         0.25,
-        0.62 * size,
+        0.38 * size,
         0.72,
-        0.42 * size,
+        0.27 * size,
         1,
         0,
       ]),
@@ -262,12 +262,12 @@ export function installEffects(rt) {
         [0, 0.48, 1, 0.12],
         [0, 0.04, 1, 0],
       ),
-      blendType: pc.BLEND_ADDITIVE,
+      blendType: pc.BLEND_NORMAL,
       depthWrite: false,
       lighting: false,
       halfLambert: false,
     });
-    flame.setLocalPosition(0, root.dwarkaFireKind === "torch" ? 0.08 : 0.14, 0);
+    flame.setLocalPosition(0, 0, 0);
     root.addChild(flame);
     const smoke = new pc.Entity("Kenney animated smoke particles");
     smoke.tags.add("smoke");
@@ -293,7 +293,7 @@ export function installEffects(rt) {
         0,
         0.16 * size,
         0.45,
-        0.42 * size,
+        0.27 * size,
         1,
         0.7 * size,
       ]),
@@ -356,11 +356,12 @@ export function installEffects(rt) {
     rt.primitive(
       "cylinder",
       "Brazier stem",
-      [x, y + 0.25, z],
-      [0.12, 0.28, 0.12],
+      [x, y + 0.23, z],
+      [0.14, 0.4, 0.14],
       mats.iron,
     );
-    createFireEffect(state.app.root, [x, y + 0.73, z], "brazier");
+    rt.primitive("cylinder", "Brazier stone foot", [x, y + 0.07, z], [0.38, 0.1, 0.38], mats.stoneLight);
+    createFireEffect(state.app.root, [x, y + 0.64, z], "brazier");
     const light = new pc.Entity("Fire light");
     light.addComponent("light", {
       type: "omni",

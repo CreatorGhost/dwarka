@@ -284,15 +284,11 @@ export function installTargeting(rt) {
       marker,
     );
     core.castShadows = false;
-    const stem = rt.primitive(
-      "box",
-      "Objective stem",
-      [0, -0.43, 0],
-      [0.025, 0.48, 0.025],
-      mats.objective,
-      marker,
-    );
-    stem.castShadows = false;
+    for (const side of [-1, 1]) {
+      const chevron = rt.primitive("box", "Objective direction chevron", [side * .15, -.4, 0], [.34, .055, .055], mats.objective, marker);
+      chevron.setLocalEulerAngles(0, 0, side * 35);
+      chevron.castShadows = false;
+    }
     marker.enabled = false;
     state.objectiveMarker = marker;
   }
