@@ -64,6 +64,10 @@ export function installModals(rt) {
     pointerNote = controls,
   }) {
     ui.modal.classList.toggle("story-beat", Boolean(story));
+    if (ui.screenshotActions) ui.screenshotActions.hidden = state.modalMode !== "pause";
+    if (ui.pauseScreenshot) ui.pauseScreenshot.hidden = state.modalMode !== "pause";
+    if (ui.screenshotDownload) ui.screenshotDownload.hidden = state.modalMode !== "pause" || !ui.screenshotDownload.hasAttribute("href");
+    if (ui.screenshotStatus) ui.screenshotStatus.hidden = state.modalMode !== "pause" || !ui.screenshotStatus.textContent;
     ui.modalTitle.textContent = title;
     ui.modalCopy.textContent = copy;
     ui.modalPrimary.textContent = primary;
@@ -246,6 +250,7 @@ export function installModals(rt) {
     if (state.snapshot?.phase === "complete") return;
     state.paused = true;
     state.playing = false;
+    if (canvas?.ownerDocument?.pointerLockElement === canvas) canvas?.ownerDocument?.exitPointerLock?.();
     rt.clearInput();
     rt.stopVoice();
     clearStoryTimers();
@@ -453,6 +458,7 @@ export function installModals(rt) {
   }
 
   function enterPlay() {
+    if (state.screenshotBusy) return;
     state.effectsReady = true;
     state.paused = false;
     state.playing = true;

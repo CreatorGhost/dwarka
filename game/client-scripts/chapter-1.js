@@ -11,6 +11,7 @@ import {
 } from "./character/animation.js";
 import { createRuntime, loadWorld } from "./runtime/context.js";
 import { installHud } from "./ui/hud.js";
+import { installScreenshot } from "./ui/screenshot.js";
 import { installModals } from "./ui/modals.js";
 import { installSession } from "./net/session.js";
 import { installHandshake } from "./net/handshake.js";
@@ -97,6 +98,7 @@ async function startChapter() {
   installDoors(rt);
   installBuild(rt);
   installLoop(rt);
+  installScreenshot(rt);
   installInput(rt);
   installQa(rt);
   rt.bindHudEvents();

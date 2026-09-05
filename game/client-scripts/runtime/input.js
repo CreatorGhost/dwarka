@@ -149,6 +149,8 @@ export function installInput(rt) {
     });
     ui.retry.addEventListener("click", rt.connect);
     ui.pause.addEventListener("click", rt.showPause);
+    ui.screenshot.addEventListener("click", rt.captureScreenshot);
+    ui.pauseScreenshot.addEventListener("click", rt.captureScreenshot);
   };
 
   rt.bindModalEvents = function bindModalEvents() {
@@ -214,6 +216,12 @@ export function installInput(rt) {
   rt.bindInputEvents = function bindInputEvents() {
     document.addEventListener("keydown", (event) => {
       state.effectsReady = true;
+      if (event.code === "KeyP" && !event.ctrlKey && !event.metaKey && !event.altKey &&
+          !event.target?.closest?.("input, select, textarea, [contenteditable]")) {
+        event.preventDefault();
+        if (!event.repeat) rt.captureScreenshot();
+        return;
+      }
       if (
         [
           "KeyW",
